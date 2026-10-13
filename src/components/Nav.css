@@ -1,0 +1,194 @@
+.nav {
+  /* Fixed above every section (including pinned ones) */
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--page-gutter);
+  --nav-text: var(--white);
+  background: rgba(255, 255, 255, 0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0);
+  transition:
+    background-color 400ms var(--ease-in-out),
+    box-shadow 400ms var(--ease-in-out);
+}
+
+/* Over the hero: white type with Figma's soft text shadow for legibility */
+.nav:not(.is-scrolled) .nav__inner {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7));
+}
+
+/* Scrolled: 90% white bar, soft shadow, chocolate type (Figma 539:12327) */
+.nav.is-scrolled {
+  --nav-text: var(--royal-chocolate-600);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Icons in both colourways, cross-fading */
+.nav__icon {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.nav__icon img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 400ms var(--ease-in-out);
+}
+
+/* Compact when scrolled (Figma 539:12758): 64px → 40px logo, 16px → 12px padding */
+.nav__logo .nav__icon {
+  transition:
+    width 400ms var(--ease-in-out),
+    height 400ms var(--ease-in-out);
+}
+
+.nav.is-scrolled .nav__inner {
+  padding: 12px 0;
+}
+
+.nav.is-scrolled .nav__logo .nav__icon {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.nav__icon-dark,
+.nav.is-scrolled .nav__icon-light {
+  opacity: 0;
+}
+
+.nav.is-scrolled .nav__icon-dark {
+  opacity: 1;
+}
+
+.nav__inner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: var(--content-max);
+  padding: 16px 0;
+  transition: padding 400ms var(--ease-in-out);
+}
+
+.nav__links {
+  flex: 1 0 0;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-width: 0;
+}
+
+.nav__links--end {
+  justify-content: flex-end;
+  gap: 40px;
+}
+
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--nav-text);
+  transition: color 400ms var(--ease-in-out), opacity 200ms ease;
+  white-space: nowrap;
+}
+
+.nav__link:hover {
+  opacity: 0.75;
+}
+
+.nav__logo {
+  flex-shrink: 0;
+}
+
+.nav__lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  color: var(--nav-text);
+  cursor: pointer;
+  transition: color 400ms var(--ease-in-out);
+}
+
+.nav__cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 24px;
+  border: 1px solid var(--white);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  color: var(--white);
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition:
+    background-color 400ms var(--ease-in-out),
+    border-color 400ms var(--ease-in-out),
+    color 400ms var(--ease-in-out);
+}
+
+.nav__cta:hover {
+  background: var(--white);
+  color: var(--royal-chocolate-700);
+}
+
+/* Scrolled: solid bronze button with chocolate type. 1px less padding offsets the
+   border (the filled button has none in Figma), so it's 44px tall like the design. */
+.nav.is-scrolled .nav__cta {
+  padding: 11px 24px;
+  border-color: var(--line-in-white);
+  background: var(--line-in-white);
+  color: var(--royal-chocolate-600);
+}
+
+.nav.is-scrolled .nav__cta:hover {
+  border-color: var(--bronze-600);
+  background: var(--bronze-600);
+}
+
+.nav__menu {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+@media (max-width: 1100px) {
+  .nav__links:not(.nav__links--end),
+  .nav__actions .nav__link,
+  .nav__lang {
+    display: none;
+  }
+
+  .nav__links--end {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .nav__cta {
+    display: none;
+  }
+}

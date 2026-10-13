@@ -1,0 +1,111 @@
+.location-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex-shrink: 0;
+  width: 324px;
+}
+
+.location-card__image {
+  position: relative;
+  height: 360px;
+  overflow: hidden;
+  background: #d9d9d9;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.08), 1px 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.location-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+
+.location-card--soon .location-card__image {
+  background: var(--royal-chocolate-700);
+}
+
+.location-card--soon .location-card__image img {
+  opacity: 0.4;
+}
+
+.location-card__badge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 12px;
+  border: 1px solid var(--white);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--white);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.location-card__details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.location-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.5;
+}
+
+.location-card__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.5;
+  color: var(--royal-chocolate-700);
+}
+
+.location-card__address {
+  font-size: 16px;
+  color: var(--royal-chocolate-700);
+}
+
+.location-card__city {
+  font-size: 16px;
+  text-transform: uppercase;
+  color: var(--grey-600);
+}
+
+.location-card__link,
+.location-card__soon {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.location-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--bronze-700);
+}
+
+.location-card__link span {
+  padding: 4px 0;
+}
+
+.location-card__link img {
+  transition: transform 300ms var(--ease-in-out);
+}
+
+.location-card__link:hover img {
+  transform: translateX(4px);
+}
+
+.location-card__soon {
+  padding: 4px 0;
+  text-transform: uppercase;
+  color: var(--grey-600);
+}

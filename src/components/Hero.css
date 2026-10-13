@@ -1,0 +1,218 @@
+.hero {
+  position: relative;
+  /*
+   * Always fill the screen. svh = the viewport with mobile browser bars shown,
+   * so the height doesn't jump as they collapse; vh is the fallback. The floor
+   * keeps the nav and the bottom-anchored copy + search from colliding.
+   */
+  height: 100vh;
+  height: 100svh;
+  min-height: 640px;
+  overflow: hidden;
+  background: var(--white);
+}
+
+.hero__image,
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero__image {
+  object-fit: cover;
+}
+
+.hero__overlay {
+  background: var(--royal-chocolate-700);
+  mix-blend-mode: multiply;
+  opacity: 0.7;
+}
+
+.hero__content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  width: min(1136px, calc(100% - 2 * var(--page-gutter)));
+  padding: 48px 0;
+}
+
+.hero__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  text-align: center;
+}
+
+.hero__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 64px;
+  line-height: 1.2;
+  color: var(--white);
+}
+
+.hero__title em {
+  font-style: italic;
+  font-weight: 500;
+}
+
+.hero__subtitle {
+  font-weight: 300;
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--royal-chocolate-300);
+}
+
+/* Darkens as the hero scrolls away — animated by GSAP in Hero.tsx */
+.hero__shade {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Search bar */
+.hero-search {
+  display: flex;
+  align-items: stretch;
+  width: min(952px, 100%);
+  border: 0.5px solid var(--royal-chocolate-500);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.hero-search__cell {
+  flex: 1 0 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 20px 0;
+  cursor: pointer;
+}
+
+.hero-search__field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 40px;
+  border-right: 1px solid var(--royal-chocolate-500);
+}
+
+.hero-search__field--intro {
+  align-items: center;
+  justify-content: center;
+  padding: 12px 40px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 20px;
+  color: var(--white);
+  white-space: nowrap;
+  cursor: default;
+}
+
+.hero-search__label {
+  font-size: 14px;
+  line-height: 20px;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.hero-search__select {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-search__select select {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  appearance: none;
+  font-size: 18px;
+  line-height: 24px;
+  color: var(--royal-chocolate-300);
+  cursor: pointer;
+}
+
+.hero-search__select select:focus-visible {
+  outline: 1px solid var(--bronze-500);
+  outline-offset: 4px;
+}
+
+.hero-search__select option {
+  color: var(--royal-chocolate-700);
+}
+
+.hero-search__select img {
+  pointer-events: none;
+}
+
+.hero-search__submit {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 40px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transition: transform 300ms var(--ease-in-out);
+}
+
+.hero-search__submit:hover {
+  transform: translateX(6px);
+}
+
+@media (max-width: 900px) {
+  .hero__title {
+    font-size: 40px;
+  }
+
+  .hero__subtitle {
+    font-size: 17px;
+  }
+
+  .hero-search {
+    flex-wrap: wrap;
+  }
+
+  .hero-search__cell {
+    flex-basis: 50%;
+    padding: 14px 0;
+  }
+
+  .hero-search__field {
+    padding: 0 20px;
+  }
+
+  .hero-search__cell:first-child {
+    display: none;
+  }
+
+  .hero-search__cell:nth-child(3) .hero-search__field {
+    border-right: 0;
+  }
+
+  .hero-search__cell:last-child {
+    flex-basis: 100%;
+    border-top: 0.5px solid var(--royal-chocolate-500);
+  }
+}

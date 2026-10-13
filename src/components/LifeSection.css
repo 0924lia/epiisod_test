@@ -1,0 +1,23 @@
+.life {
+  position: relative;
+  overflow-x: clip;
+  background: var(--white);
+}
+
+/* Intro stays pinned underneath while the wellness fold slides over it */
+.life__intro {
+  position: sticky;
+  top: 0;
+  background: var(--white);
+}
+
+/* Move In, direction left — slide-in is scrubbed by GSAP in LifeSection.tsx */
+.life__wellness {
+  position: absolute;
+  top: var(--slide, 100vh);
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  background: var(--white);
+  will-change: transform;
+}
