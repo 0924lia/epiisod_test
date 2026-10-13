@@ -66,7 +66,7 @@ export default function Hero() {
             <div className="hero-search__field hero-search__field--intro">Start your story</div>
           </div>
 
-          <label className="hero-search__cell">
+          <label className="hero-search__cell hero-search__cell--action">
             <div className="hero-search__field">
               <span className="hero-search__label">Country</span>
               <span className="hero-search__select">
@@ -80,7 +80,7 @@ export default function Hero() {
             </div>
           </label>
 
-          <label className="hero-search__cell">
+          <label className="hero-search__cell hero-search__cell--action">
             <div className="hero-search__field">
               <span className="hero-search__label">City</span>
               <span className="hero-search__select">
@@ -94,7 +94,7 @@ export default function Hero() {
             </div>
           </label>
 
-          <div className="hero-search__cell">
+          <div className="hero-search__cell hero-search__cell--action">
             <button type="submit" className="hero-search__submit" aria-label="Search">
               <img src={arrowRight} width={24} height={24} alt="" />
             </button>

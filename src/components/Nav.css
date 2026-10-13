@@ -4,7 +4,8 @@
   inset: 0 0 auto 0;
   z-index: 100;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: 0 var(--page-gutter);
   --nav-text: var(--white);
   background: rgba(255, 255, 255, 0);
@@ -15,15 +16,21 @@
 }
 
 /* Over the hero: white type with Figma's soft text shadow for legibility */
-.nav:not(.is-scrolled) .nav__inner {
+.nav:not(.is-scrolled):not(.is-open) .nav__inner {
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7));
 }
 
 /* Scrolled: 90% white bar, soft shadow, chocolate type (Figma 539:12327) */
-.nav.is-scrolled {
+.nav.is-scrolled,
+.nav.is-open {
   --nav-text: var(--royal-chocolate-600);
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Mega menu open: solid white (Figma 539:18628) */
+.nav.is-open {
+  background: var(--white);
 }
 
 /* Icons in both colourways, cross-fading */
@@ -58,11 +65,13 @@
 }
 
 .nav__icon-dark,
-.nav.is-scrolled .nav__icon-light {
+.nav.is-scrolled .nav__icon-light,
+.nav.is-open .nav__icon-light {
   opacity: 0;
 }
 
-.nav.is-scrolled .nav__icon-dark {
+.nav.is-scrolled .nav__icon-dark,
+.nav.is-open .nav__icon-dark {
   opacity: 1;
 }
 
@@ -107,6 +116,17 @@
   color: var(--nav-text);
   transition: color 400ms var(--ease-in-out), opacity 200ms ease;
   white-space: nowrap;
+}
+
+button.nav__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.nav__link.is-active {
+  font-weight: 700;
 }
 
 .nav__link:hover {
@@ -156,14 +176,16 @@
 
 /* Scrolled: solid bronze button with chocolate type. 1px less padding offsets the
    border (the filled button has none in Figma), so it's 44px tall like the design. */
-.nav.is-scrolled .nav__cta {
+.nav.is-scrolled .nav__cta,
+.nav.is-open .nav__cta {
   padding: 11px 24px;
   border-color: var(--line-in-white);
   background: var(--line-in-white);
   color: var(--royal-chocolate-600);
 }
 
-.nav.is-scrolled .nav__cta:hover {
+.nav.is-scrolled .nav__cta:hover,
+.nav.is-open .nav__cta:hover {
   border-color: var(--bronze-600);
   background: var(--bronze-600);
 }
@@ -178,7 +200,8 @@
 @media (max-width: 1100px) {
   .nav__links:not(.nav__links--end),
   .nav__actions .nav__link,
-  .nav__lang {
+  .nav__lang,
+  .locations-menu {
     display: none;
   }
 

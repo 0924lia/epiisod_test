@@ -1,6 +1,9 @@
 import macquarie from '../assets/loc-macquarie.jpg';
 import bedford from '../assets/loc-bedford.jpg';
 import mckenzie from '../assets/loc-mckenzie.jpg';
+import fairway from '../assets/loc-fairway.jpg';
+import stirling from '../assets/loc-stirling.jpg';
+import euston from '../assets/loc-euston.jpg';
 
 export type Property = {
   id: string;
@@ -33,7 +36,7 @@ export const REGIONS: Region[] = [
   },
 ];
 
-/** Properties shown in the design. Add Perth and London entries as content becomes available. */
+/** Every property, shown in the Locations carousel and the nav's Locations menu. */
 export const PROPERTIES: Property[] = [
   {
     id: 'macquarie-park',
@@ -55,6 +58,30 @@ export const PROPERTIES: Property[] = [
     address: 'Mckenzie Street, Melbourne VIC',
     city: 'Melbourne',
     image: mckenzie,
+    comingSoon: true,
+  },
+  {
+    id: 'fairway',
+    name: 'EPIISOD Fairway',
+    address: 'Perth WA',
+    city: 'Perth',
+    image: fairway,
+    comingSoon: true,
+  },
+  {
+    id: 'stirling',
+    name: 'EPIISOD Stirling',
+    address: 'Perth WA',
+    city: 'Perth',
+    image: stirling,
+    comingSoon: true,
+  },
+  {
+    id: 'euston',
+    name: 'EPIISOD Euston',
+    address: 'Euston, London NW1',
+    city: 'London',
+    image: euston,
     comingSoon: true,
   },
 ];

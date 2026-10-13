@@ -102,6 +102,16 @@
   cursor: pointer;
 }
 
+/* Hover (Figma 451:1263): the whole cell lifts with a 10% white fill */
+.hero-search__cell--action {
+  transition: background-color 300ms var(--ease-in-out);
+}
+
+.hero-search__cell--action:hover,
+.hero-search__cell--action:focus-within {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .hero-search__field {
   flex: 1;
   display: flex;
@@ -177,7 +187,7 @@
   transition: transform 300ms var(--ease-in-out);
 }
 
-.hero-search__submit:hover {
+.hero-search__cell--action:hover .hero-search__submit {
   transform: translateX(6px);
 }
 
