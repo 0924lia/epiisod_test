@@ -119,7 +119,8 @@ p {
 /* Exit parallax (lib/useExitParallax.ts): the section clips its drifting content */
 .exit-parallax {
   position: relative;
-  overflow: hidden;
+  /* clip, not hidden: hidden would make it a scroll container and break sticky children */
+  overflow: clip;
 }
 
 [data-exit-content] {

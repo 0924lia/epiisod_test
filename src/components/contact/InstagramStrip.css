@@ -78,6 +78,10 @@
 .instagram__strip {
   margin: 0 calc(-1 * max(var(--page-gutter), (100vw - var(--content-max)) / 2));
   overflow: hidden;
+  /* Vertical swipes still scroll the page; horizontal ones move the strip */
+  touch-action: pan-y;
+  cursor: grab;
+  outline: none;
 }
 
 .instagram__track {
@@ -87,20 +91,18 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  /* One set of posts (6 × 344px) every 28s ≈ 74px/s */
-  animation: instagram-loop 28s linear infinite;
+  /* Moved by InstagramStrip.tsx: autoplay at 24px/s, plus the visitor's own scrolling */
+  will-change: transform;
 }
 
-.instagram__strip:hover .instagram__track,
-.instagram__strip:focus-within .instagram__track {
-  animation-play-state: paused;
+.instagram__strip.is-dragging {
+  cursor: grabbing;
+  user-select: none;
 }
 
-/* One set of posts plus its trailing gap: the second set lands where the first began */
-@keyframes instagram-loop {
-  to {
-    transform: translateX(calc(-50% - 12px));
-  }
+.instagram__strip:focus-visible {
+  outline: 1px solid var(--line-in-white);
+  outline-offset: 4px;
 }
 
 .instagram__track li {
@@ -125,16 +127,6 @@
 
 .instagram__track a:hover img {
   transform: scale(1.04);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .instagram__track {
-    animation: none;
-  }
-
-  .instagram__strip {
-    overflow-x: auto;
-  }
 }
 
 @media (max-width: 700px) {

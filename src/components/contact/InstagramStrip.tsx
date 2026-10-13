@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import type { KeyboardEvent, MouseEvent, PointerEvent } from 'react';
 import { gsap, useGSAP } from '../../lib/smoothScroll';
 import { useExitParallax } from '../../lib/useExitParallax';
 import background from '../../assets/property/hero.jpg';
@@ -14,6 +15,15 @@ import instagram from '../../assets/contact/instagram-light.svg';
 import './InstagramStrip.css';
 
 const POSTS = [ig1, ig2, ig3, ig4, ig5, ig6];
+/** Copies of the posts in the track, so the loop never shows an edge on wide screens. */
+const COPIES = 3;
+/** Autoplay speed (px/s). */
+const SPEED = 24;
+/** Autoplay waits this long (ms) after the visitor last scrolled or dragged. */
+const RESUME_AFTER = 1200;
+const DRAG_THRESHOLD = 5;
+/** How quickly a released drag's coasting fades (per second). */
+const FRICTION = 4;
 const SOCIALS = [
   { name: 'TikTok', icon: tiktok },
   { name: 'Facebook', icon: facebook },
@@ -22,12 +32,132 @@ const SOCIALS = [
 
 /**
  * "Life is good @EPIISOD" (Figma 539:23924): Instagram posts over a blurred photo.
- * The posts drift past in a slow loop (paused on hover); the backdrop lags behind the
- * scroll, and the section drifts and dims as the next one slides over it.
+ * The posts drift past in an endless loop that visitors can also scroll themselves —
+ * trackpad swipe, Shift + wheel, drag (with a little coasting) or the arrow keys —
+ * autoplay resuming shortly after. The backdrop lags behind the page scroll, and the
+ * section drifts and dims as the next one slides over it.
  */
 export default function InstagramStrip() {
   const sectionRef = useRef<HTMLElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLUListElement>(null);
+  /** Loop state, kept out of React so the strip animates without re-rendering. */
+  const loop = useRef({
+    offset: 0,
+    inertia: 0,
+    lastInput: -Infinity,
+    hovering: false,
+    drag: null as null | { startX: number; startOffset: number; moved: boolean; samples: { x: number; t: number }[] },
+    suppressClick: false,
+  });
   useExitParallax(sectionRef);
+
+  // One frame loop drives autoplay, coasting and wrapping; the track moves by transform
+  useEffect(() => {
+    const strip = stripRef.current;
+    const track = trackRef.current;
+    if (!strip || !track) return;
+    const state = loop.current;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const setWidth = () => {
+      const items = track.children;
+      return (items[POSTS.length] as HTMLElement).offsetLeft - (items[0] as HTMLElement).offsetLeft;
+    };
+
+    let frame = 0;
+    let last = performance.now();
+    const tick = (now: number) => {
+      const dt = Math.min((now - last) / 1000, 0.1);
+      last = now;
+      if (!state.drag) {
+        if (Math.abs(state.inertia) > 5) {
+          state.offset += state.inertia * dt;
+          state.inertia *= Math.exp(-FRICTION * dt);
+        } else if (!reduced && !state.hovering && now - state.lastInput > RESUME_AFTER) {
+          state.offset += SPEED * dt;
+        }
+      }
+      const width = setWidth();
+      state.offset = ((state.offset % width) + width) % width;
+      track.style.transform = `translate3d(${-state.offset}px, 0, 0)`;
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+
+    // Horizontal wheel / trackpad swipe (or Shift + wheel) scrolls the strip; vertical passes to the page
+    const onWheel = (e: WheelEvent) => {
+      const dx = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.shiftKey ? e.deltaY : 0;
+      if (!dx) return;
+      e.preventDefault();
+      state.offset += dx;
+      state.inertia = 0;
+      state.lastInput = performance.now();
+    };
+    strip.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      cancelAnimationFrame(frame);
+      strip.removeEventListener('wheel', onWheel);
+    };
+  }, []);
+
+  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    const state = loop.current;
+    state.inertia = 0;
+    state.drag = { startX: e.clientX, startOffset: state.offset, moved: false, samples: [{ x: e.clientX, t: e.timeStamp }] };
+  };
+
+  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    const state = loop.current;
+    const d = state.drag;
+    if (!d) return;
+    const dx = e.clientX - d.startX;
+    if (!d.moved) {
+      if (Math.abs(dx) < DRAG_THRESHOLD) return;
+      d.moved = true;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      e.currentTarget.classList.add('is-dragging');
+    }
+    d.samples = [...d.samples.filter((s) => e.timeStamp - s.t < 100), { x: e.clientX, t: e.timeStamp }];
+    state.offset = d.startOffset - dx;
+    state.lastInput = performance.now();
+  };
+
+  const endDrag = (e: PointerEvent<HTMLDivElement>) => {
+    const state = loop.current;
+    const d = state.drag;
+    state.drag = null;
+    if (!d?.moved) return;
+    e.currentTarget.classList.remove('is-dragging');
+    // A drag shouldn't also open the post it ended on
+    state.suppressClick = true;
+    requestAnimationFrame(() => (state.suppressClick = false));
+    const first = d.samples[0];
+    const dt = e.timeStamp - first.t;
+    state.inertia = dt > 0 ? -((e.clientX - first.x) / dt) * 1000 : 0;
+    state.lastInput = performance.now();
+  };
+
+  const onClickCapture = (e: MouseEvent) => {
+    if (loop.current.suppressClick) e.preventDefault();
+  };
+
+  // Arrow keys glide one post at a time
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const state = loop.current;
+    const step = (trackRef.current?.children[1] as HTMLElement | undefined)?.offsetLeft ?? 344;
+    const proxy = { x: state.offset };
+    state.lastInput = Infinity; // hold autoplay during the glide
+    gsap.to(proxy, {
+      x: state.offset + (e.key === 'ArrowRight' ? step : -step),
+      duration: 0.6,
+      ease: 'power2.out',
+      onUpdate: () => (state.offset = proxy.x),
+      onComplete: () => (state.lastInput = performance.now()),
+    });
+  };
 
   useGSAP(
     () => {
@@ -75,12 +205,33 @@ export default function InstagramStrip() {
           </div>
         </div>
 
-        <div className="instagram__strip">
-          {/* Posts twice over, so the loop wraps seamlessly */}
-          <ul className="instagram__track">
-            {[...POSTS, ...POSTS].map((src, i) => (
+        <div
+          ref={stripRef}
+          className="instagram__strip"
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="Instagram posts — use the arrow keys or scroll sideways"
+          tabIndex={0}
+          data-lenis-prevent-horizontal
+          onPointerEnter={(e) => e.pointerType === 'mouse' && (loop.current.hovering = true)}
+          onPointerLeave={() => (loop.current.hovering = false)}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onClickCapture={onClickCapture}
+          onKeyDown={onKeyDown}
+        >
+          {/* Repeated copies of the posts, so the loop wraps seamlessly */}
+          <ul ref={trackRef} className="instagram__track">
+            {Array.from({ length: COPIES }, () => POSTS).flat().map((src, i) => (
               <li key={i} aria-hidden={i >= POSTS.length}>
-                <a href="#" tabIndex={i >= POSTS.length ? -1 : undefined} aria-label={`Instagram post ${(i % POSTS.length) + 1}`}>
+                <a
+                  href="#"
+                  tabIndex={i >= POSTS.length ? -1 : undefined}
+                  aria-label={`Instagram post ${(i % POSTS.length) + 1}`}
+                  draggable={false}
+                >
                   <img src={src} alt="" draggable={false} />
                 </a>
               </li>

@@ -18,6 +18,9 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  /* Stays in view beside the long form, just below the compact nav (69px) */
+  position: sticky;
+  top: calc(69px + 48px);
 }
 
 .contact__heading {
@@ -365,6 +368,10 @@
   .contact-form {
     flex: none;
     width: 100%;
+  }
+
+  .contact__intro {
+    position: static;
   }
 }
 

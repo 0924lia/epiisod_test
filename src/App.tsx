@@ -29,7 +29,7 @@ function HomePage() {
         <LifeSection />
         <Partners />
         <TokenFold />
-        <StayConnected />
+        <StayConnected exitParallax />
       </main>
       <Footer />
     </>

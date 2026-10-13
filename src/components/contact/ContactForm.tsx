@@ -90,10 +90,32 @@ export default function ContactForm() {
           </p>
 
           <fieldset className="contact-form__fields" disabled={submitted}>
+            <Field label="Name" required>
+              <span className="contact-field__box">
+                <input type="text" name="name" placeholder="Your name" autoComplete="name" required />
+              </span>
+            </Field>
+
             <div className="contact-form__row">
-              <Field label="Name" required>
-                <span className="contact-field__box">
-                  <input type="text" name="name" placeholder="Your name" autoComplete="name" required />
+              <Field label="Contact number" required>
+                <span className="contact-field__box contact-field__box--phone">
+                  <span className="contact-field__dial">
+                    {dial.flag && <img src={dial.flag} width={33} height={22} alt="" />}
+                    <img src={caretDown} width={24} height={24} alt="" />
+                    <select
+                      aria-label="Country calling code"
+                      value={dial.code}
+                      onChange={(e) => setDial(DIAL_CODES.find((d) => d.code === e.target.value) ?? DIAL_CODES[0])}
+                    >
+                      {DIAL_CODES.map((d) => (
+                        <option key={d.code} value={d.code}>
+                          {d.country} ({d.code})
+                        </option>
+                      ))}
+                    </select>
+                  </span>
+                  <span className="contact-field__code">{dial.code}</span>
+                  <input type="tel" name="phone" autoComplete="tel-national" required />
                 </span>
               </Field>
               <Field label="Email address" required>
@@ -131,28 +153,6 @@ export default function ContactForm() {
                 </span>
               </Field>
             </div>
-
-            <Field label="Contact number" required>
-              <span className="contact-field__box contact-field__box--phone">
-                <span className="contact-field__dial">
-                  {dial.flag && <img src={dial.flag} width={33} height={22} alt="" />}
-                  <img src={caretDown} width={24} height={24} alt="" />
-                  <select
-                    aria-label="Country calling code"
-                    value={dial.code}
-                    onChange={(e) => setDial(DIAL_CODES.find((d) => d.code === e.target.value) ?? DIAL_CODES[0])}
-                  >
-                    {DIAL_CODES.map((d) => (
-                      <option key={d.code} value={d.code}>
-                        {d.country} ({d.code})
-                      </option>
-                    ))}
-                  </select>
-                </span>
-                <span className="contact-field__code">{dial.code}</span>
-                <input type="tel" name="phone" autoComplete="tel-national" required />
-              </span>
-            </Field>
 
             <Field label="Message">
               <span className="contact-field__box contact-field__box--message">

@@ -41,7 +41,7 @@ export default function PropertyPage({ content }: { content: PropertyContent }) 
         <PropertyLocation id={SECTIONS.location} content={content} />
         <Promotions id={SECTIONS.promotions} content={content} />
         <Faqs id={SECTIONS.faqs} content={content} />
-        <StayConnected id={SECTIONS.waitlist} />
+        <StayConnected id={SECTIONS.waitlist} exitParallax />
       </main>
       <Footer />
     </>
