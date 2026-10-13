@@ -1,4 +1,5 @@
 import { PROPERTIES, REGIONS, type Property } from './locationData';
+import { MegaMenuPanel } from './MegaMenu';
 import arrowRight from '../assets/menu-arrow-right.svg';
 import './LocationsMenu.css';
 
@@ -9,7 +10,7 @@ type LocationsMenuProps = {
 };
 
 function PropertyItem({ property, onNavigate }: { property: Property; onNavigate: () => void }) {
-  const { name, address, comingSoon } = property;
+  const { name, address, comingSoon, href } = property;
   const content = (
     <>
       <span className="locations-menu__name-row">
@@ -26,11 +27,11 @@ function PropertyItem({ property, onNavigate }: { property: Property; onNavigate
     </>
   );
 
-  // Only open properties link through; coming-soon ones are listed but inert.
-  return comingSoon ? (
+  // Open properties always link through; coming-soon ones only once they have a page.
+  return comingSoon && !href ? (
     <div className="locations-menu__property">{content}</div>
   ) : (
-    <a href="#" className="locations-menu__property is-link" onClick={onNavigate}>
+    <a href={href ?? '#'} className="locations-menu__property is-link" onClick={onNavigate}>
       {content}
     </a>
   );
@@ -43,32 +44,26 @@ function PropertyItem({ property, onNavigate }: { property: Property; onNavigate
  */
 export default function LocationsMenu({ id, open, onNavigate }: LocationsMenuProps) {
   return (
-    <div id={id} className={`locations-menu${open ? ' is-open' : ''}`}>
-      <div className="locations-menu__clip">
-        <div className="locations-menu__inner">
-          <p className="locations-menu__heading">Our locations</p>
+    <MegaMenuPanel id={id} open={open} heading="Our locations">
+      {REGIONS.map((region) => (
+        <div key={region.id} className="locations-menu__row">
+          <div className="locations-menu__region">
+            <p className="locations-menu__region-name">{region.name}</p>
+            <p className="locations-menu__region-summary">{region.summary}</p>
+          </div>
 
-          {REGIONS.map((region) => (
-            <div key={region.id} className="locations-menu__row">
-              <div className="locations-menu__region">
-                <p className="locations-menu__region-name">{region.name}</p>
-                <p className="locations-menu__region-summary">{region.summary}</p>
-              </div>
-
-              <div className="locations-menu__cities">
-                {region.cities.map((city) => (
-                  <div key={city} className="locations-menu__city">
-                    <p className="locations-menu__city-name">{city}</p>
-                    {PROPERTIES.filter((p) => p.city === city).map((p) => (
-                      <PropertyItem key={p.id} property={p} onNavigate={onNavigate} />
-                    ))}
-                  </div>
+          <div className="locations-menu__cities">
+            {region.cities.map((city) => (
+              <div key={city} className="locations-menu__city">
+                <p className="locations-menu__city-name">{city}</p>
+                {PROPERTIES.filter((p) => p.city === city).map((p) => (
+                  <PropertyItem key={p.id} property={p} onNavigate={onNavigate} />
                 ))}
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    </div>
+      ))}
+    </MegaMenuPanel>
   );
 }

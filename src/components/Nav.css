@@ -12,11 +12,23 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0);
   transition:
     background-color 400ms var(--ease-in-out),
-    box-shadow 400ms var(--ease-in-out);
+    box-shadow 400ms var(--ease-in-out),
+    transform 400ms var(--ease-in-out);
+}
+
+/* Property pages, deep in the content: the main bar slides away, the sub-navigation stays */
+.nav.is-condensed {
+  transform: translateY(calc(-1 * var(--bar-h, 0px)));
+}
+
+/* …but comes back while keyboard focus is in it (not after a mouse click, which leaves focus behind) */
+.nav.is-condensed:has(.nav__inner :focus-visible) {
+  transform: none;
 }
 
 /* Over the hero: white type with Figma's soft text shadow for legibility */
-.nav:not(.is-scrolled):not(.is-open) .nav__inner {
+.nav:not(.is-scrolled):not(.is-open) .nav__inner,
+.nav:not(.is-scrolled):not(.is-open) .nav__sub {
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7));
 }
 
@@ -134,6 +146,7 @@ button.nav__link {
 }
 
 .nav__logo {
+  display: flex;
   flex-shrink: 0;
 }
 
@@ -197,11 +210,107 @@ button.nav__link {
   cursor: pointer;
 }
 
+/*
+ * Property pages: a 24px-padded bar with a hairline, then the sub-navigation.
+ * Once scrolled it compacts exactly like the homepage's (40px logo, 12px padding).
+ */
+.nav--sub .nav__inner {
+  border-bottom: 1px solid var(--royal-chocolate-500);
+  transition:
+    padding 400ms var(--ease-in-out),
+    border-color 400ms var(--ease-in-out);
+}
+
+.nav--sub:not(.is-scrolled) .nav__inner {
+  padding: 24px 0;
+}
+
+.nav--sub.is-scrolled .nav__inner {
+  border-bottom-color: var(--line-in-white);
+}
+
+/* An open mega menu brings its own divider */
+.nav--sub.is-open .nav__inner {
+  border-bottom-color: transparent;
+}
+
+.nav__sub {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  width: calc(100% + 2 * var(--page-gutter));
+  max-height: 80px;
+  padding: 4px var(--page-gutter);
+  background: rgba(248, 245, 239, 0);
+  transition:
+    background-color 400ms var(--ease-in-out),
+    max-height 400ms var(--ease-in-out),
+    padding 400ms var(--ease-in-out),
+    opacity 250ms var(--ease-in-out);
+}
+
+.nav.is-scrolled .nav__sub {
+  --nav-text: var(--royal-chocolate-700);
+  background: var(--bronze-200);
+}
+
+/* A mega menu takes over: the sub-navigation folds away while it's open */
+.nav.is-open .nav__sub {
+  max-height: 0;
+  padding-block: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    max-height 400ms var(--ease-in-out),
+    padding 400ms var(--ease-in-out),
+    opacity 150ms var(--ease-in-out),
+    visibility 0s linear 400ms;
+}
+
+/*
+ * Dark tone (Contact page, Figma 539:24148): a solid chocolate bar with white type
+ * and the filled bronze button at the top; once scrolled it's the homepage's bar.
+ */
+.nav--dark:not(.is-scrolled):not(.is-open) {
+  background: var(--royal-chocolate-700);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+.nav--dark:not(.is-scrolled):not(.is-open) .nav__inner {
+  padding: 12px 0;
+  filter: none;
+}
+
+.nav--dark .nav__cta {
+  padding: 11px 24px;
+  border-color: var(--line-in-white);
+  background: var(--line-in-white);
+  color: var(--royal-chocolate-600);
+}
+
+.nav--dark .nav__cta:hover {
+  border-color: var(--bronze-600);
+  background: var(--bronze-600);
+}
+
+@media (max-width: 1100px) {
+  .nav__sub {
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav__sub::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @media (max-width: 1100px) {
   .nav__links:not(.nav__links--end),
   .nav__actions .nav__link,
   .nav__lang,
-  .locations-menu {
+  .mega-menu {
     display: none;
   }
 

@@ -7,7 +7,7 @@ type LocationCardProps = {
 };
 
 export default function LocationCard({ property }: LocationCardProps) {
-  const { name, address, city, image, comingSoon } = property;
+  const { name, address, city, image, comingSoon, href = '#' } = property;
   return (
     <article className={`location-card${comingSoon ? ' location-card--soon' : ''}`}>
       <div className="location-card__image">
@@ -25,7 +25,7 @@ export default function LocationCard({ property }: LocationCardProps) {
         {comingSoon ? (
           <p className="location-card__soon">Coming soon!</p>
         ) : (
-          <a href="#" className="location-card__link">
+          <a href={href} className="location-card__link">
             <span>View Property</span>
             <img src={arrowRight} width={24} height={24} alt="" />
           </a>

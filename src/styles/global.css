@@ -9,14 +9,19 @@
   --bronze-700: #896d42;
   --royal-chocolate-200: #ebe8e7;
   --royal-chocolate-300: #dcd7d3;
+  --royal-chocolate-400: #a59994;
   --royal-chocolate-500: #74615a;
   --royal-chocolate-600: #391d13;
   --royal-chocolate-700: #24120c;
   --line-in-white: #d7c5a9;
   --menu-text: #e9dfd0;
   --grey-200: #e9ecef;
+  --grey-400: #a9afb5;
   --grey-600: #6c757d;
   --grey-700: #495057;
+  --grey-800: #343a40;
+  --grey-900: #212529;
+  --error-500: #ea5826;
 
   --font-display: 'Playfair Display', Georgia, serif;
   --font-body: 'Albert Sans', system-ui, sans-serif;
@@ -52,7 +57,8 @@ img {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
   color: inherit;
 }
@@ -108,6 +114,25 @@ p {
   align-items: center;
   text-align: center;
   width: 100%;
+}
+
+/* Exit parallax (lib/useExitParallax.ts): the section clips its drifting content */
+.exit-parallax {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-exit-content] {
+  will-change: transform;
+}
+
+/* Darkens the section as it scrolls away — animated by GSAP */
+.exit-shade {
+  position: absolute;
+  inset: 0;
+  background: var(--royal-chocolate-700);
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Vertical hairline drawn from a horizontal SVG rotated 90° */

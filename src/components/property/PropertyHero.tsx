@@ -1,0 +1,55 @@
+import VLine from '../VLine';
+import heroLine from '../../assets/hero-line.svg';
+import arrowRight from '../../assets/arrow-right-white.svg';
+import play from '../../assets/property/icon-play-white.svg';
+import tour360 from '../../assets/property/icon-360.svg';
+import photos from '../../assets/property/icon-photos.svg';
+import type { PropertyContent } from './propertyContent';
+import './PropertyHero.css';
+
+type PropertyHeroProps = {
+  content: PropertyContent;
+  onSeeRooms: () => void;
+};
+
+/** Property hero (Figma 539:13191): name over the photo, rooms CTA and media links. */
+export default function PropertyHero({ content, onSeeRooms }: PropertyHeroProps) {
+  return (
+    <section className="property-hero">
+      <img className="property-hero__image" src={content.hero} alt="" />
+      <div className="property-hero__overlay" aria-hidden />
+
+      <div className="property-hero__content">
+        <h1 className="property-hero__title">
+          {content.brand} <em>{content.place}</em>
+        </h1>
+
+        <VLine src={heroLine} length={50} />
+
+        <div className="property-hero__actions">
+          <button type="button" className="property-hero__cta" onClick={onSeeRooms}>
+            <span>See all rooms</span>
+            <img src={arrowRight} width={24} height={24} alt="" />
+          </button>
+
+          <div className="property-hero__media">
+            <a href="#" className="property-hero__media-link">
+              <img src={play} width={24} height={24} alt="" />
+              <span>See all rooms</span>
+            </a>
+            <a href="#" className="property-hero__media-link">
+              <span className="property-hero__icon-360">
+                <img src={tour360} width={28.86} height={19.651} alt="" />
+              </span>
+              <span>360 virtual tour</span>
+            </a>
+            <a href="#" className="property-hero__media-link">
+              <img src={photos} width={24} height={24} alt="" />
+              <span>See all photos</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

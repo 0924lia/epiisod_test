@@ -1,0 +1,153 @@
+.instagram {
+  padding: 200px var(--page-gutter);
+  background: var(--royal-chocolate-700);
+}
+
+/* Taller than the section so its scroll parallax never shows an edge */
+.instagram__backdrop {
+  position: absolute;
+  inset: -15% 0;
+  width: 100%;
+  height: 130%;
+  object-fit: cover;
+}
+
+.instagram__tint {
+  position: absolute;
+  inset: 0;
+  background: rgba(57, 29, 19, 0.9);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  mix-blend-mode: overlay;
+}
+
+.instagram__content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+/* Scoped to beat the shared .eyebrow / .display-title colours */
+.instagram .instagram__eyebrow {
+  color: var(--line-in-white);
+}
+
+.instagram .instagram__title {
+  color: var(--white);
+}
+
+.instagram__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px 24px;
+  font-size: 24px;
+  line-height: 1.5;
+  color: var(--bronze-200);
+}
+
+.instagram__follow {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.instagram__follow ul {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.instagram__follow a {
+  display: block;
+  transition: opacity 200ms ease;
+}
+
+.instagram__follow a:hover {
+  opacity: 0.7;
+}
+
+/* Full-bleed strip of 320×300 posts, looping slowly */
+.instagram__strip {
+  margin: 0 calc(-1 * max(var(--page-gutter), (100vw - var(--content-max)) / 2));
+  overflow: hidden;
+}
+
+.instagram__track {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* One set of posts (6 × 344px) every 28s ≈ 74px/s */
+  animation: instagram-loop 28s linear infinite;
+}
+
+.instagram__strip:hover .instagram__track,
+.instagram__strip:focus-within .instagram__track {
+  animation-play-state: paused;
+}
+
+/* One set of posts plus its trailing gap: the second set lands where the first began */
+@keyframes instagram-loop {
+  to {
+    transform: translateX(calc(-50% - 12px));
+  }
+}
+
+.instagram__track li {
+  flex-shrink: 0;
+  width: 320px;
+  height: 300px;
+  overflow: hidden;
+}
+
+.instagram__track a {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.instagram__track img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 600ms var(--ease-in-out);
+}
+
+.instagram__track a:hover img {
+  transform: scale(1.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .instagram__track {
+    animation: none;
+  }
+
+  .instagram__strip {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .instagram {
+    padding: 120px var(--page-gutter);
+  }
+
+  .instagram__bar {
+    font-size: 18px;
+  }
+
+  .instagram__track li {
+    width: 240px;
+    height: 225px;
+  }
+}

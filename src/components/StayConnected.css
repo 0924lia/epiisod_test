@@ -1,12 +1,14 @@
 .stay-connected {
+  padding: 140px var(--page-gutter) 400px; /* +200px breathing room before the footer */
+  /* Continues the token fold's gradient (Figma 539:11693) */
+  background: linear-gradient(to bottom, var(--bronze-100), var(--bronze-200));
+}
+
+.stay-connected__content {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 40px;
-  padding: 140px var(--page-gutter) 400px; /* +200px breathing room before the footer */
-  overflow: hidden;
-  /* Continues the token fold's gradient (Figma 539:11693) */
-  background: linear-gradient(to bottom, var(--bronze-100), var(--bronze-200));
 }
 
 .stay-connected__title {
@@ -17,7 +19,7 @@
 .stay-connected__form {
   display: flex;
   align-items: flex-start;
-  gap: 24px;
+  gap: 8px;
   width: min(904px, 100%);
 }
 
@@ -53,6 +55,13 @@
 .stay-connected__field input:focus {
   border-color: var(--bronze-700);
   background: var(--white);
+}
+
+/* Submitted: fields keep their values in the resting style */
+.stay-connected__form.is-submitted input {
+  border-color: var(--line-in-white);
+  background: var(--bronze-100);
+  cursor: default;
 }
 
 .stay-connected__submit {
@@ -116,6 +125,40 @@
   transform: translateX(4px);
 }
 
+/* Replaces the button once submitted (Figma 539:21195) */
+.stay-connected__thanks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: stretch;
+  width: 208px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--bronze-700);
+  outline: none;
+  animation: stay-connected-thanks 500ms var(--ease-in-out) both;
+}
+
+.stay-connected__thanks em {
+  font-style: italic;
+}
+
+@keyframes stay-connected-thanks {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stay-connected__thanks {
+    animation: none;
+  }
+}
+
 @media (max-width: 700px) {
   .stay-connected {
     padding: 100px var(--page-gutter) 120px;
@@ -126,7 +169,12 @@
     align-items: stretch;
   }
 
-  .stay-connected__submit {
+  .stay-connected__submit,
+  .stay-connected__thanks {
     width: 100%;
+  }
+
+  .stay-connected__thanks {
+    height: 46px;
   }
 }

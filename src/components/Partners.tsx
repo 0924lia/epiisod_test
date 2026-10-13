@@ -11,19 +11,19 @@ import partnersRight from '../assets/partners-right.jpg';
 import line from '../assets/partners-line.svg';
 import './Partners.css';
 
-type Logo =
+export type Logo =
   | { kind: 'single'; src: string; width: number; height: number }
   | { kind: 'split'; mark: string; word: string };
 
 /** Placeholder partner logos, in Figma order (539:11933). */
-const LOGOS: Logo[] = [
+export const LOGOS: Logo[] = [
   { kind: 'single', src: partner1, width: 198.915, height: 30.566 },
   { kind: 'split', mark: partner2a, word: partner2b },
   { kind: 'single', src: partner3, width: 210.676, height: 44.487 },
   { kind: 'single', src: partner4, width: 198.915, height: 30.566 },
 ];
 
-function LogoSlot({ logo }: { logo: Logo }) {
+export function LogoSlot({ logo }: { logo: Logo }) {
   return (
     <div className="partner-logo">
       {logo.kind === 'single' ? (
