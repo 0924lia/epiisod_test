@@ -29,11 +29,17 @@ const SUB_LINKS: SubLink[] = [
   { label: 'Join the wait list', target: SECTIONS.waitlist },
 ];
 
+/**
+ * Sections where the main bar stays hidden even when scrolling up: Rooms pins its own
+ * controls under the sub-navigation, and Location's map tabs would sit under the bar.
+ */
+const BAR_HIDDEN_IN = [SECTIONS.rooms, SECTIONS.location];
+
 /** A property's page (Figma 539:13190), reached from Locations in the nav and the homepage. */
 export default function PropertyPage({ content }: { content: PropertyContent }) {
   return (
     <>
-      <Nav subLinks={SUB_LINKS} hideBarAfter={SECTIONS.amenities} />
+      <Nav subLinks={SUB_LINKS} hideBarAfter={SECTIONS.amenities} barHiddenIn={BAR_HIDDEN_IN} />
       <main>
         <PropertyHero content={content} onSeeRooms={() => scrollToSection(SECTIONS.rooms)} />
         <Amenities id={SECTIONS.amenities} content={content} />

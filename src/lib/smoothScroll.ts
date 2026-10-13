@@ -35,10 +35,13 @@ export function initSmoothScroll() {
   gsap.ticker.lagSmoothing(0);
 }
 
-/** Scroll the page to `top`, through Lenis when it's running so the two don't fight. */
-export function scrollToY(top: number) {
-  if (lenis) lenis.scrollTo(top, { duration: SCROLL_DURATION * 1.2, easing: easeOutExpo });
-  else window.scrollTo({ top, behavior: 'smooth' });
+/**
+ * Scroll the page to `top`, through Lenis when it's running so the two don't fight.
+ * `immediate` jumps without animating (e.g. to hold the view steady after a re-layout).
+ */
+export function scrollToY(top: number, { immediate = false }: { immediate?: boolean } = {}) {
+  if (lenis) lenis.scrollTo(top, immediate ? { immediate: true, force: true } : { duration: SCROLL_DURATION * 1.2, easing: easeOutExpo });
+  else window.scrollTo({ top, behavior: immediate ? 'instant' : 'smooth' });
 }
 
 export { gsap, ScrollTrigger, useGSAP };

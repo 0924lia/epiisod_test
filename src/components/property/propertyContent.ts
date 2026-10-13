@@ -14,23 +14,36 @@ import wifi from '../../assets/property/icon-wifi.svg';
 import shield from '../../assets/property/icon-shield.svg';
 import coffee from '../../assets/property/icon-coffee.svg';
 import calendar from '../../assets/property/icon-calendar.svg';
-import roomStudio from '../../assets/property/room-studio.jpg';
-import map from '../../assets/property/map.jpg';
+import roomQuad from '../../assets/property/rooms/quad-ensuite.jpg';
+import roomSignature from '../../assets/property/rooms/signature-studio.jpg';
+import roomSignatureFlex from '../../assets/property/rooms/signature-studio-flex.jpg';
+import roomAspect from '../../assets/property/rooms/aspect-studio.jpg';
+import roomAspectE from '../../assets/property/rooms/aspect-studio-e.jpg';
+import roomEmpowered from '../../assets/property/rooms/empowered-studio.jpg';
+import roomPremier from '../../assets/property/rooms/premier-empowered-studio.jpg';
 import promoBanner from '../../assets/property/promo-banner.jpg';
 import promo1 from '../../assets/property/promo-1.jpg';
 import promo2 from '../../assets/property/promo-2.jpg';
 import promo3 from '../../assets/property/promo-3.jpg';
 import promo4 from '../../assets/property/promo-4.jpg';
+import { MACQUARIE_PARK_PLACES } from './macquarieParkMap';
 
 export type RoomType = 'Studio' | 'Shared';
 
+/** Status tag on a room card (Figma 539:30241). */
+export type RoomTag = 'offer' | 'popular' | 'promotion' | 'soldOut' | 'value';
+
 export type Room = {
   id: string;
+  /** Used by the Studio / Shared filter. */
   type: RoomType;
+  /** Shown above the name, e.g. "Shared Apartment". */
+  typeLabel: string;
   name: string;
   image: string;
-  badge: 'offer' | 'limited';
-  features: string[];
+  tag: RoomTag;
+  /** Views, e.g. "Garden/Urban/Pool/City", where known. */
+  features?: string;
   price: number;
   available: boolean;
 };
@@ -38,6 +51,9 @@ export type Room = {
 export type Promo = { id: string; title: string; text: string; image: string };
 
 export type Faq = { question: string; answer: string };
+
+export type MapPlace = { name: string; address: string; lat: number; lng: number };
+export type MapCategory = { name: string; places: MapPlace[] };
 
 export type PropertyContent = {
   /** Shown before the italic part of the name, e.g. "EPIISOD" + "Macquarie Park". */
@@ -52,14 +68,14 @@ export type PropertyContent = {
   rooms: Room[];
   roomCurrency: string;
   stayLengths: string[];
-  mapImage: string;
-  mapCategories: string[];
+  /** The property's own pin. */
+  mapCenter: { lat: number; lng: number };
+  /** Nearby places, by category: the map's markers and its filter tabs. */
+  mapPlaces: MapCategory[];
   promotion: { eyebrow: string; title: string; text: string; image: string };
   promos: Promo[];
   faqs: Faq[];
 };
-
-const ROOM_FEATURES = ['Garden', 'Urban', 'Pool', 'City'];
 
 // TODO: replace with the real answers — the design only lists the questions.
 const PENDING_ANSWER =
@@ -98,30 +114,19 @@ export const MACQUARIE_PARK: PropertyContent = {
     { icon: calendar, label: 'Big Social Calendar' },
   ],
   rooms: [
-    { id: 'studio-1', type: 'Studio', badge: 'offer' },
-    { id: 'shared-1', type: 'Shared', badge: 'limited' },
-    { id: 'shared-2', type: 'Shared', badge: 'limited' },
-    { id: 'studio-2', type: 'Studio', badge: 'offer' },
-    { id: 'studio-3', type: 'Studio', badge: 'offer' },
-  ].map((r) => ({
-    ...(r as Pick<Room, 'id' | 'type' | 'badge'>),
-    name: 'Premier Empowered Studio',
-    image: roomStudio,
-    features: ROOM_FEATURES,
-    price: 799,
-    available: true,
-  })),
+    { id: 'quad', type: 'Shared', typeLabel: 'Shared Apartment', name: 'Quad 4 Bedroom Ensuite', image: roomQuad, tag: 'offer', price: 615, available: true },
+    { id: 'quint', type: 'Shared', typeLabel: 'Shared Apartment', name: 'Quint 5 Bedroom Ensuite', image: roomQuad, tag: 'popular', price: 615, available: true },
+    { id: 'signature', type: 'Studio', typeLabel: 'Studio', name: 'Signature Studio', image: roomSignature, tag: 'promotion', features: 'Garden/Urban/Pool/City', price: 725, available: true },
+    { id: 'signature-flex', type: 'Studio', typeLabel: 'Studio', name: 'Signature Studio Flex', image: roomSignatureFlex, tag: 'promotion', price: 727, available: true },
+    { id: 'aspect', type: 'Studio', typeLabel: 'Studio', name: 'Aspect Studio', image: roomAspect, tag: 'soldOut', features: 'Garden/Urban/Pool/City', price: 745, available: false },
+    { id: 'aspect-e', type: 'Studio', typeLabel: 'Studio', name: 'Aspect Studio E', image: roomAspectE, tag: 'promotion', features: 'Garden/Pool', price: 840, available: true },
+    { id: 'empowered', type: 'Studio', typeLabel: 'Studio', name: 'Empowered Studio', image: roomEmpowered, tag: 'soldOut', price: 873, available: false },
+    { id: 'premier-empowered', type: 'Studio', typeLabel: 'Studio', name: 'Premier Empowered Studio', image: roomPremier, tag: 'value', price: 893, available: true },
+  ],
   roomCurrency: 'AU$',
   stayLengths: ['12 weeks', '6 months', '12 months'],
-  mapImage: map,
-  mapCategories: [
-    'Transport',
-    'Education',
-    'Food',
-    'Shopping & Entertainment',
-    'Telcos & Post Offices',
-    'Other Landmarks',
-  ],
+  mapCenter: { lat: -33.77917242506175, lng: 151.11718975214868 },
+  mapPlaces: MACQUARIE_PARK_PLACES,
   promotion: {
     eyebrow: 'Promotion',
     title: 'Refer a Friend - Double the Joy, $600 in Rewards!',

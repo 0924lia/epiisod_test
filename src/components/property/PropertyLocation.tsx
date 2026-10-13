@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import FilterTabs from './FilterTabs';
+import PropertyMap from './PropertyMap';
 import { useExitParallax } from '../../lib/useExitParallax';
 import pin from '../../assets/property/icon-location-pin.svg';
 import type { PropertyContent } from './propertyContent';
@@ -8,9 +9,8 @@ import './PropertyLocation.css';
 const ALL = 'All';
 
 /**
- * Location (Figma 539:13621): address and the neighbourhood map.
- * The map is the static design image for now, so the category tabs only mark a
- * selection — TODO: swap in an interactive map whose markers they filter.
+ * Location (Figma 539:13621): address and the neighbourhood map. The category tabs
+ * filter the map's markers (places as on the live EPIISOD site).
  */
 export default function PropertyLocation({ id, content }: { id: string; content: PropertyContent }) {
   const [category, setCategory] = useState(ALL);
@@ -29,15 +29,22 @@ export default function PropertyLocation({ id, content }: { id: string; content:
             </p>
           </div>
           <FilterTabs
+            className="property-location__tabs"
             label="Places nearby"
-            options={[ALL, ...content.mapCategories]}
+            options={[ALL, ...content.mapPlaces.map((c) => c.name)]}
             value={category}
             onChange={setCategory}
           />
         </div>
 
         <div className="property-location__map">
-          <img src={content.mapImage} alt={`Map of the area around ${content.brand} ${content.place}`} />
+          <PropertyMap
+            name={`${content.brand} ${content.place}`}
+            address={content.address.replace(/^[^,]+,\s*/, '') + ', Australia'}
+            center={content.mapCenter}
+            categories={content.mapPlaces}
+            active={category === ALL ? null : category}
+          />
         </div>
       </div>
       <div className="exit-shade" aria-hidden />

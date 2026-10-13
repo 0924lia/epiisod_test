@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import VLine from '../VLine';
+import { gsap, useGSAP } from '../../lib/smoothScroll';
 import heroLine from '../../assets/hero-line.svg';
 import arrowRight from '../../assets/arrow-right-white.svg';
 import play from '../../assets/property/icon-play-white.svg';
@@ -12,12 +14,36 @@ type PropertyHeroProps = {
   onSeeRooms: () => void;
 };
 
-/** Property hero (Figma 539:13191): name over the photo, rooms CTA and media links. */
+/**
+ * Property hero (Figma 539:13191): name over the photo, rooms CTA and media links.
+ * Same exit parallax as the homepage hero: as it scrolls away the photo drifts at half
+ * speed (so the next section slides over it), the copy lags and fades, and it darkens.
+ */
 export default function PropertyHero({ content, onSeeRooms }: PropertyHeroProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useGSAP(
+    () => {
+      gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+        gsap
+          .timeline({
+            defaults: { ease: 'none', duration: 1 },
+            scrollTrigger: { trigger: sectionRef.current, start: 'top top', end: 'bottom top', scrub: true },
+          })
+          .to('.property-hero__image', { yPercent: 50 }, 0)
+          .to('.property-hero__content', { y: 320 }, 0)
+          .to('.property-hero__content', { opacity: 0, duration: 0.7 }, 0)
+          .to('.property-hero__shade', { opacity: 0.6 }, 0);
+      });
+    },
+    { scope: sectionRef },
+  );
+
   return (
-    <section className="property-hero">
+    <section ref={sectionRef} className="property-hero">
       <img className="property-hero__image" src={content.hero} alt="" />
       <div className="property-hero__overlay" aria-hidden />
+      <div className="property-hero__shade" aria-hidden />
 
       <div className="property-hero__content">
         <h1 className="property-hero__title">

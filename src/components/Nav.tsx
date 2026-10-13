@@ -46,7 +46,9 @@ export function scrollToSection(id: string) {
   const hideAfter = header.dataset.hideAfter && document.getElementById(header.dataset.hideAfter);
   const top = pageTop(section);
   const goingDown = top - sub > window.scrollY;
-  const barHides = !!hideAfter && goingDown && top - sub >= pageTop(hideAfter) - sub - COMPACT_BAR_HEIGHT;
+  const barHides =
+    (header.dataset.barHiddenIn?.split(',') ?? []).includes(id) ||
+    (!!hideAfter && goingDown && top - sub >= pageTop(hideAfter) - sub - COMPACT_BAR_HEIGHT);
   scrollToY(top - sub - (barHides ? 0 : COMPACT_BAR_HEIGHT));
 }
 
@@ -71,15 +73,20 @@ function Icon({ light, dark, size }: { light: string; dark: string; size: number
  * (Figma 539:13194), which turns into a bronze band once scrolled (Figma 539:22227).
  * With `hideBarAfter`, once that section is reached the main bar slides away while
  * scrolling down — leaving just the sub-navigation — and returns on scrolling up.
+ * Within the `barHiddenIn` sections it stays hidden in both directions, for sections that
+ * pin their own controls under the sub-navigation.
  * `tone="dark"` starts as a solid chocolate bar (Figma 539:24148) for pages without a hero.
  */
 export default function Nav({
   subLinks,
   hideBarAfter,
+  barHiddenIn,
   tone = 'light',
 }: {
   subLinks?: SubLink[];
   hideBarAfter?: string;
+  /** Section ids where the main bar stays hidden even when scrolling up. */
+  barHiddenIn?: string[];
   /** `dark`: a solid chocolate bar until scrolled (Contact page). */
   tone?: 'light' | 'dark';
 }) {
@@ -105,8 +112,15 @@ export default function Nav({
       const section = document.getElementById(hideBarAfter);
       const header = headerRef.current;
       if (!section || !header) return;
+      const inHiddenSection = (barHiddenIn ?? []).some((id) => {
+        const r = document.getElementById(id)?.getBoundingClientRect();
+        return !!r && r.top <= header.offsetHeight && r.bottom > header.offsetHeight;
+      });
       if (y < pageTop(section) - header.offsetHeight) {
         setCondensed(false);
+        lastY = y;
+      } else if (inHiddenSection) {
+        setCondensed(true);
         lastY = y;
       } else if (Math.abs(y - lastY) > DIRECTION_TOLERANCE) {
         setCondensed(y > lastY);
@@ -116,7 +130,24 @@ export default function Nav({
     update();
     window.addEventListener('scroll', update, { passive: true });
     return () => window.removeEventListener('scroll', update);
-  }, [hideBarAfter]);
+  }, [hideBarAfter, barHiddenIn]);
+
+  // Publish how much of the nav is on screen (bar + sub-navigation, minus a hidden bar)
+  // as --nav-offset, so sticky page content can sit just below it. Held while a menu is open.
+  useEffect(() => {
+    const header = headerRef.current;
+    const bar = barRef.current;
+    if (!header || !bar || openMenu) return;
+    const update = () => {
+      const sub = header.querySelector<HTMLElement>('.nav__sub')?.offsetHeight ?? 0;
+      const visible = (condensed ? 0 : bar.offsetHeight) + sub;
+      document.documentElement.style.setProperty('--nav-offset', `${visible}px`);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(header);
+    return () => ro.disconnect();
+  }, [condensed, openMenu]);
 
   // The hidden bar slides up by its own height, which changes as it compacts
   useEffect(() => {
@@ -124,7 +155,8 @@ export default function Nav({
     const header = headerRef.current;
     if (!bar || !header) return;
     const ro = new ResizeObserver(() => header.style.setProperty('--bar-h', `${bar.offsetHeight}px`));
-    ro.observe(bar);
+    // border-box: the bar compacts by padding too, which a content-box observer misses
+    ro.observe(bar, { box: 'border-box' });
     return () => ro.disconnect();
   }, []);
 
@@ -148,6 +180,7 @@ export default function Nav({
       ref={headerRef}
       className={`nav${tone === 'dark' ? ' nav--dark' : ''}${subLinks ? ' nav--sub' : ''}${scrolled ? ' is-scrolled' : ''}${openMenu ? ' is-open' : ''}${condensed && !openMenu ? ' is-condensed' : ''}`}
       data-hide-after={hideBarAfter}
+      data-bar-hidden-in={barHiddenIn?.join(',')}
     >
       <nav ref={barRef} className="nav__inner" aria-label="Main">
         <div className="nav__links">

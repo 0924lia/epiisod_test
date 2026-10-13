@@ -1,0 +1,82 @@
+.property-map {
+  width: 100%;
+  height: 100%;
+  background: var(--bronze-100);
+  font-family: var(--font-body);
+}
+
+/* Soften OpenStreetMap's colours toward the site's warm, muted palette */
+.property-map .leaflet-tile-pane {
+  filter: grayscale(0.75) sepia(0.2) brightness(1.04) contrast(0.95);
+}
+
+/* Numbered place markers (as on the live site): dark circles with sand numbers */
+.map-marker {
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--white);
+  border-radius: 50%;
+  background: #111;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--line-in-white);
+  transition: transform 150ms ease;
+}
+
+.map-marker:hover {
+  transform: scale(1.12);
+}
+
+/* The property: EPIISOD mark on a cream disc */
+.map-home {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(248, 245, 239, 0.92);
+  box-shadow: 0 4px 14px rgba(57, 29, 19, 0.25);
+}
+
+/* Popups: white card, serif title, small address (Figma 539:13638) */
+.map-popup .leaflet-popup-content-wrapper {
+  border-radius: 4px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.map-popup .leaflet-popup-content {
+  margin: 14px 40px 14px 16px;
+}
+
+.map-popup__title {
+  margin: 0 !important;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.3;
+  color: var(--royal-chocolate-700);
+}
+
+.map-popup--home .map-popup__title {
+  font-size: 22px;
+}
+
+.map-popup__address {
+  margin: 4px 0 0 !important;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--royal-chocolate-600);
+}
+
+.map-popup .leaflet-popup-close-button {
+  top: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  color: var(--royal-chocolate-700);
+}
+
+.property-map .leaflet-control-zoom a {
+  color: var(--royal-chocolate-700);
+}
