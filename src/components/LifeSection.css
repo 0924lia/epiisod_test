@@ -11,6 +11,21 @@
   background: var(--white);
 }
 
+/* Drifts left and dims as it's covered — animated by GSAP in LifeSection.tsx */
+.life__intro-content {
+  will-change: transform;
+}
+
+/* A full screen tall, so it also dims any space below the intro on tall screens */
+.life__intro-shade {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 100vh;
+  background: var(--royal-chocolate-700);
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Move In, direction left — slide-in is scrubbed by GSAP in LifeSection.tsx */
 .life__wellness {
   position: absolute;

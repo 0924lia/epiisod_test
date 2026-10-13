@@ -11,6 +11,8 @@ import './LifeSection.css';
  * while the wellness fold slides in over it; once it has fully arrived, the wellness
  * story scrolls on normally.
  *
+ * As it's covered, the intro drifts left at a slower pace and dims (parallax with shade).
+ *
  * Wellness is laid out `slide` px below the top of the section and pulled up by the
  * same amount while sliding, so at the hand-off its layout and visual positions meet
  * and its own sticky heading takes over without a jump.
@@ -59,6 +61,17 @@ export default function LifeSection() {
         )
         .fromTo('.life__wellness', { y: -slide }, { y: 0, ease: 'none', duration: 1 }, 0);
 
+      // Intro hands over with parallax: it lags behind the incoming fold and darkens
+      gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+        gsap
+          .timeline({
+            defaults: { ease: 'power1.inOut', duration: 1 },
+            scrollTrigger: { trigger: section, start: 'top top', end: `+=${slide}`, scrub: true },
+          })
+          .fromTo('.life__intro-content', { xPercent: 0 }, { xPercent: -30 }, 0)
+          .fromTo('.life__intro-shade', { opacity: 0 }, { opacity: 0.35 }, 0);
+      });
+
       // Parallax: each layer drifts at its own --speed from the moment the section
       // enters until the wellness fold covers it. At the section's top it sits
       // exactly where Figma places it.
@@ -105,7 +118,10 @@ export default function LifeSection() {
       aria-label="Life at EPIISOD"
     >
       <div className="life__intro">
-        <LifeIntro onNext={skipToWellness} />
+        <div className="life__intro-content">
+          <LifeIntro onNext={skipToWellness} />
+        </div>
+        <div className="life__intro-shade" aria-hidden />
       </div>
       <div ref={wellnessRef} className="life__wellness">
         <Wellness offset={slide} stepScroll={stepScroll} />

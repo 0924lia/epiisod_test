@@ -15,15 +15,13 @@ type Story = {
   body: string;
   dots: string;
   image: string;
-  /** Heading column width per Figma variant. */
-  width: number;
 };
 
 const BODY =
   'Modern spaces, all-inclusive amenities, and a vibrant student community—all in the cities where you study.';
 
 const STORIES: Story[] = [
-  { title: <em>Wellness</em>, label: 'Wellness', body: BODY, dots: dots1, image: wellness1, width: 324 },
+  { title: <em>Wellness</em>, label: 'Wellness', body: BODY, dots: dots1, image: wellness1 },
   {
     title: (
       <>
@@ -34,7 +32,6 @@ const STORIES: Story[] = [
     body: BODY,
     dots: dots2,
     image: wellness2,
-    width: 440,
   },
   {
     title: (
@@ -46,7 +43,6 @@ const STORIES: Story[] = [
     body: BODY,
     dots: dots3,
     image: wellness3,
-    width: 324,
   },
 ];
 
@@ -150,7 +146,7 @@ export default function Wellness({ offset, stepScroll }: WellnessProps) {
   return (
     <div ref={rootRef} className="wellness" style={{ height: `calc(100vh + ${stepScroll}px)` }}>
       <div className="wellness__stage">
-        <div className="wellness__heading" style={{ width: story.width }}>
+        <div className="wellness__heading">
           <p className="eyebrow">student life</p>
           <div className="wellness__copy" key={current}>
             <h3 className="wellness__title">{story.title}</h3>

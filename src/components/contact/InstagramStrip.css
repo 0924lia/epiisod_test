@@ -3,21 +3,24 @@
   background: var(--royal-chocolate-700);
 }
 
-/* Taller than the section so its scroll parallax never shows an edge */
+/*
+ * The photo is blurred directly (filter, not backdrop-filter on the tint): Safari and
+ * some Firefox setups drop backdrop-filter when it's combined with a blend mode.
+ * Oversized on every side so the scroll parallax and the blur's soft edges stay hidden.
+ */
 .instagram__backdrop {
   position: absolute;
-  inset: -15% 0;
-  width: 100%;
+  inset: -15% -5%;
+  width: 110%;
   height: 130%;
   object-fit: cover;
+  filter: blur(40px);
 }
 
 .instagram__tint {
   position: absolute;
   inset: 0;
   background: rgba(57, 29, 19, 0.9);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
   mix-blend-mode: overlay;
 }
 

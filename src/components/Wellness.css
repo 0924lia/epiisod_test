@@ -17,12 +17,13 @@
   overflow: clip;
 }
 
+/* One width for every story (the widest Figma variant), so the copy never re-wraps */
 .wellness__heading {
   display: flex;
   flex-direction: column;
   gap: 40px;
   flex-shrink: 0;
-  transition: width 500ms var(--ease-in-out);
+  width: 440px;
 }
 
 .wellness__copy {
@@ -178,7 +179,7 @@
   }
 
   .wellness__heading {
-    width: 100% !important;
+    width: 100%;
     gap: 16px;
   }
 
