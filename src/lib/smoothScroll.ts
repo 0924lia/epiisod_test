@@ -5,6 +5,9 @@ import { useGSAP } from '@gsap/react';
 import 'lenis/dist/lenis.css';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
+// Phones resize the viewport as the address bar shows and hides; re-measuring every
+// scroll animation then makes pinned sections jump, so only real resizes count.
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 let lenis: Lenis | null = null;
 
@@ -42,6 +45,13 @@ export function initSmoothScroll() {
 export function scrollToY(top: number, { immediate = false }: { immediate?: boolean } = {}) {
   if (lenis) lenis.scrollTo(top, immediate ? { immediate: true, force: true } : { duration: SCROLL_DURATION * 1.2, easing: easeOutExpo });
   else window.scrollTo({ top, behavior: immediate ? 'instant' : 'smooth' });
+}
+
+/** Freeze page scrolling (e.g. behind an open menu panel), through Lenis when it's running. */
+export function setScrollLocked(locked: boolean) {
+  if (locked) lenis?.stop();
+  else lenis?.start();
+  document.documentElement.style.overflow = locked ? 'hidden' : '';
 }
 
 export { gsap, ScrollTrigger, useGSAP };

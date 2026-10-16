@@ -159,9 +159,10 @@
   }
 }
 
+/* Phones (Figma 704:9121): fields stacked 8px apart, then the full-width button 24px below */
 @media (max-width: 700px) {
   .stay-connected {
-    padding: 100px var(--page-gutter) 120px;
+    padding: 72px var(--page-gutter);
   }
 
   .stay-connected__form {
@@ -172,6 +173,7 @@
   .stay-connected__submit,
   .stay-connected__thanks {
     width: 100%;
+    margin-top: 16px;
   }
 
   .stay-connected__thanks {

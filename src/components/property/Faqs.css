@@ -36,8 +36,6 @@
   position: relative;
   width: min(672px, 100%);
   font-weight: 300;
-  font-size: 18px;
-  line-height: 1.5;
   text-align: center;
   color: var(--royal-chocolate-600);
 }
@@ -113,8 +111,6 @@
 .faqs__answer p {
   padding: 0 32px 24px 0;
   font-weight: 300;
-  font-size: 16px;
-  line-height: 1.5;
   color: var(--royal-chocolate-600);
 }
 

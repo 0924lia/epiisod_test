@@ -41,7 +41,7 @@ export default function ComingSoonHero({ property }: { property: Property }) {
       <div className="coming-soon-hero__shade" aria-hidden />
 
       <div className="coming-soon-hero__content">
-        <h1 className="coming-soon-hero__title">
+        <h1 className="type-h1 coming-soon-hero__title">
           {BRAND} <em>{place}</em>
         </h1>
 

@@ -12,7 +12,8 @@ import './StayConnected.css';
  * once both are filled, SUBMIT becomes a solid bronze button with white type.
  * After submitting, the fields lock and the button gives way to "Thank you." (Figma 539:21195).
  * With `exitParallax`, it drifts as the footer scrolls over it — undimmed, so the two
- * read as one continuous surface.
+ * read as one continuous surface. On phones the footer only arrives once the form has
+ * moved well up the screen, so filling it in is never interrupted.
  */
 export default function StayConnected({ id, exitParallax = false }: { id?: string; exitParallax?: boolean }) {
   const [name, setName] = useState('');
@@ -20,7 +21,7 @@ export default function StayConnected({ id, exitParallax = false }: { id?: strin
   const [submitted, setSubmitted] = useState(false);
   const thanksRef = useRef<HTMLParagraphElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
-  useExitParallax(sectionRef, { enabled: exitParallax, shade: false });
+  useExitParallax(sectionRef, { enabled: exitParallax, shade: false, lateOnPhones: true });
   const ready = name.trim() !== '' && email.trim() !== '';
 
   const onSubmit = (e: FormEvent) => {

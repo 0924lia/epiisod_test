@@ -43,7 +43,7 @@ function RoomCard({ room, currency }: { room: Room; currency: string }) {
       <div className="room-card__body">
         <div className="room-card__heading">
           <p className="room-card__type">{room.typeLabel}</p>
-          <h3 className="room-card__name">{room.name}</h3>
+          <h3 className="type-h4 room-card__name">{room.name}</h3>
           {/* Kept even when empty so every card's price lines up */}
           <p className="room-card__features">{room.features ?? '\u00a0'}</p>
         </div>
@@ -142,7 +142,7 @@ export default function Rooms({ id, content }: { id: string; content: PropertyCo
       <div className="rooms__content">
         <div className="heading-group rooms__heading">
           <p className="eyebrow">Rooms</p>
-          <h2 className="rooms__title">
+          <h2 className="type-h2 rooms__title">
             Find your <em>space</em>
           </h2>
         </div>

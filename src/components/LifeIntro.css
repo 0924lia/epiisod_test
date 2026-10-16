@@ -140,29 +140,83 @@
   }
 }
 
+/*
+ * Phones (Figma 704:8742): one screen tall with the heading centred and the photos kept
+ * in the Figma composition around it — offsets measured from the centre of the 614px
+ * frame. --u is one Figma pixel, scaled with the screen height (0.9–1.2×) so the photos
+ * grow on taller phones instead of drifting apart.
+ */
 @media (max-width: 700px) {
   .life-intro {
-    height: 720px;
+    --u: clamp(0.9px, 100svh / 614, 1.2px);
+    height: 100vh;
+    height: 100svh;
+    min-height: 560px;
+    padding: 72px var(--page-gutter);
   }
 
-  .life-intro__photo--1 {
-    top: 40px;
-  }
-
-  .life-intro__photo--2 {
+  .life-intro__heading > img {
     display: none;
   }
 
+  /* Subtler drift on phones: each layer travels about half its desktop distance */
+  .life-intro__heading {
+    --speed: -0.03;
+  }
+
+  .life-intro__photo--1 {
+    --speed: 0.14;
+  }
+
+  .life-intro__photo--2 {
+    --speed: 0.08;
+  }
+
   .life-intro__photo--3 {
-    left: -40px;
-    top: auto;
-    bottom: 40px;
+    --speed: 0.18;
+  }
+
+  .life-intro__photo--4 {
+    --speed: 0.11;
+  }
+
+  .life-intro__photo--1,
+  .life-intro__photo--2,
+  .life-intro__photo--3,
+  .life-intro__photo--4 {
+    scale: none;
+  }
+
+  .life-intro__photo--1 {
+    left: calc(-31 * var(--u));
+    top: calc(50% - 235 * var(--u));
+    width: calc(193 * var(--u));
+    height: calc(116 * var(--u));
+  }
+
+  .life-intro__photo--2 {
+    display: block;
+    left: auto;
+    right: 0;
+    top: calc(50% - 261 * var(--u));
+    width: calc(151 * var(--u));
+    height: calc(142 * var(--u));
+  }
+
+  .life-intro__photo--3 {
+    left: calc(-15 * var(--u));
+    top: calc(50% + 99 * var(--u));
+    bottom: auto;
+    width: calc(161 * var(--u));
+    height: calc(100 * var(--u));
   }
 
   .life-intro__photo--4 {
     left: auto;
-    right: -60px;
-    top: auto;
-    bottom: 40px;
+    right: calc(-38 * var(--u));
+    top: calc(50% + 114 * var(--u));
+    bottom: auto;
+    width: calc(151 * var(--u));
+    height: calc(69 * var(--u));
   }
 }

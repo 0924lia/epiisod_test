@@ -20,18 +20,6 @@
   margin-bottom: 8px;
 }
 
-.rooms__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 48px;
-  line-height: 1.2;
-  color: var(--royal-chocolate-700);
-}
-
-.rooms__title em {
-  font-style: italic;
-}
 
 /*
  * Search: two fields and a solid bronze button. Pinned below the nav while the rooms
@@ -356,14 +344,6 @@
   color: var(--bronze-700);
 }
 
-.room-card__name {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 24px;
-  line-height: 1.5;
-  color: var(--royal-chocolate-700);
-}
 
 .room-card__features {
   font-size: 16px;

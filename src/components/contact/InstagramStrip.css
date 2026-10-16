@@ -137,8 +137,17 @@
     padding: 120px var(--page-gutter);
   }
 
+  /* Hashtag and "Follow Us" stacked and centred */
   .instagram__bar {
+    flex-direction: column;
+    align-items: center;
     font-size: 18px;
+    text-align: center;
+  }
+
+  .instagram__follow {
+    flex-direction: column;
+    gap: 16px;
   }
 
   .instagram__track li {

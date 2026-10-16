@@ -1,8 +1,8 @@
 .coming-soon-hero {
   position: relative;
+  /* Always one screen tall; the copy scales with the screen height (as on the homepage hero) */
   height: 100vh;
   height: 100svh;
-  min-height: 640px;
   overflow: hidden;
   background: #000;
 }
@@ -41,28 +41,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 48px;
+  gap: clamp(16px, 6svh, 48px);
   width: min(var(--content-max), calc(100% - 2 * var(--page-gutter)));
-  padding-bottom: 80px;
+  padding-bottom: clamp(24px, 10svh, 80px);
   text-align: center;
   color: var(--white);
 }
 
 .coming-soon-hero__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 64px;
-  line-height: 1.2;
-}
-
-.coming-soon-hero__title em {
-  font-style: italic;
-  font-weight: 500;
+  font-size: clamp(32px, 8svh, 64px);
+  color: var(--white);
 }
 
 .coming-soon-hero__status {
-  font-size: 32px;
+  font-size: clamp(20px, 4svh, 32px);
   line-height: 1.2;
   text-transform: uppercase;
 }
@@ -87,14 +79,21 @@
 
 @media (max-width: 900px) {
   .coming-soon-hero__title {
-    font-size: 40px;
+    font-size: clamp(28px, 5svh, 40px);
   }
 
   .coming-soon-hero__status {
-    font-size: 24px;
+    font-size: clamp(18px, 3svh, 24px);
   }
 
   .coming-soon-hero__content {
-    gap: 32px;
+    gap: clamp(16px, 4svh, 32px);
+  }
+}
+
+/* Very short screens: drop the decorative line so the copy stays clear of the nav */
+@media (max-height: 600px) {
+  .coming-soon-hero__content .vline {
+    display: none;
   }
 }

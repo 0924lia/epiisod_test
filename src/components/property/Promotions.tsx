@@ -219,8 +219,8 @@ export default function Promotions({ id, content }: { id: string; content: Prope
         <div className="promo-banner__copy">
           <div className="promo-banner__text">
             <p className="promo-banner__eyebrow">{promotion.eyebrow}</p>
-            <h2 className="promo-banner__title">{promotion.title}</h2>
-            <p className="promo-banner__body">{promotion.text}</p>
+            <h3 className="type-h3 promo-banner__title">{promotion.title}</h3>
+            <p className="type-body-m promo-banner__body">{promotion.text}</p>
           </div>
           <div className="promo-banner__actions">
             <a href="#" className="promo-banner__button">
@@ -236,10 +236,10 @@ export default function Promotions({ id, content }: { id: string; content: Prope
 
       <div className="promotions__latest">
         <div className="promotions__header">
-          <h2 className="promotions__title">
+          <h2 className="type-h2 promotions__title">
             Latest <em>promotion</em>
           </h2>
-          <a href="#" className="promotions__all">
+          <a href="/promotions" className="promotions__all">
             View Promotions
           </a>
         </div>
@@ -266,8 +266,8 @@ export default function Promotions({ id, content }: { id: string; content: Prope
                 </div>
                 <div className="promo-card__body">
                   <div className="promo-card__text">
-                    <h3 className="promo-card__title">{promo.title}</h3>
-                    <p className="promo-card__description">{promo.text}</p>
+                    <h3 className="type-h4 promo-card__title">{promo.title}</h3>
+                    <p className="type-body-m promo-card__description">{promo.text}</p>
                   </div>
                   <a href="#" className="promo-card__link" draggable={false}>
                     <span>Learn more</span>

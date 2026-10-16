@@ -36,9 +36,5 @@
 
 .mega-menu__heading {
   padding-right: 32px;
-  font-size: 16px;
-  line-height: 20px;
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
   color: var(--bronze-700);
 }

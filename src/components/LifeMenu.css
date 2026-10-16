@@ -47,3 +47,103 @@
 .life-menu__link:first-child .life-menu__description {
   font-size: 18px;
 }
+
+/* Navigation option B (Figma 690:4739 / 690:4830): rows of bordered links */
+.nav-menu-b__row {
+  display: flex;
+  align-items: stretch;
+  width: min(1136px, 100%);
+  padding: 16px 0;
+}
+
+.nav-menu-b__link {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 32px;
+  transition: background-color 200ms ease;
+}
+
+.nav-menu-b__link:hover,
+.nav-menu-b__link:focus-visible {
+  background: var(--bronze-200);
+}
+
+.nav-menu-b__link .life-menu__description {
+  font-size: 18px;
+}
+
+.nav-menu-b__link .nav-menu-b__small {
+  font-size: 16px;
+}
+
+/* Life: Why EPIISOD (555px, ruled both sides) · Experience */
+.nav-menu-b__row--life .nav-menu-b__link:first-child {
+  flex-shrink: 0;
+  width: 555px;
+  border-left: 1px solid var(--line-in-white);
+  border-right: 1px solid var(--line-in-white);
+}
+
+.nav-menu-b__row--life .nav-menu-b__link:last-child {
+  flex: 1 0 0;
+  min-width: 0;
+}
+
+/* Blog: label (208px, ruled left) · For Parents (348px) · For International Students */
+.nav-menu-b__label {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 208px;
+  padding: 20px 32px;
+  border-left: 1px solid var(--line-in-white);
+}
+
+.nav-menu-b__link--article {
+  gap: 4px;
+  padding-block: 36px;
+}
+
+.nav-menu-b__row--blog .nav-menu-b__link--article:nth-of-type(1) {
+  flex-shrink: 0;
+  width: 348px;
+}
+
+.nav-menu-b__row--blog .nav-menu-b__link--article:nth-of-type(2) {
+  flex: 1 0 0;
+  min-width: 0;
+}
+
+.nav-menu-b__article-description {
+  font-weight: 300;
+  color: var(--royal-chocolate-500);
+}
+
+.nav-menu-b__article {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--royal-chocolate-700);
+}
+
+/* Contact: Contact Us (440px, ruled both sides) · Join the Waitlist (464px) */
+.nav-menu-b__row--contact .nav-menu-b__link:first-child {
+  flex-shrink: 0;
+  width: 440px;
+  border-left: 1px solid var(--line-in-white);
+  border-right: 1px solid var(--line-in-white);
+}
+
+.nav-menu-b__row--contact .nav-menu-b__link:last-child {
+  flex-shrink: 0;
+  width: 464px;
+}
+
+.nav-menu-b__row--contact {
+  width: min(var(--content-max), 100%);
+}

@@ -83,11 +83,19 @@ export default function Wellness({ offset, stepScroll }: WellnessProps) {
       const track = trackRef.current;
       if (!section || !view || !track) return;
 
-      // Track offset that centres row i's image in the window.
+      // Track offset that centres row i's image in the window. On phones (Figma 713:4094)
+      // the images sit side by side and the track moves sideways instead, setting each
+      // image at the start of the window with the next one peeking in on the right.
+      const phone = () => window.matchMedia('(max-width: 700px)').matches;
       const alignedY = (i: number) => {
         const row = rowRefs.current[i];
-        if (!row) return 0;
+        if (!row || phone()) return 0;
         return -row.offsetTop + (view.clientHeight - row.offsetHeight) / 2;
+      };
+      const alignedX = (i: number) => {
+        const row = rowRefs.current[i];
+        if (!row || !phone()) return 0;
+        return -(row.offsetLeft - rowRefs.current[0]!.offsetLeft);
       };
 
       const tl = gsap.timeline({
@@ -121,11 +129,14 @@ export default function Wellness({ offset, stepScroll }: WellnessProps) {
 
       tl.addLabel('story0', timeOf(0)).fromTo(
         track,
-        { y: () => alignedY(0) },
-        { y: () => alignedY(0), duration: HOLD, ease: 'none' },
+        { x: () => alignedX(0), y: () => alignedY(0) },
+        { x: () => alignedX(0), y: () => alignedY(0), duration: HOLD, ease: 'none' },
       );
       for (let i = 1; i < STORIES.length; i++) {
-        tl.to(track, { y: () => alignedY(i) }).addLabel(`story${i}`, timeOf(i));
+        tl.to(track, { x: () => alignedX(i), y: () => alignedY(i) }).addLabel(
+          `story${i}`,
+          timeOf(i),
+        );
       }
       tl.to({}, { duration: HOLD }).addLabel('end');
 
@@ -149,8 +160,8 @@ export default function Wellness({ offset, stepScroll }: WellnessProps) {
         <div className="wellness__heading">
           <p className="eyebrow">student life</p>
           <div className="wellness__copy" key={current}>
-            <h3 className="wellness__title">{story.title}</h3>
-            <p className="wellness__body">{story.body}</p>
+            <h3 className="type-h3 wellness__title">{story.title}</h3>
+            <p className="type-body-l wellness__body">{story.body}</p>
           </div>
           <div className="wellness__dots">
             <img src={story.dots} width={8} height={56} alt="" />

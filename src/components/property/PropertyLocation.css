@@ -28,21 +28,11 @@
   border-bottom: 1px solid var(--line-in-white);
 }
 
-.property-location__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 48px;
-  line-height: 1.2;
-  color: var(--royal-chocolate-600);
-}
 
 .property-location__address {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 18px;
-  line-height: 1.5;
   color: var(--royal-chocolate-700);
 }
 

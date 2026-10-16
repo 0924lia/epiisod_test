@@ -1,25 +1,32 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { scrollToY } from '../lib/smoothScroll';
 import caretLight from '../assets/caret-down.svg';
 import caretDark from '../assets/caret-down-dark.svg';
 import logoLight from '../assets/nav-logo.svg';
 import logoDark from '../assets/nav-logo-compact.svg';
-import dropdownLight from '../assets/dropdown.svg';
-import dropdownDark from '../assets/dropdown-dark.svg';
 import menuLight from '../assets/menu-icon.svg';
 import menuDark from '../assets/menu-icon-dark.svg';
 import MegaMenu from './MegaMenu';
+import LanguageSelect from './LanguageSelect';
+import HamburgerMenu from './HamburgerMenu';
+import ContactMenu from './ContactMenu';
+import { NAV_VARIANT } from '../lib/navVariant';
 import LifeMenu from './LifeMenu';
 import LocationsMenu from './LocationsMenu';
 import './Nav.css';
 
-type MenuKey = 'life' | 'locations';
+type MenuKey = 'life' | 'locations' | 'contact';
 
-/** Primary links; those with a `menu` toggle a mega menu instead of navigating. */
-const PRIMARY_LINKS: { label: string; menu?: MenuKey; href?: string }[] = [
+/**
+ * Primary links; those with a `menu` toggle a mega menu instead of navigating.
+ * Navigation option B (Figma 690:3977) turns Contact us into a menu (without a caret).
+ */
+const PRIMARY_LINKS: { label: string; menu?: MenuKey; href?: string; caret?: boolean }[] = [
   { label: 'Life @ epiisod', menu: 'life' },
   { label: 'Locations', menu: 'locations' },
-  { label: 'Contact us', href: '/contact' },
+  NAV_VARIANT === 'b'
+    ? { label: 'Contact us', menu: 'contact', caret: false }
+    : { label: 'Contact us', href: '/contact' },
 ];
 const menuId = (menu: MenuKey) => `nav-${menu}-menu`;
 /** A link in the sub-navigation row: scrolls to the section with this id. */
@@ -27,6 +34,8 @@ export type SubLink = { label: string; target: string };
 
 /** Scroll distance (px) after which the nav gains its solid background. */
 const SCROLLED_AFTER = 40;
+/** Without `hideBarAfter`, the bar starts hiding on the way down once the page is scrolled this far (px). */
+const HIDE_AFTER = 160;
 /** Scroll movement (px) that counts as a change of direction for hiding the bar. */
 const DIRECTION_TOLERANCE = 6;
 /** Height of the compact (scrolled) bar: 12px padding ×2 + 44px Book a tour button + 1px rule (Nav.css). */
@@ -71,11 +80,12 @@ function Icon({ light, dark, size }: { light: string; dark: string; size: number
  *
  * Property pages pass `subLinks`: a second row jumping to the page's sections
  * (Figma 539:13194), which turns into a bronze band once scrolled (Figma 539:22227).
- * With `hideBarAfter`, once that section is reached the main bar slides away while
- * scrolling down — leaving just the sub-navigation — and returns on scrolling up.
+ * Scrolling down, the main bar slides away (on property pages only from `hideBarAfter`,
+ * leaving the sub-navigation); scrolling up brings it back.
  * Within the `barHiddenIn` sections it stays hidden in both directions, for sections that
  * pin their own controls under the sub-navigation.
- * `tone="dark"` starts as a solid chocolate bar (Figma 539:24148) for pages without a hero.
+ * `tone="dark"` starts as a solid chocolate bar (Figma 539:24148) for pages without a hero;
+ * `tone="cream"` as a cream bar with chocolate type (Figma 735:13845, About us).
  */
 export default function Nav({
   subLinks,
@@ -87,12 +97,15 @@ export default function Nav({
   hideBarAfter?: string;
   /** Section ids where the main bar stays hidden even when scrolling up. */
   barHiddenIn?: string[];
-  /** `dark`: a solid chocolate bar until scrolled (Contact page). */
-  tone?: 'light' | 'dark';
+  /** `dark`: a solid chocolate bar until scrolled (Contact page). `cream`: a cream bar with
+   *  chocolate type (About us). */
+  tone?: 'light' | 'dark' | 'cream';
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [condensed, setCondensed] = useState(false);
   const [openMenu, setOpenMenu] = useState<MenuKey | null>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const closePanel = useCallback(() => setPanelOpen(false), []);
   const headerRef = useRef<HTMLElement>(null);
   const barRef = useRef<HTMLElement>(null);
 
@@ -103,20 +116,22 @@ export default function Nav({
     return () => window.removeEventListener('scroll', update);
   }, []);
 
-  // Hide the main bar past `hideBarAfter` while scrolling down; bring it back on the way up
+  // Hide the main bar while scrolling down — past `hideBarAfter` if given, otherwise once
+  // the page has scrolled HIDE_AFTER px — and bring it back on the way up
   useEffect(() => {
-    if (!hideBarAfter) return;
     let lastY = window.scrollY;
     const update = () => {
       const y = window.scrollY;
-      const section = document.getElementById(hideBarAfter);
       const header = headerRef.current;
-      if (!section || !header) return;
+      if (!header) return;
+      const section = hideBarAfter ? document.getElementById(hideBarAfter) : null;
+      if (hideBarAfter && !section) return;
+      const hideFrom = section ? pageTop(section) - header.offsetHeight : HIDE_AFTER;
       const inHiddenSection = (barHiddenIn ?? []).some((id) => {
         const r = document.getElementById(id)?.getBoundingClientRect();
         return !!r && r.top <= header.offsetHeight && r.bottom > header.offsetHeight;
       });
-      if (y < pageTop(section) - header.offsetHeight) {
+      if (y < hideFrom) {
         setCondensed(false);
         lastY = y;
       } else if (inHiddenSection) {
@@ -176,90 +191,116 @@ export default function Nav({
   }, [openMenu]);
 
   return (
-    <header
-      ref={headerRef}
-      className={`nav${tone === 'dark' ? ' nav--dark' : ''}${subLinks ? ' nav--sub' : ''}${scrolled ? ' is-scrolled' : ''}${openMenu ? ' is-open' : ''}${condensed && !openMenu ? ' is-condensed' : ''}`}
-      data-hide-after={hideBarAfter}
-      data-bar-hidden-in={barHiddenIn?.join(',')}
-    >
-      <nav ref={barRef} className="nav__inner" aria-label="Main">
-        <div className="nav__links">
-          {PRIMARY_LINKS.map(({ label, menu, href = '#' }) =>
-            menu ? (
-              <button
-                key={label}
-                type="button"
-                className={`nav__link${openMenu === menu ? ' is-active' : ''}`}
-                aria-expanded={openMenu === menu}
-                aria-controls={menuId(menu)}
-                onClick={() => setOpenMenu((current) => (current === menu ? null : menu))}
-              >
-                <span>{label}</span>
-                <Icon light={caretLight} dark={caretDark} size={16} />
-              </button>
-            ) : (
-              <a key={label} href={href} className="nav__link">
-                <span>{label}</span>
-              </a>
-            ),
-          )}
-        </div>
-
-        <a href="/" className="nav__logo" aria-label="EPIISOD home">
-          <Icon light={logoLight} dark={logoDark} size={64} />
-        </a>
-
-        <div className="nav__links nav__links--end">
-          <div className="nav__actions">
-            <a href="#" className="nav__link">
-              <span>Log in</span>
-            </a>
-            <button type="button" className="nav__lang">
-              <span>EN</span>
-              <Icon light={dropdownLight} dark={dropdownDark} size={16} />
-            </button>
-            <a href="#" className="nav__cta">
-              Book a tour
-            </a>
+    <>
+      <header
+        ref={headerRef}
+        className={`nav${tone !== 'light' ? ` nav--${tone}` : ''}${subLinks ? ' nav--sub' : ''}${scrolled ? ' is-scrolled' : ''}${openMenu ? ' is-open' : ''}${condensed && !openMenu ? ' is-condensed' : ''}`}
+        data-hide-after={hideBarAfter}
+        data-bar-hidden-in={barHiddenIn?.join(',')}
+      >
+        <nav ref={barRef} className="nav__inner" aria-label="Main">
+          <div className="nav__links">
+            {PRIMARY_LINKS.map(({ label, menu, href = '#', caret = true }) =>
+              menu ? (
+                <button
+                  key={label}
+                  type="button"
+                  className={`nav__link${openMenu === menu ? ' is-active' : ''}`}
+                  aria-expanded={openMenu === menu}
+                  aria-controls={menuId(menu)}
+                  onClick={() => setOpenMenu((current) => (current === menu ? null : menu))}
+                >
+                  <span>{label}</span>
+                  {caret && <Icon light={caretLight} dark={caretDark} size={16} />}
+                </button>
+              ) : (
+                <a key={label} href={href} className="nav__link">
+                  <span>{label}</span>
+                </a>
+              ),
+            )}
           </div>
-          <button type="button" className="nav__menu" aria-label="Open menu">
-            <Icon light={menuLight} dark={menuDark} size={40} />
-          </button>
-        </div>
-      </nav>
 
-      <MegaMenu activeId={openMenu && menuId(openMenu)}>
-        <LifeMenu
-          id={menuId('life')}
-          open={openMenu === 'life'}
-          onNavigate={() => setOpenMenu(null)}
-        />
-        <LocationsMenu
-          id={menuId('locations')}
-          open={openMenu === 'locations'}
-          onNavigate={() => setOpenMenu(null)}
-        />
-      </MegaMenu>
+          <a href="/" className="nav__logo" aria-label="EPIISOD home">
+            <Icon light={logoLight} dark={logoDark} size={64} />
+          </a>
 
-      {subLinks && (
-        <nav className="nav__sub" aria-label="On this page">
-          {subLinks.map(({ label, target }) => (
-            <a
-              key={target}
-              href={`#${target}`}
-              className="nav__link nav__sub-link"
-              onClick={(e) => {
-                // Handled here, not by Lenis's anchor scrolling, so the section clears the bar
-                e.preventDefault();
-                e.stopPropagation();
-                scrollToSection(target);
+          <div className="nav__links nav__links--end">
+            <div className="nav__actions">
+              {NAV_VARIANT === 'b' && (
+                <a href="/about" className="nav__link">
+                  <span>About</span>
+                </a>
+              )}
+              {NAV_VARIANT === 'b' && <LanguageSelect onOpen={() => setOpenMenu(null)} />}
+              <a href="#" className="nav__link">
+                <span>Log in</span>
+              </a>
+              {NAV_VARIANT === 'a' && <LanguageSelect onOpen={() => setOpenMenu(null)} />}
+              <a href="#" className="nav__cta">
+                Book a tour
+              </a>
+            </div>
+            {/* Option B has no hamburger on desktop; it remains the navigation on tablets and phones */}
+            <button
+              type="button"
+              className={`nav__menu${NAV_VARIANT === 'b' ? ' nav__menu--small-screens' : ''}`}
+              aria-label="Open menu"
+              aria-haspopup="dialog"
+              aria-expanded={panelOpen}
+              onClick={() => {
+                setOpenMenu(null);
+                setPanelOpen(true);
               }}
             >
-              {label}
-            </a>
-          ))}
+              <Icon light={menuLight} dark={menuDark} size={40} />
+            </button>
+          </div>
         </nav>
-      )}
-    </header>
+
+        <MegaMenu activeId={openMenu && menuId(openMenu)}>
+          <LifeMenu
+            id={menuId('life')}
+            open={openMenu === 'life'}
+            onNavigate={() => setOpenMenu(null)}
+            variant={NAV_VARIANT}
+          />
+          <LocationsMenu
+            id={menuId('locations')}
+            open={openMenu === 'locations'}
+            onNavigate={() => setOpenMenu(null)}
+          />
+          {NAV_VARIANT === 'b' && (
+            <ContactMenu
+              id={menuId('contact')}
+              open={openMenu === 'contact'}
+              onNavigate={() => setOpenMenu(null)}
+            />
+          )}
+        </MegaMenu>
+
+        {subLinks && (
+          <nav className="nav__sub" aria-label="On this page">
+            {subLinks.map(({ label, target }) => (
+              <a
+                key={target}
+                href={`#${target}`}
+                className="nav__link nav__sub-link"
+                onClick={(e) => {
+                  // Handled here, not by Lenis's anchor scrolling, so the section clears the bar
+                  e.preventDefault();
+                  e.stopPropagation();
+                  scrollToSection(target);
+                }}
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+        )}
+      </header>
+      {/* Outside the header: its hide-on-scroll transform would carry a fixed overlay */}
+      <HamburgerMenu open={panelOpen} onClose={closePanel} />
+    </>
   );
 }

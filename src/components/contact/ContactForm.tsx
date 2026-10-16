@@ -15,12 +15,11 @@ const DIAL_CODES = [
   { country: 'Australia', code: '+61', flag: flagAu },
   { country: 'United Kingdom', code: '+44', flag: null },
 ];
-const MESSAGE_LIMIT = 150;
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: ReactNode }) {
   return (
     <label className="contact-field">
-      <span className="contact-field__label">
+      <span className="type-body-s contact-field__label">
         {label}
         {required && <span className="contact-form__required">*</span>}
       </span>
@@ -31,15 +30,16 @@ function Field({ label, required, children }: { label: string; required?: boolea
 
 /**
  * Contact (Figma 539:23815): how to reach the team beside the enquiry form.
- * The section drifts and dims as the next one slides over it.
+ * The section drifts and dims as the next one slides over it — only once the form has
+ * moved well up the screen, so Submit stays clear as you reach it.
  */
 export default function ContactForm() {
   const sectionRef = useRef<HTMLElement>(null);
   const thanksRef = useRef<HTMLParagraphElement>(null);
   const [dial, setDial] = useState(DIAL_CODES[0]);
-  const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  useExitParallax(sectionRef);
+  // Held until the form has moved well up the screen, so Submit isn't dimmed as you reach it
+  useExitParallax(sectionRef, { late: true });
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -58,16 +58,16 @@ export default function ContactForm() {
         <div className="contact__intro">
           <div className="contact__heading">
             <p className="eyebrow">Get in touch</p>
-            <h1 className="display-title">
+            <h1 className="type-h1">
               Every chapter begins with a <em>conversation</em>
             </h1>
-            <p className="contact__lede">
+            <p className="type-body-l contact__lede">
               Whether you have a question or simply want to learn more, we’re here — with thoughtful
               support and a team that responds with clarity, care, and intention.
             </p>
           </div>
 
-          <ul className="contact__details">
+          <ul className="type-body-l contact__details">
             <li>
               <img src={emailIcon} width={24} height={24} alt="" />
               <a href="mailto:empsydney@epiisod.com">empsydney@epiisod.com</a>
@@ -84,7 +84,7 @@ export default function ContactForm() {
         </div>
 
         <form className={`contact-form${submitted ? ' is-submitted' : ''}`} onSubmit={onSubmit}>
-          <p className="contact-form__legend">
+          <p className="type-body-s contact-form__legend">
             <span className="contact-form__required">* </span>
             <em>Required field</em>
           </p>
@@ -156,33 +156,24 @@ export default function ContactForm() {
 
             <Field label="Message">
               <span className="contact-field__box contact-field__box--message">
-                <textarea
-                  name="message"
-                  placeholder="Anything you want to share..."
-                  maxLength={MESSAGE_LIMIT}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                />
-                <span className="contact-field__count" aria-live="polite">
-                  {message.length}/{MESSAGE_LIMIT}
-                </span>
+                <textarea name="message" placeholder="Anything you want to share..." />
               </span>
             </Field>
 
             <div className="contact-form__consents">
-              <label className="contact-check">
+              <label className="type-body-s contact-check">
                 <input type="checkbox" name="marketing" />
                 <span>
                   Sign me up to receive marketing communications from EPIISOD, including updates,
                   offers, event details, newsletters and more!
                 </span>
               </label>
-              <label className="contact-check">
+              <label className="type-body-s contact-check">
                 <input type="checkbox" name="privacy" required />
                 <span>
                   I have read, understood, and agree to the EPIISOD <a href="#">Privacy Policy</a>,
                   and consent to the collection and use of my personal information in accordance
-                  with it.
+                  with it.<span className="contact-form__required">*</span>
                 </span>
               </label>
             </div>

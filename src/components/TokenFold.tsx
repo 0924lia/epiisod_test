@@ -11,11 +11,14 @@ import './TokenFold.css';
 const COIN_COLOR = '#c99d6a';
 /** Seconds per full turn of the automatic spin (before scroll speeds it up). */
 const SPIN_SECONDS = 2.4;
-/** Where on screen the token travels between as the rows flow past it (parallax). */
-const TOKEN_SCREEN_FROM = '40%';
-const TOKEN_SCREEN_TO = '62%';
+/** Where on screen the token travels between as the rows flow past it (parallax). On
+ *  phones the rows are short, so the token drifts up the screen instead — lengthening
+ *  the scroll it takes to cross them, for a gentler pass. */
+const TOKEN_SCREEN = { desktop: ['40%', '62%'], phone: ['80%', '32%'] };
+const isPhone = () => window.matchMedia('(max-width: 700px)').matches;
 /** Extra radius used to part the text ahead of the token's edge — plus more when
- *  scrolling fast, so the liquid opening never trails the token. */
+ *  scrolling fast, so the liquid opening never trails the token. Sized for the 154px
+ *  desktop token; smaller tokens (phones) scale them down in proportion. */
 const LEAD = 24;
 const LEAD_PER_SPEED = 0.07; // extra px of lead per px/s of scroll speed (capped below)
 const LEAD_MAX_EXTRA = 90;
@@ -29,7 +32,7 @@ const BULGE = 8;
  * where the token passes. `join` marks halves that are one phrase split mid-word (no
  * space between them); the others get a word space.
  */
-const ROWS: { left: ReactNode; right: ReactNode; join?: boolean }[] = [
+const ROWS: { left: ReactNode; right: ReactNode; join?: boolean; only?: 'desktop' | 'phone' }[] = [
   {
     left: (
       <>
@@ -38,29 +41,32 @@ const ROWS: { left: ReactNode; right: ReactNode; join?: boolean }[] = [
     ),
     right: (
       <>
-        <em>ned</em> student living
+        <em>ned</em> student living.
       </>
     ),
     join: true,
   },
-  { left: 'Live well, study better', right: 'An elevated student life' },
+  { left: 'Live well, study better.', right: 'An elevated student life', only: 'desktop' },
+  // Phones (Figma 713:4138) give each of those phrases its own row
+  { left: 'Live well, s', right: 'tudy better.', join: true, only: 'phone' },
+  { left: 'An elevated', right: 'student life', only: 'phone' },
   {
     left: (
       <>
-        Make it <em>yours</em>
+        Make it <em>yours.</em>
       </>
     ),
-    right: 'Wellness',
+    right: 'Wellness,',
   },
   {
     left: (
       <>
-        <em>Comfort-led</em> design
+        <em>Comfort-led</em> design,
       </>
     ),
     right: (
       <>
-        <em>Effortless</em> living
+        <em>Effortless</em> living.
       </>
     ),
   },
@@ -207,11 +213,18 @@ export default function TokenFold() {
         });
       });
 
-      // Desktop: the token travels through the rows, splitting each one.
-      mm.add('(min-width: 901px) and (prefers-reduced-motion: no-preference)', () => {
-        const rows = gsap.utils.toArray<HTMLElement>('.token-fold__row');
+      // Every screen size: the token travels through the rows, splitting each one.
+      // Re-run when crossing the phone breakpoint, where the set of rows changes.
+      mm.add({ motion: '(prefers-reduced-motion: no-preference)', phone: '(max-width: 700px)' }, (ctx) => {
+        if (!ctx.conditions?.motion) return;
+        // Only the rows shown at this size (the others are display: none)
+        const rows = gsap.utils
+          .toArray<HTMLElement>('.token-fold__row')
+          .filter((row) => row.offsetParent !== null);
         const token = section.querySelector<HTMLElement>('.token')!;
         const vline = section.querySelector<HTMLElement>('.vline');
+        // The lead and bulge distances, scaled to the token's size (1 on desktop)
+        const k = () => token.offsetHeight / 154;
 
         // Offsets within the section (offsets ignore transforms, so they're stable).
         const topIn = (el: HTMLElement) => {
@@ -226,7 +239,8 @@ export default function TokenFold() {
         const endCentre = () => topIn(token) + token.offsetHeight / 2;
         const startCentre = () => {
           // Clear of the first row even at full scroll-speed lead, so rows always start closed.
-          const clearOfFirstRow = topIn(rows[0]) - (token.offsetHeight / 2 + LEAD + LEAD_MAX_EXTRA + 8);
+          const clearOfFirstRow =
+            topIn(rows[0]) - (token.offsetHeight / 2 + (LEAD + LEAD_MAX_EXTRA) * k() + 8);
           return vline ? Math.min(topIn(vline) + vline.offsetHeight / 2, clearOfFirstRow) : clearOfFirstRow;
         };
 
@@ -262,7 +276,8 @@ export default function TokenFold() {
 
           const c = coin.getBoundingClientRect();
           const cy = c.top + c.height / 2;
-          const R = c.height / 2 + LEAD + Math.min(LEAD_MAX_EXTRA, speed * LEAD_PER_SPEED);
+          const scale = k();
+          const R = c.height / 2 + (LEAD + Math.min(LEAD_MAX_EXTRA, speed * LEAD_PER_SPEED)) * scale;
           rows.forEach((row, i) => {
             const r = row.getBoundingClientRect();
             const rowCentre = r.top + r.height / 2;
@@ -277,7 +292,7 @@ export default function TokenFold() {
             // Bulge away from the token, strongest when it's just above or below the row.
             const d = rowCentre - cy;
             const near = Math.max(0, 1 - Math.abs(d) / (R * 2.2));
-            bulgeTo[i](Math.sign(d) * near * BULGE);
+            bulgeTo[i](Math.sign(d) * near * BULGE * scale);
           });
         };
 
@@ -301,7 +316,8 @@ export default function TokenFold() {
         });
 
         // Parallax travel: the rows scroll up past the token at normal speed while it
-        // drifts down the screen more slowly, from TOKEN_SCREEN_FROM to TOKEN_SCREEN_TO.
+        // drifts down the screen more slowly (up, on phones), between the TOKEN_SCREEN points.
+        const screenSpan = () => TOKEN_SCREEN[isPhone() ? 'phone' : 'desktop'];
         gsap.fromTo(
           coin,
           { y: () => startCentre() - endCentre() },
@@ -310,9 +326,10 @@ export default function TokenFold() {
             ease: 'none',
             scrollTrigger: {
               trigger: section,
-              start: () => `top+=${startCentre()} ${TOKEN_SCREEN_FROM}`,
-              end: () => `top+=${endCentre()} ${TOKEN_SCREEN_TO}`,
-              scrub: true,
+              start: () => `top+=${startCentre()} ${screenSpan()[0]}`,
+              end: () => `top+=${endCentre()} ${screenSpan()[1]}`,
+              // Phones scroll natively, so a short catch-up smooths the touch input
+              scrub: isPhone() ? 0.6 : true,
               invalidateOnRefresh: true,
             },
           },
@@ -330,7 +347,10 @@ export default function TokenFold() {
 
       <div className="token-fold__rows">
         {ROWS.map((row, i) => (
-          <div key={i} className={`token-fold__row${row.join ? ' token-fold__row--join' : ''}`}>
+          <div
+            key={i}
+            className={`token-fold__row${row.join ? ' token-fold__row--join' : ''}${row.only ? ` token-fold__row--${row.only}` : ''}`}
+          >
             <p className="token-fold__half token-fold__half--left">{row.left}</p>
             <p className="token-fold__half token-fold__half--right">{row.right}</p>
           </div>

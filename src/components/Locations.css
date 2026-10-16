@@ -12,7 +12,9 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--column-gap);
+  /* The columns meet (464 + 904 = 1368); the intro's 48px padding is the visual gap.
+     --column-gap still sets how far the cards slide back beneath the intro. */
+  gap: 0;
   max-width: var(--content-max);
   margin: 0 auto;
   isolation: isolate;
@@ -28,8 +30,8 @@
   flex-direction: column;
   gap: 64px;
   flex-shrink: 0;
-  width: 556px;
-  padding-right: 96px;
+  width: 464px;
+  padding-right: 48px;
   align-self: stretch;
   background: var(--white);
   /* Shadow fades in as cards start sliding beneath the column */
@@ -49,8 +51,6 @@
 }
 
 .locations__lede {
-  font-size: 18px;
-  line-height: 1.5;
   color: var(--grey-700);
 }
 
@@ -114,9 +114,9 @@
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: 40px;
   flex-shrink: 0;
-  width: 788px;
+  width: 904px;
 }
 
 .locations__showcase-header {
@@ -127,12 +127,6 @@
 
 .locations__region-title {
   flex: 1;
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 40px;
-  line-height: 1.2;
-  color: var(--royal-chocolate-700);
 }
 
 .locations__filters {
@@ -251,6 +245,8 @@
  * a comfortable 24px hit area; the bar thickens while hovered or dragged.
  */
 .locations__scrubber {
+  /* The track stays 788px within the wider showcase (Figma 539:10885) */
+  width: min(788px, 100%);
   padding: 10px 0;
   /* Only pull the top padding up; the bottom must stay inside the overview's clip-path */
   margin-top: -10px;
@@ -310,7 +306,15 @@
   width: 100%;
 }
 
+.locations__summary {
+  display: none;
+}
+
 @media (max-width: 1300px) {
+  .locations__overview {
+    gap: var(--column-gap);
+  }
+
   .locations__intro {
     width: 40%;
     padding-right: 48px;
@@ -359,15 +363,116 @@
     gap: 16px;
   }
 
-  .locations__region-title {
-    font-size: 32px;
-  }
-
   .locations__filters {
     gap: 16px;
   }
 
   .locations__filter {
     font-size: 15px;
+  }
+}
+
+/*
+ * Phones (Figma 704:7663): the regions become two tabs (the active one underlined) with
+ * its summary on its own line, the region title gives way to full-width city filters,
+ * and the cards shrink to 253px with a 180px photo so the next one peeks in.
+ */
+@media (max-width: 700px) {
+  .locations {
+    padding: 72px var(--page-gutter);
+  }
+
+  .locations__overview,
+  .locations__intro {
+    gap: 32px;
+  }
+
+  .locations__intro-copy {
+    gap: 24px;
+  }
+
+  .locations__regions {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .locations__regions li {
+    flex: 1 0 0;
+    min-width: 0;
+  }
+
+  .locations__region {
+    padding: 8px 0;
+    border-bottom-color: transparent;
+    text-align: center;
+    transition: border-color 300ms var(--ease-in-out);
+  }
+
+  .locations__region.is-active {
+    border-bottom-color: var(--bronze-500);
+  }
+
+  .locations__region-header {
+    justify-content: center;
+  }
+
+  .locations__region-header img,
+  .locations__region .locations__region-summary,
+  .locations__region-title {
+    display: none;
+  }
+
+  .locations__summary {
+    display: block;
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 1;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--bronze-700);
+  }
+
+  .locations__showcase {
+    gap: 40px;
+  }
+
+  .locations__showcase-header {
+    gap: 0;
+  }
+
+  .locations__filters {
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+  }
+
+  /* Fewer than four cities (London): grouped in the middle rather than pushed apart */
+  .locations__filters:not(:has(> :nth-child(4))) {
+    justify-content: center;
+    gap: 32px;
+  }
+
+  .locations__filter {
+    font-size: 16px;
+  }
+
+  .locations__viewport {
+    min-height: 0;
+  }
+
+  .locations__track {
+    gap: 16px;
+  }
+
+  .locations__track .location-card {
+    width: 253px;
+  }
+
+  .locations__track .location-card__image {
+    height: 180px;
+  }
+
+  .locations__track .location-card__link {
+    text-transform: uppercase;
   }
 }

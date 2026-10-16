@@ -77,11 +77,8 @@
   gap: 32px;
 }
 
+/* Column titles are h2s (so screen readers can jump between footer sections) */
 .footer__heading {
-  font-weight: 500;
-  font-size: 18px;
-  line-height: 30px;
-  text-transform: uppercase;
   opacity: 0.9;
 }
 
@@ -147,6 +144,12 @@
   opacity: 0.9;
 }
 
+/* One line on larger screens, separated by bars */
+.footer__legal span + span::before {
+  content: '|';
+  margin: 0 14px;
+}
+
 @media (max-width: 900px) {
   .footer__body {
     padding-top: 64px;
@@ -170,5 +173,45 @@
 @media (max-width: 560px) {
   .footer__column {
     flex-basis: 100%;
+  }
+}
+
+/*
+ * Phones (Figma 704:9404): one column of groups 40px apart — EPIISOD, Locations,
+ * Contact, Policies, then Follow us — and the legal links stacked and centred.
+ */
+@media (max-width: 700px) {
+  /* 60px above and below the wordmark (Figma 704:9300) */
+  .footer__brand {
+    padding: 60px var(--page-gutter);
+  }
+
+  .footer__body {
+    padding: 72px var(--page-gutter);
+  }
+
+  .footer__columns {
+    flex-direction: column;
+    gap: 40px;
+    padding-bottom: 40px;
+  }
+
+  .footer__column {
+    display: contents;
+  }
+
+  .footer__group--follow {
+    order: 1;
+  }
+
+  .footer__legal {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    font-size: 16px;
+  }
+
+  .footer__legal span + span::before {
+    content: none;
   }
 }

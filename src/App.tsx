@@ -10,6 +10,8 @@ import Footer from './components/Footer';
 import PropertyPage from './pages/PropertyPage';
 import ComingSoonPage from './pages/ComingSoonPage';
 import ContactPage from './pages/ContactPage';
+import AboutPage from './pages/AboutPage';
+import PromotionsPage from './pages/PromotionsPage';
 import { PROPERTIES } from './components/locationData';
 import { MACQUARIE_PARK, type PropertyContent } from './components/property/propertyContent';
 
@@ -43,6 +45,8 @@ function HomePage() {
 export default function App() {
   const path = window.location.pathname.replace(/\/+$/, '');
   if (path === '/contact') return <ContactPage />;
+  if (path === '/about') return <AboutPage />;
+  if (path === '/promotions') return <PromotionsPage />;
   const property = PROPERTIES.find((p) => p.href === path);
   if (!property) return <HomePage />;
   const content = PROPERTY_PAGES[property.id];

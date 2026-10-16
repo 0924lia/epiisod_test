@@ -55,15 +55,18 @@ const LOCATIONS = [
 const EPIISOD_LINKS = ['About', 'Why EPIISOD', 'Experience', 'For Parents', 'For International Students', 'Blog'];
 const CONTACT_LINKS = ['Contact Us', 'Book a Tour', 'FAQS'];
 const POLICY_LINKS = ['Cancellation', 'Policy 1', 'Policy 2'];
+/** Footer links with a page so far; the rest link to '#' until their pages exist. */
+const LINK_HREFS: Record<string, string> = { About: '/about', 'Contact Us': '/contact' };
+const LEGAL_LINKS = ['Terms and Condition', 'Something something', 'Something something'];
 
 function LinkGroup({ title, links }: { title: string; links: string[] }) {
   return (
     <div className="footer__group">
-      <p className="footer__heading">{title}</p>
+      <h2 className="type-h5 footer__heading">{title}</h2>
       <ul className="footer__links">
         {links.map((link) => (
           <li key={link}>
-            <a href="#">{link}</a>
+            <a href={LINK_HREFS[link] ?? '#'}>{link}</a>
           </li>
         ))}
       </ul>
@@ -94,8 +97,9 @@ export default function Footer() {
           scrollTrigger: {
             trigger: footer,
             start: 'top bottom',
-            // Settles a little before the very bottom so it rests as designed
-            end: 'top 15%',
+            // Assembled by the time the footer's top is just over halfway up the screen, so
+            // the wordmark is in place soon after it scrolls into view
+            end: 'top 55%',
             scrub: true,
           },
         });
@@ -146,8 +150,8 @@ export default function Footer() {
           <div className="footer__columns">
             <div className="footer__column">
               <LinkGroup title="EPIISOD" links={EPIISOD_LINKS} />
-              <div className="footer__group">
-                <p className="footer__heading">Follow us</p>
+              <div className="footer__group footer__group--follow">
+                <h2 className="type-h5 footer__heading">Follow us</h2>
                 <ul className="footer__socials">
                   {SOCIALS.map((s) => (
                     <li key={s.name}>
@@ -162,7 +166,7 @@ export default function Footer() {
 
             <div className="footer__column">
               <div className="footer__group">
-                <p className="footer__heading">Locations</p>
+                <h2 className="type-h5 footer__heading">Locations</h2>
                 <div className="footer__locations">
                   {LOCATIONS.map((loc) => (
                     <ul key={loc.city} className="footer__links">
@@ -185,8 +189,9 @@ export default function Footer() {
           </div>
 
           <p className="footer__legal">
-            Terms and Condition&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;Something something&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;Something
-            something
+            {LEGAL_LINKS.map((link, i) => (
+              <span key={i}>{link}</span>
+            ))}
           </p>
         </div>
       </div>

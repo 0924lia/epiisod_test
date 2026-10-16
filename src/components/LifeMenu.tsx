@@ -1,11 +1,20 @@
 import { MegaMenuPanel } from './MegaMenu';
+import type { NavVariant } from '../lib/navVariant';
+import arrowRight from '../assets/menu-arrow-right.svg';
 import './LifeMenu.css';
 
 type LifeMenuProps = {
   id: string;
   open: boolean;
   onNavigate: () => void;
+  variant?: NavVariant;
 };
+
+/** Option B's Blog row (Figma 690:4739). Pages not built yet link to '#'. */
+const BLOG_LINKS = [
+  { title: 'For Parents', description: 'Choosing the right place for your child' },
+  { title: 'For International Students', description: 'An elevated student living' },
+];
 
 const LINKS = [
   { title: 'Why EPIISOD', description: 'Where Your Story Finds Its Place' },
@@ -18,9 +27,41 @@ const LINKS = [
 
 /**
  * Life @ EPIISOD mega menu (Figma 539:20915): page links with a short description,
- * highlighting on hover (Figma 539:21311).
+ * highlighting on hover (Figma 539:21311). Navigation option B (Figma 690:4739) adds a
+ * Blog row, which in option A lives in the hamburger menu.
  */
-export default function LifeMenu({ id, open, onNavigate }: LifeMenuProps) {
+export default function LifeMenu({ id, open, onNavigate, variant = 'a' }: LifeMenuProps) {
+  if (variant === 'b') {
+    return (
+      <MegaMenuPanel id={id} open={open} heading="Life @ EPIISOD">
+        <div className="nav-menu-b__row nav-menu-b__row--life">
+          <a href="#" className="nav-menu-b__link" onClick={onNavigate}>
+            <span className="life-menu__title">Why EPIISOD</span>
+            <span className="life-menu__description">Where Your Story Finds Its Place</span>
+          </a>
+          <a href="#" className="nav-menu-b__link" onClick={onNavigate}>
+            <span className="life-menu__title">Experience</span>
+            <span className="life-menu__description nav-menu-b__small">
+              The EPIISOD Experience that goes beyond accommodation
+            </span>
+          </a>
+        </div>
+        <div className="nav-menu-b__row nav-menu-b__row--blog">
+          <p className="nav-menu-b__label life-menu__title">Blog</p>
+          {BLOG_LINKS.map(({ title, description }) => (
+            <a key={title} href="#" className="nav-menu-b__link nav-menu-b__link--article" onClick={onNavigate}>
+              <span className="nav-menu-b__article">
+                {title}
+                <img src={arrowRight} width={16} height={16} alt="" />
+              </span>
+              <span className="type-body-s nav-menu-b__article-description">{description}</span>
+            </a>
+          ))}
+        </div>
+      </MegaMenuPanel>
+    );
+  }
+
   return (
     <MegaMenuPanel id={id} open={open} heading="Life @ EPIISOD">
       <div className="life-menu__links">

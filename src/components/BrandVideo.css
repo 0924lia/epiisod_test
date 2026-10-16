@@ -132,3 +132,24 @@
     margin: -44px 0 0 -44px;
   }
 }
+
+/* Phones (Figma 704:8593): 72px padding, 40px between the heading and the film, 72px play */
+@media (max-width: 700px) {
+  .brand-video {
+    padding: 72px var(--page-gutter);
+  }
+
+  .brand-video__lift {
+    gap: 40px;
+  }
+
+  .brand-video__play,
+  .brand-video__play img {
+    width: 72px;
+    height: 72px;
+  }
+
+  .brand-video__play {
+    margin: -36px 0 0 -36px;
+  }
+}

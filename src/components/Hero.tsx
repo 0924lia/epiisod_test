@@ -50,10 +50,10 @@ export default function Hero() {
 
       <div className="hero__content">
         <div className="hero__copy">
-          <h1 className="hero__title">
+          <h1 className="type-h1 hero__title">
             Thoughtfully designed <em>student living</em>
           </h1>
-          <p className="hero__subtitle">
+          <p className="type-lead hero__subtitle">
             Modern spaces, all-inclusive amenities, and a vibrant student community—all in the
             cities where you study.
           </p>

@@ -95,10 +95,10 @@ export default function Amenities({ id, content }: { id: string; content: Proper
           <div className="amenities__details">
             <div className="amenities__heading">
               <p className="eyebrow">Amenities</p>
-              <h2 className="amenities__title">
+              <h2 className="type-h2 amenities__title">
                 Thoughtfully designed <em>student housing</em> in {content.city}
               </h2>
-              <p className="amenities__lede">
+              <p className="type-body-l amenities__lede">
                 Modern spaces, all-inclusive amenities, and a vibrant student community—all in the
                 cities where you study.
               </p>
@@ -106,7 +106,7 @@ export default function Amenities({ id, content }: { id: string; content: Proper
 
             <ul className="amenities__list">
               {content.amenities.map(({ icon, label }, i) => (
-                <li key={i} className="amenities__item">
+                <li key={i} className="type-lead amenities__item">
                   <img src={icon} width={24} height={24} alt="" />
                   <span>{label}</span>
                 </li>
@@ -121,7 +121,7 @@ export default function Amenities({ id, content }: { id: string; content: Proper
         </div>
 
         <div className="amenities__partners">
-          <h3 className="amenities__partners-title">
+          <h3 className="type-h3 amenities__partners-title">
             Part of the story at <em>{content.place}</em>
           </h3>
           <div className="amenities__logos">

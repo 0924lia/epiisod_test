@@ -53,7 +53,7 @@ type MegaMenuPanelProps = {
 export function MegaMenuPanel({ id, open, heading, children }: MegaMenuPanelProps) {
   return (
     <div id={id} className={`mega-menu__panel${open ? ' is-open' : ''}`}>
-      <p className="mega-menu__heading">{heading}</p>
+      <p className="type-h6 mega-menu__heading">{heading}</p>
       {children}
     </div>
   );

@@ -8,10 +8,13 @@ import './BrandVideo.css';
 
 /** "Luxury hotel room panning shot" — Mixkit Stock Video Free License. */
 const VIDEO_SRC = '/media/brand-film.mp4';
-/** Side of the thumbnail square in Figma 539:10149. */
-const THUMB_SIZE = 300;
+/** Phones (Figma 704:8593 → 704:8727) start from a smaller square over a shorter scroll. */
+const PHONE = '(max-width: 700px)';
+/** Side of the thumbnail square: Figma 539:10149, or 100px on phones. */
+const THUMB_SIZE = { desktop: 300, phone: 100 };
 /** Scroll distance (px) the pinned reveal is spread over — larger is slower. */
-const EXPAND_SCROLL = 1000;
+const EXPAND_SCROLL = { desktop: 1000, phone: 700 };
+const isPhone = () => window.matchMedia(PHONE).matches;
 
 /**
  * Figma 539:10149 → 539:11535. The frame always occupies its full 1136×639 slot
@@ -33,7 +36,7 @@ export default function BrandVideo() {
       if (!section || !stage) return;
 
       gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
-        const size = () => Math.min(THUMB_SIZE, stage.clientWidth, stage.clientHeight);
+        const size = () => Math.min(THUMB_SIZE[isPhone() ? 'phone' : 'desktop'], stage.clientWidth, stage.clientHeight);
         const insetY = () => (stage.clientHeight - size()) / 2;
         const insetX = () => (stage.clientWidth - size()) / 2;
         // Top of `el` within the section, summed through any offsetParents (the transformed
@@ -57,22 +60,38 @@ export default function BrandVideo() {
           return Math.max(0, centreOn - vh / 2);
         };
 
-        // 1) Reveal: pinned from the Figma start state (section at the top of the screen,
-        //    square under the heading) and stretched over EXPAND_SCROLL px, with a soft
-        //    catch-up (scrub: 1) so it glides rather than tracking the wheel exactly.
-        const reveal = gsap
+        // 1) Hold: the section pins at the top of the screen for EXPAND_SCROLL px while the
+        //    content lifts to centre the open frame.
+        const hold = gsap
           .timeline({
-            defaults: { ease: 'power2.inOut', duration: 1 },
             scrollTrigger: {
               trigger: section,
               start: 'top top',
-              end: `+=${EXPAND_SCROLL}`,
+              end: () => `+=${EXPAND_SCROLL[isPhone() ? 'phone' : 'desktop']}`,
               pin: true,
-              scrub: 1,
+              // Pins a frame early so a fast touch flick doesn't overshoot before it holds
+              anticipatePin: 1,
+              scrub: 0.4,
               invalidateOnRefresh: true,
             },
           })
-          .fromTo('.brand-video__lift', { y: 0 }, { y: () => -lift(), ease: 'power1.inOut' }, 0)
+          .fromTo('.brand-video__lift', { y: 0 }, { y: () => -lift(), ease: 'power1.inOut', duration: 1 });
+        const pin = hold.scrollTrigger!;
+
+        // 2) Reveal: the square starts opening as soon as it's fully on screen (not when the
+        //    pin begins), so it answers the first scroll, and finishes as the hold ends. A
+        //    light catch-up (scrub: 0.4) keeps it smooth without trailing the finger.
+        gsap
+          .timeline({
+            defaults: { ease: 'power1.out', duration: 1 },
+            scrollTrigger: {
+              trigger: section,
+              start: () => `top+=${topInSection(stage) + size()} bottom`,
+              end: () => pin.end,
+              scrub: 0.4,
+              invalidateOnRefresh: true,
+            },
+          })
           .fromTo(
             '.brand-video__frame',
             {
@@ -91,9 +110,8 @@ export default function BrandVideo() {
             0.7,
           );
 
-        // 2) Exit — the hero's treatment: once the frame is open, the section drifts at
+        // 3) Exit — the hero's treatment: once the frame is open, the section drifts at
         //    half speed so the next section slides up over it, and the image darkens.
-        const pin = reveal.scrollTrigger!;
         gsap
           .timeline({
             defaults: { ease: 'none', duration: 1 },

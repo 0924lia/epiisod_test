@@ -59,7 +59,7 @@ export default function Faqs({ id, content }: { id: string; content: PropertyCon
           <em>{content.place}</em>
         </h2>
       </div>
-      <p className="faqs__lede">General things you need to know before you move in.</p>
+      <p className="type-body-l faqs__lede">General things you need to know before you move in.</p>
 
       <VLine src={line} length={100} />
 
@@ -79,7 +79,7 @@ export default function Faqs({ id, content }: { id: string; content: PropertyCon
                 <span>{question}</span>
                 <img src={caretDown} width={24} height={24} alt="" />
               </button>
-              <div id={panelId} className="faqs__answer" role="region">
+              <div id={panelId} className="type-body-m faqs__answer" role="region">
                 <div className="faqs__answer-clip">
                   <p>{answer}</p>
                 </div>

@@ -22,8 +22,8 @@ export default function PropertyLocation({ id, content }: { id: string; content:
       <div className="property-location__content" data-exit-content>
         <div className="property-location__header">
           <div className="property-location__title-row">
-            <h2 className="property-location__title">Location</h2>
-            <p className="property-location__address">
+            <h2 className="type-h2 property-location__title">Location</h2>
+            <p className="type-body-l property-location__address">
               <img src={pin} width={24} height={24} alt="" />
               {content.address}
             </p>

@@ -23,7 +23,7 @@ function PropertyItem({ property, onNavigate }: { property: Property; onNavigate
           </span>
         )}
       </span>
-      <span className="locations-menu__address">{address}</span>
+      <span className="type-body-s locations-menu__address">{address}</span>
     </>
   );
 

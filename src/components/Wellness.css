@@ -34,23 +34,9 @@
   animation: wellness-copy-in 600ms var(--ease-in-out);
 }
 
-.wellness__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 48px;
-  line-height: 1.2;
-  color: var(--royal-chocolate-700);
-}
-
-.wellness__title em {
-  font-style: italic;
-}
 
 .wellness__body {
   font-weight: 300;
-  font-size: 18px;
-  line-height: 1.5;
   color: var(--royal-chocolate-600);
 }
 
@@ -169,40 +155,46 @@
   }
 }
 
+/*
+ * Phones (Figma 713:4094): the heading on top, the images side by side below it (each
+ * 286px, 16px apart, the next peeking in from the right) and the dots centred beneath.
+ * The heading's children join the stage grid (display: contents) so the dots can sit
+ * under the images; the vertical dot graphic is turned to run left to right.
+ */
 @media (max-width: 700px) {
   .wellness__stage {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(4, auto);
+    align-content: start;
+    gap: 16px 0;
+    height: 100vh;
     height: 100svh;
-    padding-top: 24px;
+    padding: 48px var(--page-gutter) 0;
   }
 
   .wellness__heading {
-    width: 100%;
-    gap: 16px;
+    display: contents;
   }
 
   .wellness__copy {
     height: auto;
-    gap: 12px;
+    gap: 16px;
   }
 
-  .wellness__title {
-    font-size: 32px;
-  }
-
-  .wellness__body {
-    font-size: 16px;
-  }
-
-  .wellness__dots {
-    display: none;
-  }
-
+  /* Full screen width so images slide in from the right edge and out past the left */
   .wellness__window {
-    flex: 1;
-    width: 100%;
+    grid-row: 3;
+    align-self: start;
+    width: auto;
+    margin: 8px calc(-1 * var(--page-gutter)) 0;
+  }
+
+  .wellness__track {
+    flex-direction: row;
+    gap: 16px;
+    width: max-content;
+    padding: 0 var(--page-gutter);
   }
 
   .wellness__row--2 {
@@ -210,7 +202,15 @@
   }
 
   .wellness__frame {
-    width: min(100%, calc((100svh - 300px) * 580 / 733));
-    margin: 0 auto;
+    height: auto;
+    width: min(286px, calc((100svh - 310px) * 580 / 733));
+  }
+
+  .wellness__dots {
+    grid-row: 4;
+    justify-self: center;
+    /* 24px below the images: the turned 56px graphic is 8px tall, so trim 24px each side */
+    margin: -16px 0 -24px;
+    transform: rotate(-90deg);
   }
 }

@@ -17,8 +17,8 @@ export default function LocationCard({ property }: LocationCardProps) {
 
       <div className="location-card__details">
         <div className="location-card__info">
-          <h3 className="location-card__name">{name}</h3>
-          <p className="location-card__address">{address}</p>
+          <h3 className="type-h4 location-card__name">{name}</h3>
+          <p className="type-body-m location-card__address">{address}</p>
           <p className="location-card__city">{city}</p>
         </div>
 

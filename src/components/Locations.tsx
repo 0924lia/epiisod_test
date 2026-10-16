@@ -252,7 +252,7 @@ export default function Locations() {
                 Write your <em>story</em>
               </h2>
             </div>
-            <p className="locations__lede">
+            <p className="type-body-l locations__lede">
               Modern spaces, all-inclusive amenities, and a vibrant student community—all in the
               cities where you study.
             </p>
@@ -276,11 +276,13 @@ export default function Locations() {
               </li>
             ))}
           </ul>
+          {/* Phones show the regions as tabs, so the active one's summary sits below them */}
+          <p className="locations__summary">{region.summary}</p>
         </div>
 
         <div className="locations__showcase">
           <div className="locations__showcase-header">
-            <h3 className="locations__region-title">{region.name}</h3>
+            <h3 className="type-h3 locations__region-title">{region.name}</h3>
             <div className="locations__filters" role="group" aria-label="Filter by city">
               {filters.map((f) => (
                 <button

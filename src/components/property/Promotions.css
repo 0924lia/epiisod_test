@@ -46,17 +46,10 @@
 }
 
 .promo-banner__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 36px;
-  line-height: 1.4;
   color: var(--white);
 }
 
 .promo-banner__body {
-  font-size: 16px;
-  line-height: 1.5;
   color: var(--bronze-300);
 }
 
@@ -119,18 +112,6 @@
   gap: 24px;
 }
 
-.promotions__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 48px;
-  line-height: 1.2;
-  color: var(--royal-chocolate-600);
-}
-
-.promotions__title em {
-  font-style: italic;
-}
 
 .promotions__all {
   flex-shrink: 0;
@@ -230,18 +211,8 @@
   gap: 12px;
 }
 
-.promo-card__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 24px;
-  line-height: 1.4;
-  color: #000;
-}
 
 .promo-card__description {
-  font-size: 16px;
-  line-height: 1.5;
   color: var(--royal-chocolate-500);
 }
 
@@ -334,10 +305,6 @@
 }
 
 @media (max-width: 700px) {
-  .promotions__title {
-    font-size: 36px;
-  }
-
   .promotions__header {
     flex-direction: column;
     align-items: flex-start;

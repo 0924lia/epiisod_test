@@ -3,7 +3,7 @@
   position: relative;
   /* Type size: Figma's 56px at 1512px wide, scaling with the window. Row gaps and the
      token are sized from it too, so their proportions hold at every width. */
-  --fs: clamp(30px, 3.7vw, 56px);
+  --fs: clamp(26px, 3.7vw, 56px);
   --size: calc(var(--fs) * 2.75); /* token: 154px at 56px type */
   display: flex;
   flex-direction: column;
@@ -143,47 +143,42 @@
   pointer-events: none;
 }
 
-/* Phones: halves rejoin into whole centred lines; the token sits above them */
-@media (max-width: 900px) {
+/* Rows that only appear at one size (see ROWS in TokenFold.tsx) */
+.token-fold__row--phone {
+  display: none;
+}
+
+/*
+ * Phones (Figma 713:4138): the same pass-through as desktop with 20px type, rows 15px
+ * apart, an 87px token and a 50px line; the long second row becomes two. Rows may run
+ * wider than the screen's content area, as in Figma; the section clips them sideways.
+ */
+@media (max-width: 700px) {
   .token-fold {
-    --fs: clamp(26px, 7vw, 36px);
-    padding: 100px var(--page-gutter);
+    --fs: 20.3px;
+    --size: 87px;
+    gap: 40px;
+    padding: 72px var(--page-gutter);
+  }
+
+  .token-fold .vline {
+    height: 50px !important;
+  }
+
+  .token-fold .vline img {
+    width: 50px;
   }
 
   .token-fold__rows {
-    gap: 12px;
-    padding-bottom: 0;
+    gap: 15px;
+    padding-bottom: calc(var(--size) + 48px);
   }
 
-  .token-fold__row {
-    display: block;
-    text-align: center;
+  .token-fold__row--desktop {
+    display: none;
   }
 
-  .token-fold__half {
-    display: inline;
-    white-space: normal;
-  }
-
-  /* Rows of two separate phrases stack; split-word rows stay joined on one line */
-  .token-fold__row:not(.token-fold__row--join) .token-fold__half {
-    display: block;
-    text-align: center;
-  }
-
-  .token-fold__row:not(.token-fold__row--join) + .token-fold__row:not(.token-fold__row--join) {
-    margin-top: 0;
-  }
-
-  .token-fold {
-    --size: 132px;
-  }
-
-  .token {
-    position: relative;
-    left: auto;
-    bottom: auto;
-    order: -1;
-    margin: 0 auto 16px;
+  .token-fold__row--phone {
+    display: flex;
   }
 }

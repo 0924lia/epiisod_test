@@ -46,7 +46,7 @@ export default function PropertyHero({ content, onSeeRooms }: PropertyHeroProps)
       <div className="property-hero__shade" aria-hidden />
 
       <div className="property-hero__content">
-        <h1 className="property-hero__title">
+        <h1 className="type-h1 property-hero__title">
           {content.brand} <em>{content.place}</em>
         </h1>
 
@@ -61,7 +61,7 @@ export default function PropertyHero({ content, onSeeRooms }: PropertyHeroProps)
           <div className="property-hero__media">
             <a href="#" className="property-hero__media-link">
               <img src={play} width={24} height={24} alt="" />
-              <span>See all rooms</span>
+              <span>Property video</span>
             </a>
             <a href="#" className="property-hero__media-link">
               <span className="property-hero__icon-360">
