@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 140px var(--page-gutter) 400px; /* +200px breathing room before the token fold */
+  padding: 140px var(--page-gutter) 400px; /* +200px breathing room before the sign-up */
   overflow: hidden;
   background: var(--white);
 }

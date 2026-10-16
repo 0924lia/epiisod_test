@@ -3,11 +3,17 @@
   color: var(--royal-chocolate-700);
 }
 
-/* Giant wordmark, full content width (Figma 539:18091) */
+/*
+ * Giant wordmark, full content width (Figma 539:18091), 100px below the footer's top.
+ * The clip keeps the assembling pieces off the page's sides; the 100px above and below
+ * leave room for the arcs swinging in and the letters rising, so nothing looks cropped.
+ * The negative margin takes the bottom room back, so the links keep their spacing.
+ */
 .footer__brand {
   display: flex;
   justify-content: center;
-  padding: 0 var(--page-gutter);
+  padding: 100px var(--page-gutter);
+  margin-bottom: -100px;
   overflow: clip;
 }
 
@@ -184,6 +190,7 @@
   /* 60px above and below the wordmark (Figma 704:9300) */
   .footer__brand {
     padding: 60px var(--page-gutter);
+    margin-bottom: 0;
   }
 
   .footer__body {

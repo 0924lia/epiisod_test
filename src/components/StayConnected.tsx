@@ -11,11 +11,20 @@ import './StayConnected.css';
  * Figma 539:11773 / 539:11875. Fields turn white with a bronze border while focused;
  * once both are filled, SUBMIT becomes a solid bronze button with white type.
  * After submitting, the fields lock and the button gives way to "Thank you." (Figma 539:21195).
- * With `exitParallax`, it drifts as the footer scrolls over it — undimmed, so the two
- * read as one continuous surface. On phones the footer only arrives once the form has
+ * With `exitParallax`, it drifts as the next section (the footer, or the token fold on
+ * the homepage) scrolls over it — undimmed, so the two read as one continuous surface. On phones the footer only arrives once the form has
  * moved well up the screen, so filling it in is never interrupted.
  */
-export default function StayConnected({ id, exitParallax = false }: { id?: string; exitParallax?: boolean }) {
+export default function StayConnected({
+  id,
+  exitParallax = false,
+  fromWhite = false,
+}: {
+  id?: string;
+  exitParallax?: boolean;
+  /** Fade in from white rather than starting on cream, for when a white section precedes it. */
+  fromWhite?: boolean;
+}) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -36,7 +45,11 @@ export default function StayConnected({ id, exitParallax = false }: { id?: strin
   }, [submitted]);
 
   return (
-    <section ref={sectionRef} className="stay-connected exit-parallax" id={id}>
+    <section
+      ref={sectionRef}
+      className={`stay-connected exit-parallax${fromWhite ? ' stay-connected--from-white' : ''}`}
+      id={id}
+    >
       <div className="stay-connected__content" data-exit-content>
         <VLine src={ctaLine} length={100} />
         <h2 className="display-title stay-connected__title">

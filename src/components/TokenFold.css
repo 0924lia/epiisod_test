@@ -9,10 +9,12 @@
   flex-direction: column;
   align-items: center;
   gap: 24px;
-  padding: 80px var(--page-gutter);
+  /* 200px below for ample negative space before the footer (120px on phones) */
+  padding: 120px var(--page-gutter) 200px;
   /* Clip sideways (halves sliding apart) but not vertically */
   overflow-x: clip;
-  background: linear-gradient(to bottom, var(--white), var(--bronze-100));
+  /* Continues the sign-up's cream into the footer's bronze */
+  background: linear-gradient(to bottom, var(--bronze-100), var(--bronze-200));
 }
 
 .token-fold__rows {
@@ -158,7 +160,7 @@
     --fs: 20.3px;
     --size: 87px;
     gap: 40px;
-    padding: 72px var(--page-gutter);
+    padding: 120px var(--page-gutter);
   }
 
   .token-fold .vline {

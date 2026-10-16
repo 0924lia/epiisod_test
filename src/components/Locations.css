@@ -214,9 +214,10 @@
   outline-offset: 8px;
 }
 
+/* Cards stretch to the tallest one, so their links line up (LocationCard.css) */
 .locations__track {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 24px;
   width: max-content;
   /* Cards start at the showcase edge and the last one rests at the content edge */
@@ -226,6 +227,12 @@
 
 .locations__track > * {
   scroll-snap-align: start;
+}
+
+/* A single card sits in the middle of the showcase column (between the paddings) */
+.locations__track:has(> :only-child) {
+  width: 100%;
+  justify-content: center;
 }
 
 .locations__empty {

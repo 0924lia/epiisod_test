@@ -93,35 +93,39 @@ export default function Footer() {
         const arcsBottom = gsap.utils.toArray<HTMLElement>('.footer__wordmark-part--arc-bottom');
 
         const tl = gsap.timeline({
-          defaults: { ease: 'power2.out' },
+          defaults: { ease: 'sine.out' },
           scrollTrigger: {
             trigger: footer,
-            start: 'top bottom',
-            // Assembled by the time the footer's top is just over halfway up the screen, so
-            // the wordmark is in place soon after it scrolls into view
-            end: 'top 55%',
-            scrub: true,
+            // Spread over a long stretch of scroll while the wordmark is on screen: from
+            // as it comes into view until it's well up the screen, so it assembles slowly
+            start: 'top 95%',
+            // clamp(): on very tall screens the page can't scroll that far, so it finishes
+            // at the bottom of the page instead
+            end: 'clamp(top 15%)',
+            // A gentle catch-up, so the pieces glide after the scroll
+            scrub: 1.2,
           },
         });
 
-        // Letters: rise from below at alternating depths, staggered left → right.
+        // Letters: drift up out of the wordmark's band (which clips them) at alternating
+        // depths, overlapping one another left → right.
         letters.forEach((el, i) => {
           tl.fromTo(
             el,
-            { yPercent: i % 2 ? 55 : 30, opacity: 0 },
-            { yPercent: 0, opacity: 1, duration: 0.6 },
-            i * 0.06,
+            { yPercent: i % 2 ? 140 : 90, opacity: 0 },
+            { yPercent: 0, opacity: 1, duration: 1 },
+            i * 0.12,
           );
         });
 
-        // Arcs: swing into place around their circle centres (below the top arcs,
+        // Arcs: swing softly into place around their circle centres (below the top arcs,
         // above the bottom ones), alternating direction.
         [...arcsTop, ...arcsBottom].forEach((el, i) => {
           tl.fromTo(
             el,
-            { rotation: i % 2 ? 22 : -22, opacity: 0 },
-            { rotation: 0, opacity: 1, duration: 0.7, ease: 'power3.out' },
-            0.15 + i * 0.07,
+            { rotation: i % 2 ? 60 : -60, opacity: 0 },
+            { rotation: 0, opacity: 1, duration: 1.1, ease: 'sine.inOut' },
+            0.3 + i * 0.12,
           );
         });
       });

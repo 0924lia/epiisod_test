@@ -30,8 +30,8 @@ function HomePage() {
         <BrandVideo />
         <LifeSection />
         <Partners />
+        <StayConnected exitParallax fromWhite />
         <TokenFold />
-        <StayConnected exitParallax />
       </main>
       <Footer />
     </>

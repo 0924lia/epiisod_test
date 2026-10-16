@@ -106,7 +106,7 @@ function Token() {
  * gold line. As you scroll, the rows flow up past it (it drifts down the screen more
  * slowly — parallax) and each row splits around it like liquid: the halves part just
  * ahead of the token, then flow back together with a soft wobble, while nearby rows bulge
- * away. It passes every row and ends below "Write your story" before the sign-up.
+ * away. It passes every row and ends below "Write your story" before the footer.
  * Decorative: the headlines repeat earlier sections.
  */
 export default function TokenFold() {
