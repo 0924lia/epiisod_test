@@ -12,7 +12,12 @@ import './HamburgerMenu.css';
 type Link = { label: string; href: string };
 
 /** Expandable groups (Figma 652:9263 / 652:9422). Pages not built yet link to '#'. */
-const GROUPS: Record<'contact' | 'blog', Link[]> = {
+const GROUPS: Record<'life' | 'contact' | 'blog', Link[]> = {
+  /** The desktop bar's Life @ EPIISOD menu (Figma 539:20915) */
+  life: [
+    { label: 'Why EPIISOD', href: '/why-epiisod' },
+    { label: 'Experience', href: '#' },
+  ],
   contact: [
     { label: 'Contact Us', href: '/contact' },
     { label: 'Join Waitlist', href: '#' },
@@ -67,7 +72,7 @@ function Group({ label, links, onNavigate }: { label: string; links: Link[]; onN
 
 /**
  * Hamburger menu (Figma 652:9490): a white panel sliding in from the right over the
- * blurred page. Contact and Blog expand in place; Locations opens a second panel
+ * blurred page. Life @ EPIISOD, Contact and Blog expand in place; Locations opens a second panel
  * over the first, listing every property by country and city. The main navigation
  * on tablets and phones, and the ☰ menu on desktop.
  */
@@ -143,6 +148,7 @@ export default function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
             <PanelHeader onClose={onClose} closeRef={closeRef} />
             <nav aria-label="Menu">
               <ul className="menu-panel__items">
+                <Group label="Life @ EPIISOD" links={GROUPS.life} onNavigate={onClose} />
                 <li>
                   <button ref={locationsButtonRef} type="button" className="menu-panel__item" onClick={() => showLocations(true)}>
                     <span>Locations</span>
