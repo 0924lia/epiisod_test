@@ -44,7 +44,23 @@
 }
 
 @media (max-width: 700px) {
+  /* One row that scrolls sideways, bleeding to the screen edges, rather than wrapping */
+  .filter-tabs {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    margin-inline: calc(-1 * var(--page-gutter));
+    padding-inline: var(--page-gutter);
+    overflow-x: auto;
+    scroll-padding-inline: var(--page-gutter);
+    scrollbar-width: none;
+  }
+
+  .filter-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
   .filter-tabs__option {
+    flex-shrink: 0;
     font-size: 15px;
   }
 }

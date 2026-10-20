@@ -12,9 +12,9 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  /* The columns meet (464 + 904 = 1368); the intro's 48px padding is the visual gap.
-     --column-gap still sets how far the cards slide back beneath the intro. */
-  gap: 0;
+  /* 24px between the columns (464 + 24 + 880 = 1368); --column-gap also sets how far
+     the cards slide back beneath the intro */
+  gap: var(--column-gap);
   max-width: var(--content-max);
   margin: 0 auto;
   isolation: isolate;
@@ -115,8 +115,8 @@
   display: flex;
   flex-direction: column;
   gap: 40px;
-  flex-shrink: 0;
-  width: 904px;
+  flex: 1;
+  min-width: 0;
 }
 
 .locations__showcase-header {

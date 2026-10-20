@@ -192,8 +192,57 @@
   }
 }
 
+/* Phones: the photo runs edge to edge, the amenities sit two to a row */
 @media (max-width: 700px) {
+  .amenities__main {
+    padding: 80px 0 0;
+  }
+
+  .amenities__gallery {
+    aspect-ratio: 390 / 320;
+  }
+
+  .amenities__pager {
+    right: 16px;
+    bottom: 16px;
+    gap: 12px;
+  }
+
+  .amenities__details {
+    gap: 32px;
+    padding: 32px var(--page-gutter) 0;
+  }
+
   .amenities__list {
-    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .amenities__item {
+    gap: 8px;
+    font-size: 16px;
+  }
+
+  .amenities__item img {
+    margin-top: 0;
+  }
+
+  .amenities__cta {
+    align-self: stretch;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .amenities__partners {
+    gap: 32px;
+    padding: 72px var(--page-gutter) 80px;
+  }
+
+  .amenities__partners-title {
+    width: auto;
+  }
+
+  /* Two 163px logos to a row (Partners.css) */
+  .amenities__logos {
+    gap: 16px;
   }
 }

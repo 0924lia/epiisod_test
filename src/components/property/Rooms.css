@@ -424,3 +424,66 @@
     height: 240px;
   }
 }
+
+/* Phones: tighter section and cards, so the list reads as a list */
+@media (max-width: 700px) {
+  .rooms {
+    padding: 80px var(--page-gutter);
+  }
+
+  .rooms__content {
+    gap: 32px;
+  }
+
+  .rooms__heading {
+    margin-bottom: 0;
+  }
+
+  .rooms__search {
+    gap: 12px;
+  }
+
+  .rooms__results {
+    gap: 32px;
+  }
+
+  .rooms__toolbar {
+    gap: 20px;
+  }
+
+  .rooms__view,
+  .rooms__available {
+    font-size: 16px;
+  }
+
+  .rooms__grid {
+    gap: 24px;
+  }
+
+  .room-card {
+    box-shadow: 0 48px 40px -40px rgba(57, 29, 19, 0.2);
+  }
+
+  .room-card__image {
+    height: auto;
+    aspect-ratio: 342 / 220;
+  }
+
+  .room-card__body {
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .room-card__type {
+    font-size: 14px;
+  }
+
+  .room-card__features {
+    font-size: 14px;
+  }
+
+  /* One card per row, so there's no price line to keep level: drop the empty views line */
+  .room-card__features.is-empty {
+    display: none;
+  }
+}

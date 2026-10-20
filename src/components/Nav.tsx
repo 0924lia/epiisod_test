@@ -106,8 +106,10 @@ export default function Nav({
   const [openMenu, setOpenMenu] = useState<MenuKey | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const closePanel = useCallback(() => setPanelOpen(false), []);
+  const [currentSub, setCurrentSub] = useState<string | null>(null);
   const headerRef = useRef<HTMLElement>(null);
   const barRef = useRef<HTMLElement>(null);
+  const subRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const update = () => setScrolled(window.scrollY > SCROLLED_AFTER);
@@ -174,6 +176,33 @@ export default function Nav({
     ro.observe(bar, { box: 'border-box' });
     return () => ro.disconnect();
   }, []);
+
+  // The section under the nav is the sub-navigation's current link
+  useEffect(() => {
+    if (!subLinks) return;
+    const update = () => {
+      const below = (headerRef.current?.offsetHeight ?? 0) + 1;
+      let current: string | null = null;
+      for (const { target } of subLinks) {
+        const r = document.getElementById(target)?.getBoundingClientRect();
+        if (r && r.top <= below && r.bottom > below) current = target;
+      }
+      setCurrentSub(current);
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    return () => window.removeEventListener('scroll', update);
+  }, [subLinks]);
+
+  // Where the row scrolls sideways (tablets and phones), keep the current link in view
+  useEffect(() => {
+    const row = subRef.current;
+    const link = currentSub && row?.querySelector<HTMLElement>(`[href="#${currentSub}"]`);
+    if (!row || !link || row.scrollWidth <= row.clientWidth) return;
+    const l = link.getBoundingClientRect();
+    const r = row.getBoundingClientRect();
+    row.scrollBy({ left: l.left + l.width / 2 - (r.left + r.width / 2), behavior: 'smooth' });
+  }, [currentSub]);
 
   // Close the open menu on Escape or a click anywhere outside the nav
   useEffect(() => {
@@ -280,12 +309,13 @@ export default function Nav({
         </MegaMenu>
 
         {subLinks && (
-          <nav className="nav__sub" aria-label="On this page">
+          <nav ref={subRef} className="nav__sub" aria-label="On this page">
             {subLinks.map(({ label, target }) => (
               <a
                 key={target}
                 href={`#${target}`}
-                className="nav__link nav__sub-link"
+                className={`nav__link nav__sub-link${target === currentSub ? ' is-current' : ''}`}
+                aria-current={target === currentSub ? 'location' : undefined}
                 onClick={(e) => {
                   // Handled here, not by Lenis's anchor scrolling, so the section clears the bar
                   e.preventDefault();

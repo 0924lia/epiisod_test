@@ -45,7 +45,9 @@ function RoomCard({ room, currency }: { room: Room; currency: string }) {
           <p className="room-card__type">{room.typeLabel}</p>
           <h3 className="type-h4 room-card__name">{room.name}</h3>
           {/* Kept even when empty so every card's price lines up */}
-          <p className="room-card__features">{room.features ?? '\u00a0'}</p>
+          <p className={`room-card__features${room.features ? '' : ' is-empty'}`}>
+            {room.features ?? '\u00a0'}
+          </p>
         </div>
         <p className="room-card__price">
           <span className="room-card__from">From</span>

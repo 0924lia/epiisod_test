@@ -345,6 +345,31 @@ button.nav__link {
   .nav__sub::-webkit-scrollbar {
     display: none;
   }
+
+  /* The row scrolls sideways here: underline the section in view, which the row keeps
+     scrolled into sight (Nav.tsx) */
+  .nav__sub-link {
+    box-shadow: inset 0 -1px 0 transparent;
+    transition:
+      color 400ms var(--ease-in-out),
+      opacity 200ms ease,
+      box-shadow 300ms var(--ease-in-out);
+  }
+
+  .nav__sub-link.is-current {
+    box-shadow: inset 0 -1px 0 currentColor;
+  }
+}
+
+@media (max-width: 700px) {
+  .nav__sub {
+    gap: 20px;
+  }
+
+  .nav__sub-link {
+    font-size: 14px;
+    letter-spacing: 1.4px;
+  }
 }
 
 /* Navigation option B: the hamburger only on tablets and phones */

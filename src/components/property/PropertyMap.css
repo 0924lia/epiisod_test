@@ -77,6 +77,28 @@
   color: var(--royal-chocolate-700);
 }
 
+/* Phones: a smaller card, so the open popup doesn't cover the map */
+@media (max-width: 700px) {
+  .map-popup .leaflet-popup-content {
+    margin: 10px 32px 10px 12px;
+    max-width: 220px;
+  }
+
+  .map-popup__title,
+  .map-popup--home .map-popup__title {
+    font-size: 16px;
+  }
+
+  .map-popup__address {
+    font-size: 12px;
+  }
+
+  .map-popup .leaflet-popup-close-button {
+    top: 6px;
+    right: 6px;
+  }
+}
+
 .property-map .leaflet-control-zoom a {
   color: var(--royal-chocolate-700);
 }

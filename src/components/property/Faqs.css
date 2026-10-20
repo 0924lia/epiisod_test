@@ -158,3 +158,10 @@
     padding: 120px var(--page-gutter);
   }
 }
+
+@media (max-width: 700px) {
+  .faqs {
+    gap: 32px;
+    padding: 80px var(--page-gutter);
+  }
+}
