@@ -3,18 +3,33 @@ import type { KeyboardEvent, MouseEvent, PointerEvent } from 'react';
 import { gsap, useGSAP } from '../../lib/smoothScroll';
 import { useExitParallax } from '../../lib/useExitParallax';
 import background from '../../assets/property/hero.jpg';
-import ig1 from '../../assets/contact/instagram-1.jpg';
-import ig2 from '../../assets/contact/instagram-2.jpg';
-import ig3 from '../../assets/contact/instagram-3.jpg';
-import ig4 from '../../assets/contact/instagram-4.jpg';
-import ig5 from '../../assets/contact/instagram-5.jpg';
-import ig6 from '../../assets/contact/instagram-6.jpg';
 import tiktok from '../../assets/contact/tiktok-light.svg';
 import facebook from '../../assets/contact/facebook-light.svg';
 import instagram from '../../assets/contact/instagram-light.svg';
+import { useInstagramFeed } from './instagramFeed';
+import type { InstagramPost } from './instagramFeed';
 import './InstagramStrip.css';
 
-const POSTS = [ig1, ig2, ig3, ig4, ig5, ig6];
+const dateFormat = new Intl.DateTimeFormat('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+const countFormat = new Intl.NumberFormat('en-AU', { notation: 'compact' });
+
+/** Hover / focus details: the caption, then the date and counts. */
+function PostDetails({ post }: { post: InstagramPost }) {
+  const counts = [
+    post.likes !== undefined && `${countFormat.format(post.likes)} likes`,
+    post.comments !== undefined && `${countFormat.format(post.comments)} comments`,
+  ].filter(Boolean);
+  return (
+    <span className="instagram__details" aria-hidden>
+      {post.caption && <span className="instagram__caption">{post.caption}</span>}
+      <span className="instagram__meta">
+        <span>{dateFormat.format(new Date(post.timestamp))}</span>
+        {counts.length > 0 && <span>{counts.join(' · ')}</span>}
+      </span>
+      <span className="instagram__view">View on Instagram</span>
+    </span>
+  );
+}
 /** Copies of the posts in the track, so the loop never shows an edge on wide screens. */
 const COPIES = 3;
 /** Autoplay speed (px/s). */
@@ -36,8 +51,17 @@ const SOCIALS = [
  * trackpad swipe, Shift + wheel, drag (with a little coasting) or the arrow keys —
  * autoplay resuming shortly after. The backdrop lags behind the page scroll, and the
  * section drifts and dims as the next one slides over it.
+ *
+ * Posts come from the Instagram feed (instagramFeed.ts), with sample posts until it's
+ * connected. Hovering or focusing a post shows its caption, date and counts; clicking
+ * opens it on Instagram in a new tab (a drag never does). Touch screens have no hover,
+ * so a tap opens the post directly.
  */
 export default function InstagramStrip() {
+  const posts = useInstagramFeed();
+  /** Read by the frame loop, which outlives renders. */
+  const postCount = useRef(posts.length);
+  postCount.current = posts.length;
   const sectionRef = useRef<HTMLElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLUListElement>(null);
@@ -61,7 +85,8 @@ export default function InstagramStrip() {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const setWidth = () => {
       const items = track.children;
-      return (items[POSTS.length] as HTMLElement).offsetLeft - (items[0] as HTMLElement).offsetLeft;
+      const next = items[postCount.current] as HTMLElement | undefined;
+      return next ? next.offsetLeft - (items[0] as HTMLElement).offsetLeft : track.scrollWidth;
     };
 
     let frame = 0;
@@ -224,15 +249,18 @@ export default function InstagramStrip() {
         >
           {/* Repeated copies of the posts, so the loop wraps seamlessly */}
           <ul ref={trackRef} className="instagram__track">
-            {Array.from({ length: COPIES }, () => POSTS).flat().map((src, i) => (
-              <li key={i} aria-hidden={i >= POSTS.length}>
+            {Array.from({ length: COPIES }, () => posts).flat().map((post, i) => (
+              <li key={`${post.id}-${i}`} aria-hidden={i >= posts.length}>
                 <a
-                  href="#"
-                  tabIndex={i >= POSTS.length ? -1 : undefined}
-                  aria-label={`Instagram post ${(i % POSTS.length) + 1}`}
+                  href={post.permalink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  tabIndex={i >= posts.length ? -1 : undefined}
+                  aria-label={`Instagram post: ${post.caption || 'view on Instagram'} (opens in a new tab)`}
                   draggable={false}
                 >
-                  <img src={src} alt="" draggable={false} />
+                  <img src={post.image} alt="" draggable={false} />
+                  <PostDetails post={post} />
                 </a>
               </li>
             ))}

@@ -128,8 +128,95 @@
   transition: transform 600ms var(--ease-in-out);
 }
 
-.instagram__track a:hover img {
+.instagram__track a {
+  position: relative;
+}
+
+.instagram__track a:hover img,
+.instagram__track a:focus-visible img {
   transform: scale(1.04);
+}
+
+/* Post details on hover / keyboard focus: a chocolate fade, the caption, date and counts */
+.instagram__details {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px;
+  background: linear-gradient(180deg, rgba(36, 18, 12, 0.2) 0%, rgba(36, 18, 12, 0.88) 55%);
+  color: var(--white);
+  opacity: 0;
+  transition: opacity 400ms var(--ease-in-out);
+  pointer-events: none;
+}
+
+.instagram__track a:hover .instagram__details,
+.instagram__track a:focus-visible .instagram__details {
+  opacity: 1;
+}
+
+/* No details mid-drag, and none on touch screens, where a tap opens the post */
+.instagram__strip.is-dragging .instagram__details {
+  opacity: 0;
+}
+
+@media (hover: none) {
+  .instagram__details {
+    display: none;
+  }
+}
+
+.instagram__caption,
+.instagram__meta,
+.instagram__view {
+  transform: translateY(8px);
+  transition: transform 500ms var(--ease-in-out);
+}
+
+.instagram__track a:hover :is(.instagram__caption, .instagram__meta, .instagram__view),
+.instagram__track a:focus-visible :is(.instagram__caption, .instagram__meta, .instagram__view) {
+  transform: none;
+}
+
+/* Up to four lines of the caption */
+.instagram__caption {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
+.instagram__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--line-in-white);
+}
+
+.instagram__view {
+  align-self: flex-start;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--line-in-white);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.instagram__track a:focus-visible {
+  outline: 1px solid var(--line-in-white);
+  outline-offset: -1px;
 }
 
 @media (max-width: 700px) {
