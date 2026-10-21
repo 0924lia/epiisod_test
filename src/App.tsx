@@ -13,6 +13,7 @@ import ContactPage from './pages/ContactPage';
 import AboutPage from './pages/AboutPage';
 import PromotionsPage from './pages/PromotionsPage';
 import WhyPage from './pages/WhyPage';
+import ExperiencePage from './pages/ExperiencePage';
 import { PROPERTIES } from './components/locationData';
 import { MACQUARIE_PARK, type PropertyContent } from './components/property/propertyContent';
 
@@ -49,6 +50,7 @@ export default function App() {
   if (path === '/about') return <AboutPage />;
   if (path === '/promotions') return <PromotionsPage />;
   if (path === '/why-epiisod') return <WhyPage />;
+  if (path === '/experience') return <ExperiencePage />;
   const property = PROPERTIES.find((p) => p.href === path);
   if (!property) return <HomePage />;
   const content = PROPERTY_PAGES[property.id];

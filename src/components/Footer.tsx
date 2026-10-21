@@ -56,7 +56,7 @@ const EPIISOD_LINKS = ['About', 'Why EPIISOD', 'Experience', 'For Parents', 'For
 const CONTACT_LINKS = ['Contact Us', 'Book a Tour', 'FAQS'];
 const POLICY_LINKS = ['Cancellation', 'Policy 1', 'Policy 2'];
 /** Footer links with a page so far; the rest link to '#' until their pages exist. */
-const LINK_HREFS: Record<string, string> = { About: '/about', 'Why EPIISOD': '/why-epiisod', 'Contact Us': '/contact' };
+const LINK_HREFS: Record<string, string> = { About: '/about', 'Why EPIISOD': '/why-epiisod', Experience: '/experience', 'Contact Us': '/contact' };
 const LEGAL_LINKS = ['Terms and Condition', 'Something something', 'Something something'];
 
 function LinkGroup({ title, links }: { title: string; links: string[] }) {

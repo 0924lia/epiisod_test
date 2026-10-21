@@ -54,4 +54,63 @@ export function setScrollLocked(locked: boolean) {
   document.documentElement.style.overflow = locked ? 'hidden' : '';
 }
 
+const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+/**
+ * Step snapping for a pinned ScrollTrigger, done through Lenis so the two don't fight
+ * (ScrollTrigger's own `snap` moves the page while Lenis holds its own target, and the
+ * page springs back). Once scrolling has come to rest inside the trigger, the page eases
+ * on to the next of `points` (trigger progress, 0–1) in the direction it was last
+ * scrolled, so a light scroll never falls back. Returns a cleanup function.
+ */
+export function addStepSnap(
+  trigger: ScrollTrigger,
+  points: () => number[],
+  { duration = 1.1, rest = 160 }: { duration?: number; rest?: number } = {},
+) {
+  let timer = 0;
+  let lastY = window.scrollY;
+  let direction = 0;
+  let snapping = false;
+
+  const snap = () => {
+    if (snapping) return;
+    const { start, end } = trigger;
+    const y = window.scrollY;
+    if (y <= start + 1 || y >= end - 1) return;
+    const targets = points().map((p) => start + p * (end - start));
+    if (targets.some((t) => Math.abs(t - y) < 2)) return;
+    const ahead = targets.filter((t) => (direction >= 0 ? t > y : t < y));
+    // Past the last step (or before the first) the page is free to move on
+    if (!ahead.length) return;
+    const target = direction >= 0 ? Math.min(...ahead) : Math.max(...ahead);
+    snapping = true;
+    const done = () => {
+      snapping = false;
+      lastY = window.scrollY;
+    };
+    if (lenis) {
+      lenis.scrollTo(target, { duration, easing: easeInOutCubic, onComplete: done });
+    } else {
+      window.scrollTo({ top: target, behavior: 'smooth' });
+      window.setTimeout(done, duration * 1000);
+    }
+  };
+
+  const onScroll = () => {
+    if (snapping) return;
+    const y = window.scrollY;
+    if (y !== lastY) direction = Math.sign(y - lastY);
+    lastY = y;
+    window.clearTimeout(timer);
+    timer = window.setTimeout(snap, rest);
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  return () => {
+    window.removeEventListener('scroll', onScroll);
+    window.clearTimeout(timer);
+  };
+}
+
 export { gsap, ScrollTrigger, useGSAP };

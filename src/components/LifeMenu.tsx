@@ -16,12 +16,11 @@ const BLOG_LINKS = [
   { title: 'For International Students', description: 'An elevated student living' },
 ];
 
-/** Pages not built yet link to '#'. */
 const LINKS = [
   { title: 'Why EPIISOD', href: '/why-epiisod', description: 'Where Your Story Finds Its Place' },
   {
     title: 'Experience',
-    href: '#',
+    href: '/experience',
     description:
       'The EPIISOD Experience goes beyond accommodation to create a living environment shaped around everyday ease, wellbeing, and connection.',
   },
@@ -41,7 +40,7 @@ export default function LifeMenu({ id, open, onNavigate, variant = 'a' }: LifeMe
             <span className="life-menu__title">Why EPIISOD</span>
             <span className="life-menu__description">Where Your Story Finds Its Place</span>
           </a>
-          <a href="#" className="nav-menu-b__link" onClick={onNavigate}>
+          <a href="/experience" className="nav-menu-b__link" onClick={onNavigate}>
             <span className="life-menu__title">Experience</span>
             <span className="life-menu__description nav-menu-b__small">
               The EPIISOD Experience that goes beyond accommodation

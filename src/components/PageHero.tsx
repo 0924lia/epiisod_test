@@ -8,10 +8,14 @@ import './PageHero.css';
 type PageHeroProps = {
   eyebrow: string;
   title: ReactNode;
-  /** The paragraphs under the title. */
-  children: ReactNode;
+  /** The paragraphs under the title, if any. */
+  children?: ReactNode;
   /** An optional button between the copy and the line. */
   action?: ReactNode;
+  /** Optional content below the line (Experience: the partner logos). */
+  after?: ReactNode;
+  /** Extra class for page-specific spacing. */
+  className?: string;
   /** Left and right photos; phones show one of them below the line. */
   photos: { left: string; right: string };
   /** Which photo phones show (Promotions, Figma 794:4540, uses the right one). */
@@ -30,6 +34,8 @@ export default function PageHero({
   title,
   children,
   action,
+  after,
+  className = '',
   photos,
   phonePhoto = 'left',
   tone = 'white',
@@ -60,7 +66,7 @@ export default function PageHero({
   );
 
   return (
-    <section ref={sectionRef} className={`page-hero${tone === 'cream' ? ' page-hero--cream' : ''}`}>
+    <section ref={sectionRef} className={`page-hero${tone === 'cream' ? ' page-hero--cream' : ''} ${className}`}>
       <div className="page-hero__inner">
         <div className="page-hero__content">
           <div className="page-hero__copy">
@@ -68,10 +74,11 @@ export default function PageHero({
               <p className="eyebrow">{eyebrow}</p>
               <h1 className="type-h1">{title}</h1>
             </div>
-            <div className="type-body-l page-hero__lede">{children}</div>
+            {children && <div className="type-body-l page-hero__lede">{children}</div>}
           </div>
           {action}
           <VLine src={line} length={100} />
+          {after}
         </div>
 
         <div className="page-hero__photo page-hero__photo--left">

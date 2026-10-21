@@ -16,7 +16,7 @@ const GROUPS: Record<'life' | 'contact' | 'blog', Link[]> = {
   /** The desktop bar's Life @ EPIISOD menu (Figma 539:20915) */
   life: [
     { label: 'Why EPIISOD', href: '/why-epiisod' },
-    { label: 'Experience', href: '#' },
+    { label: 'Experience', href: '/experience' },
   ],
   contact: [
     { label: 'Contact Us', href: '/contact' },
