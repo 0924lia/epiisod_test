@@ -24,7 +24,9 @@
   max-width: var(--content-max);
 }
 
+/* Columns drift at different speeds while scrolling (WhyExperience.tsx) */
 .why-experience__column {
+  will-change: transform;
   flex: 1 0 0;
   min-width: 0;
   display: flex;

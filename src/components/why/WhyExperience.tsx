@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { gsap, useGSAP } from '../../lib/smoothScroll';
 import type { CSSProperties, ReactNode } from 'react';
 import VLine from '../VLine';
 import line from '../../assets/make-it-yours-line.svg';
@@ -95,6 +96,12 @@ const COLUMNS: Feature[][] = [
   ],
 ];
 
+/**
+ * Scroll parallax: how far (px) each column drifts up while the grid crosses the screen,
+ * from +distance/2 to −distance/2. The middle column, already set lowest, moves most.
+ */
+const COLUMN_DRIFT = [120, 220, 60];
+
 /** A card under the mouse opens after this pause (ms), so sweeping across doesn't flick each one open. */
 const HOVER_DELAY = 140;
 
@@ -103,6 +110,8 @@ const HOVER_DELAY = 140;
  * each titled over a chocolate fade. As with the reviews, hovering a card — or clicking /
  * tapping it — deepens the fade and lifts the title to reveal its description
  * (Figma 953:4887). A click keeps it open after the pointer leaves; clicking again closes it.
+ * While the grid scrolls past, the columns drift at different speeds (parallax), except on
+ * phones, where the cards stack in one column, and for reduced motion.
  */
 export default function WhyExperience({ id }: { id: string }) {
   /** Opened by click, tap or keyboard; stays open. */
@@ -110,6 +119,33 @@ export default function WhyExperience({ id }: { id: string }) {
   /** Under the mouse; wins over `selected` while the pointer is on the grid. */
   const [hovered, setHovered] = useState<string | null>(null);
   const open = hovered ?? selected;
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      gsap.matchMedia().add('(min-width: 701px) and (prefers-reduced-motion: no-preference)', () => {
+        gsap.utils.toArray<HTMLElement>('.why-experience__column').forEach((column, i) => {
+          const distance = COLUMN_DRIFT[i] ?? 0;
+          gsap.fromTo(
+            column,
+            { y: distance / 2 },
+            {
+              y: -distance / 2,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: gridRef.current,
+                start: 'top bottom',
+                end: 'bottom top',
+                // A short catch-up keeps the drift soft
+                scrub: 0.8,
+              },
+            },
+          );
+        });
+      });
+    },
+    { scope: gridRef },
+  );
   const hoverTimer = useRef(0);
   /** Hover a card after a short pause; leaving (`null`) closes at once. */
   const hoverSoon = (card: typeof hovered) => {
@@ -131,7 +167,7 @@ export default function WhyExperience({ id }: { id: string }) {
         </div>
       </div>
 
-      <div className="why-experience__grid" onPointerLeave={() => hoverSoon(null)}>
+      <div ref={gridRef} className="why-experience__grid" onPointerLeave={() => hoverSoon(null)}>
         {COLUMNS.map((column, c) => (
           <div key={c} className="why-experience__column">
             {column.map((feature, i) => {
