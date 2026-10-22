@@ -83,7 +83,9 @@ function Icon({ light, dark, size }: { light: string; dark: string; size: number
  * Scrolling down, the main bar slides away (on property pages only from `hideBarAfter`,
  * leaving the sub-navigation); scrolling up brings it back.
  * Within the `barHiddenIn` sections it stays hidden in both directions, for sections that
- * pin their own controls under the sub-navigation.
+ * pin their own controls under the sub-navigation. While an element in `hiddenIn` fills
+ * the top of the screen, the whole nav (sub-navigation too) slides away, for full-screen
+ * scroll stories.
  * `tone="dark"` starts as a solid chocolate bar (Figma 539:24148) for pages without a hero;
  * `tone="cream"` as a cream bar with chocolate type (Figma 735:13845, About us).
  */
@@ -91,18 +93,22 @@ export default function Nav({
   subLinks,
   hideBarAfter,
   barHiddenIn,
+  hiddenIn,
   tone = 'light',
 }: {
   subLinks?: SubLink[];
   hideBarAfter?: string;
   /** Section ids where the main bar stays hidden even when scrolling up. */
   barHiddenIn?: string[];
+  /** Element ids that hide the whole nav while they cover the top of the screen. */
+  hiddenIn?: string[];
   /** `dark`: a solid chocolate bar until scrolled (Contact page). `cream`: a cream bar with
    *  chocolate type (About us). */
   tone?: 'light' | 'dark' | 'cream';
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [condensed, setCondensed] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [openMenu, setOpenMenu] = useState<MenuKey | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const closePanel = useCallback(() => setPanelOpen(false), []);
@@ -129,6 +135,12 @@ export default function Nav({
       const section = hideBarAfter ? document.getElementById(hideBarAfter) : null;
       if (hideBarAfter && !section) return;
       const hideFrom = section ? pageTop(section) - header.offsetHeight : HIDE_AFTER;
+      setHidden(
+        (hiddenIn ?? []).some((id) => {
+          const r = document.getElementById(id)?.getBoundingClientRect();
+          return !!r && r.top <= 1 && r.bottom > header.offsetHeight;
+        }),
+      );
       const inHiddenSection = (barHiddenIn ?? []).some((id) => {
         const r = document.getElementById(id)?.getBoundingClientRect();
         return !!r && r.top <= header.offsetHeight && r.bottom > header.offsetHeight;
@@ -147,7 +159,7 @@ export default function Nav({
     update();
     window.addEventListener('scroll', update, { passive: true });
     return () => window.removeEventListener('scroll', update);
-  }, [hideBarAfter, barHiddenIn]);
+  }, [hideBarAfter, barHiddenIn, hiddenIn]);
 
   // Publish how much of the nav is on screen (bar + sub-navigation, minus a hidden bar)
   // as --nav-offset, so sticky page content can sit just below it. Held while a menu is open.
@@ -157,14 +169,14 @@ export default function Nav({
     if (!header || !bar || openMenu) return;
     const update = () => {
       const sub = header.querySelector<HTMLElement>('.nav__sub')?.offsetHeight ?? 0;
-      const visible = (condensed ? 0 : bar.offsetHeight) + sub;
+      const visible = hidden ? 0 : (condensed ? 0 : bar.offsetHeight) + sub;
       document.documentElement.style.setProperty('--nav-offset', `${visible}px`);
     };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(header);
     return () => ro.disconnect();
-  }, [condensed, openMenu]);
+  }, [condensed, hidden, openMenu]);
 
   // The hidden bar slides up by its own height, which changes as it compacts
   useEffect(() => {
@@ -223,7 +235,7 @@ export default function Nav({
     <>
       <header
         ref={headerRef}
-        className={`nav${tone !== 'light' ? ` nav--${tone}` : ''}${subLinks ? ' nav--sub' : ''}${scrolled ? ' is-scrolled' : ''}${openMenu ? ' is-open' : ''}${condensed && !openMenu ? ' is-condensed' : ''}`}
+        className={`nav${tone !== 'light' ? ` nav--${tone}` : ''}${subLinks ? ' nav--sub' : ''}${scrolled ? ' is-scrolled' : ''}${openMenu ? ' is-open' : ''}${condensed && !openMenu ? ' is-condensed' : ''}${hidden && !openMenu ? ' is-hidden' : ''}`}
         data-hide-after={hideBarAfter}
         data-bar-hidden-in={barHiddenIn?.join(',')}
       >

@@ -150,11 +150,18 @@
   position: sticky;
   top: calc(var(--nav-offset, 0px) + 24px + 46px + 24px);
   z-index: 4;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: start;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 24px;
   transition: top 400ms var(--ease-in-out);
+}
+
+/* Availability, Grid, List, Sort on the left (Figma 1080:5762); room types on the right */
+.rooms__controls {
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
 
 .rooms__views {
@@ -178,12 +185,12 @@
 }
 
 .rooms__available {
-  justify-self: end;
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 18px;
   line-height: 20px;
+  white-space: nowrap;
   color: var(--royal-chocolate-700);
   cursor: pointer;
 }
@@ -233,8 +240,8 @@
 
 .rooms__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 48px 24px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px 24px;
 }
 
 .rooms__empty {
@@ -256,7 +263,7 @@
 
 .room-card__image {
   position: relative;
-  height: 240px;
+  height: 180px;
   overflow: hidden;
   background: #d9d9d9;
 }
@@ -328,7 +335,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  padding: 16px 24px;
+  padding: 12px 16px;
 }
 
 .room-card__heading {
@@ -339,11 +346,16 @@
 }
 
 .room-card__type {
-  font-size: 18px;
+  font-size: 14px;
   text-transform: uppercase;
   color: var(--bronze-700);
 }
 
+
+/* Playfair Medium 18 (Figma 1080:5790), smaller than the shared H4 */
+.room-card__name {
+  font-size: 18px;
+}
 
 .room-card__features {
   font-size: 16px;
@@ -362,7 +374,7 @@
 
 .room-card__amount {
   font-weight: 500;
-  font-size: 24px;
+  font-size: 18px;
   line-height: normal;
   color: var(--royal-chocolate-700);
 }
@@ -380,27 +392,28 @@
   }
 
   .rooms__toolbar {
-    grid-template-columns: 1fr 1fr;
+    flex-wrap: wrap;
   }
+}
 
-  .rooms__types {
-    grid-column: 1 / -1;
-    grid-row: 2;
+@media (min-width: 1101px) and (max-width: 1300px) {
+  .rooms__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 800px) {
   .rooms__toolbar {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .rooms__controls {
+    flex-wrap: wrap;
+    gap: 16px 24px;
   }
 
   .rooms__types {
-    grid-row: auto;
     justify-content: flex-start;
-  }
-
-  .rooms__available {
-    justify-self: start;
   }
 
   .rooms__search {
@@ -421,7 +434,7 @@
   }
 
   .room-card__image {
-    height: 240px;
+    height: 220px;
   }
 }
 

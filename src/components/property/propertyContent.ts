@@ -1,19 +1,4 @@
 import hero from '../../assets/property/hero.jpg';
-import amenity01 from '../../assets/property/amenity-01.jpg';
-import amenity02 from '../../assets/property/amenity-02.jpg';
-import amenity03 from '../../assets/property/amenity-03.jpg';
-import amenity04 from '../../assets/property/amenity-04.jpg';
-import amenity05 from '../../assets/wellness-1.jpg';
-import amenity06 from '../../assets/property/amenity-06.jpg';
-import amenity07 from '../../assets/property/amenity-07.jpg';
-import amenity08 from '../../assets/property/amenity-08.jpg';
-import amenity09 from '../../assets/property/amenity-09.jpg';
-import amenity10 from '../../assets/loc-fairway.jpg';
-import mapPin from '../../assets/property/icon-map-pin.svg';
-import wifi from '../../assets/property/icon-wifi.svg';
-import shield from '../../assets/property/icon-shield.svg';
-import coffee from '../../assets/property/icon-coffee.svg';
-import calendar from '../../assets/property/icon-calendar.svg';
 import roomQuad from '../../assets/property/rooms/quad-ensuite.jpg';
 import roomSignature from '../../assets/property/rooms/signature-studio.jpg';
 import roomSignatureFlex from '../../assets/property/rooms/signature-studio-flex.jpg';
@@ -22,10 +7,13 @@ import roomAspectE from '../../assets/property/rooms/aspect-studio-e.jpg';
 import roomEmpowered from '../../assets/property/rooms/empowered-studio.jpg';
 import roomPremier from '../../assets/property/rooms/premier-empowered-studio.jpg';
 import promoBanner from '../../assets/property/promo-banner.jpg';
-import promo1 from '../../assets/property/promo-1.jpg';
-import promo2 from '../../assets/property/promo-2.jpg';
-import promo3 from '../../assets/property/promo-3.jpg';
-import promo4 from '../../assets/property/promo-4.jpg';
+import exterior from '../../assets/about/wide-macquarie.jpg';
+import lobby from '../../assets/property/amenity-lobby.jpg';
+import study from '../../assets/property/amenity-wifi.jpg';
+import building from '../../assets/property/amenity-secure.jpg';
+import coffee from '../../assets/experience/coffee.jpg';
+import socialTable from '../../assets/property/amenity-social.jpg';
+import { OFFERS } from '../promotions/promotionsData';
 import { MACQUARIE_PARK_PLACES } from './macquarieParkMap';
 
 export type RoomType = 'Studio' | 'Shared';
@@ -50,6 +38,17 @@ export type Room = {
 
 export type Promo = { id: string; title: string; text: string; image: string };
 
+/** An amenity in the scroll story (Figma 1082:17874): `lead` is set in italic. */
+export type Amenity = {
+  lead: string;
+  rest: string;
+  text: string;
+  /** The full-screen photo behind the list while it's active. */
+  image: string;
+  /** Figma's crop, as object-position with a zoom about it (default: centred cover). */
+  crop?: { position: string; zoom: number };
+};
+
 export type Faq = { question: string; answer: string };
 
 export type MapPlace = { name: string; address: string; lat: number; lng: number };
@@ -62,9 +61,7 @@ export type PropertyContent = {
   city: string;
   address: string;
   hero: string;
-  /** Carousel slides, first shown first. */
-  amenitySlides: string[];
-  amenities: { icon: string; label: string }[];
+  amenities: Amenity[];
   rooms: Room[];
   roomCurrency: string;
   stayLengths: string[];
@@ -88,30 +85,50 @@ export const MACQUARIE_PARK: PropertyContent = {
   city: 'Sydney',
   address: 'EPIISOD Macquarie Park, 17 Lachlan Ave, Macquarie Park NSW 2113',
   hero,
-  amenitySlides: [
-    amenity10,
-    amenity09,
-    amenity08,
-    amenity07,
-    amenity06,
-    amenity05,
-    amenity04,
-    amenity03,
-    amenity02,
-    amenity01,
-  ],
+  // Photos and crops from Figma 1099:34869; every description is a placeholder (Figma:
+  // "Something lorem ipsum…").
   amenities: [
-    { icon: mapPin, label: 'Prime Location' },
-    { icon: mapPin, label: 'Prime Location' },
-    { icon: mapPin, label: 'Reception 24/7' },
-    { icon: mapPin, label: 'Reception 24/7' },
-    { icon: wifi, label: 'Unlimited WiFi' },
-    { icon: wifi, label: 'Unlimited WiFi' },
-    { icon: shield, label: 'Secure Building' },
-    { icon: shield, label: 'Secure Building' },
-    { icon: coffee, label: 'Onsite Cafe' },
-    { icon: coffee, label: 'Onsite Cafe' },
-    { icon: calendar, label: 'Big Social Calendar' },
+    {
+      lead: 'Prime',
+      rest: ' Location',
+      text: 'Minutes from Macquarie University, the Metro and Macquarie Centre.',
+      image: exterior,
+      crop: { position: '0% 62%', zoom: 1.357 },
+    },
+    {
+      lead: 'Reception',
+      rest: ' 24/7',
+      text: 'A friendly team on hand day and night, whenever you need us.',
+      image: lobby,
+      crop: { position: '0% 88%', zoom: 1.63 },
+    },
+    {
+      lead: 'Unlimited',
+      rest: ' WiFi',
+      text: 'Fast, reliable internet in every room and shared space.',
+      image: study,
+      crop: { position: '0% 100%', zoom: 1.169 },
+    },
+    {
+      lead: 'Secure',
+      rest: ' Building',
+      text: 'Keyless entry and 24/7 security, so you can feel at home.',
+      image: building,
+      crop: { position: '18% 32%', zoom: 1.341 },
+    },
+    {
+      lead: 'Onsite',
+      rest: ' Cafe',
+      text: 'Coffee and a bite downstairs, made just for residents.',
+      image: coffee,
+      crop: { position: '0% 67%', zoom: 1.16 },
+    },
+    {
+      lead: 'Big Social',
+      rest: ' Calendar',
+      text: 'Dinners, events and trips that make it easy to meet people.',
+      image: socialTable,
+    },
   ],
   rooms: [
     { id: 'quad', type: 'Shared', typeLabel: 'Shared Apartment', name: 'Quad 4 Bedroom Ensuite', image: roomQuad, tag: 'offer', price: 615, available: true },
@@ -133,12 +150,8 @@ export const MACQUARIE_PARK: PropertyContent = {
     text: "Refer a friend to EPIISOD and you'll both receive a $300 rent credit once they move in. It's our way of saying thanks for growing our community!",
     image: promoBanner,
   },
-  promos: [promo1, promo2, promo3, promo4].map((image, i) => ({
-    id: `promo-${i + 1}`,
-    title: 'Flexible short stay from 12 weeks to fit your needs',
-    text: 'Flexible options to suit your plans. Click to learn more.',
-    image,
-  })),
+  // The same offers as the Promotions page (Figma 1082:16918)
+  promos: OFFERS.map(({ id, title, text, image }) => ({ id, title, text, image })),
   faqs: [
     'What documents are required to book a room?',
     'How do I book a room?',

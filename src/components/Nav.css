@@ -21,13 +21,20 @@
   transform: translateY(calc(-1 * var(--bar-h, 0px)));
 }
 
+/* Over a full-screen scroll story (`hiddenIn`): the whole nav, sub-navigation too, slides away */
+.nav.is-hidden {
+  transform: translateY(-100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0);
+}
+
 /* With no sub-navigation the whole bar is out of view: drop its shadow too */
 .nav.is-condensed:not(.nav--sub) {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0);
 }
 
 /* …but comes back while keyboard focus is in it (not after a mouse click, which leaves focus behind) */
-.nav.is-condensed:has(.nav__inner :focus-visible) {
+.nav.is-condensed:has(.nav__inner :focus-visible),
+.nav.is-hidden:has(:focus-visible) {
   transform: none;
 }
 

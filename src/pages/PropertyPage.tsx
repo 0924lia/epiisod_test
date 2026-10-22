@@ -35,11 +35,19 @@ const SUB_LINKS: SubLink[] = [
  */
 const BAR_HIDDEN_IN = [SECTIONS.rooms, SECTIONS.location];
 
+/** The amenities' full-screen stage: no nav at all while it fills the screen. */
+const HIDDEN_IN = [`${SECTIONS.amenities}-stage`];
+
 /** A property's page (Figma 539:13190), reached from Locations in the nav and the homepage. */
 export default function PropertyPage({ content }: { content: PropertyContent }) {
   return (
     <>
-      <Nav subLinks={SUB_LINKS} hideBarAfter={SECTIONS.amenities} barHiddenIn={BAR_HIDDEN_IN} />
+      <Nav
+        subLinks={SUB_LINKS}
+        hideBarAfter={SECTIONS.amenities}
+        barHiddenIn={BAR_HIDDEN_IN}
+        hiddenIn={HIDDEN_IN}
+      />
       <main>
         <PropertyHero content={content} onSeeRooms={() => scrollToSection(SECTIONS.rooms)} />
         <Amenities id={SECTIONS.amenities} content={content} />

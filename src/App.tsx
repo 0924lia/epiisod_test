@@ -14,6 +14,10 @@ import AboutPage from './pages/AboutPage';
 import PromotionsPage from './pages/PromotionsPage';
 import WhyPage from './pages/WhyPage';
 import ExperiencePage from './pages/ExperiencePage';
+import WaitlistPage from './pages/WaitlistPage';
+import BlogListPage from './pages/BlogListPage';
+import BlogPostPage from './pages/BlogPostPage';
+import { AUDIENCES, POSTS } from './components/blog/blogData';
 import { PROPERTIES } from './components/locationData';
 import { MACQUARIE_PARK, type PropertyContent } from './components/property/propertyContent';
 
@@ -51,6 +55,14 @@ export default function App() {
   if (path === '/promotions') return <PromotionsPage />;
   if (path === '/why-epiisod') return <WhyPage />;
   if (path === '/experience') return <ExperiencePage />;
+  if (path === '/join-the-waitlist') return <WaitlistPage />;
+  // Blogs: /blog/<audience> lists a blog; /blog/<audience>/<post> is a post
+  const blog = path.match(/^\/blog(?:\/([^/]+))?(?:\/([^/]+))?$/);
+  if (blog) {
+    const audience = AUDIENCES.find((a) => a.id === blog[1]) ?? AUDIENCES[0];
+    const post = blog[2] && POSTS.find((p) => p.audience === audience.id && p.slug === blog[2]);
+    return post ? <BlogPostPage key={path} post={post} audience={audience} /> : <BlogListPage key={path} audience={audience} />;
+  }
   const property = PROPERTIES.find((p) => p.href === path);
   if (!property) return <HomePage />;
   const content = PROPERTY_PAGES[property.id];

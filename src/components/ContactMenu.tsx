@@ -10,7 +10,7 @@ type ContactMenuProps = {
 /** Pages not built yet link to '#'. */
 const LINKS = [
   { title: 'Contact Us', description: 'Get in touch with us, we’re here to help', href: '/contact' },
-  { title: 'Join the Waitlist', description: 'Sign up to get notified when rooms open', href: '#' },
+  { title: 'Join the Waitlist', description: 'Sign up to get notified when rooms open', href: '/join-the-waitlist' },
 ];
 
 /**

@@ -10,10 +10,14 @@ type LifeMenuProps = {
   variant?: NavVariant;
 };
 
-/** Option B's Blog row (Figma 690:4739). Pages not built yet link to '#'. */
+/** Option B's Blog row (Figma 690:4739). */
 const BLOG_LINKS = [
-  { title: 'For Parents', description: 'Choosing the right place for your child' },
-  { title: 'For International Students', description: 'An elevated student living' },
+  { title: 'For Parents', href: '/blog/for-parents', description: 'Choosing the right place for your child' },
+  {
+    title: 'For International Students',
+    href: '/blog/for-international-students',
+    description: 'An elevated student living',
+  },
 ];
 
 const LINKS = [
@@ -49,8 +53,8 @@ export default function LifeMenu({ id, open, onNavigate, variant = 'a' }: LifeMe
         </div>
         <div className="nav-menu-b__row nav-menu-b__row--blog">
           <p className="nav-menu-b__label life-menu__title">Blog</p>
-          {BLOG_LINKS.map(({ title, description }) => (
-            <a key={title} href="#" className="nav-menu-b__link nav-menu-b__link--article" onClick={onNavigate}>
+          {BLOG_LINKS.map(({ title, href, description }) => (
+            <a key={title} href={href} className="nav-menu-b__link nav-menu-b__link--article" onClick={onNavigate}>
               <span className="nav-menu-b__article">
                 {title}
                 <img src={arrowRight} width={16} height={16} alt="" />

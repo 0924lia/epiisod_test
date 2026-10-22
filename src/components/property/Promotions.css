@@ -123,6 +123,7 @@
   font-weight: 600;
   font-size: 16px;
   line-height: 20px;
+  text-transform: uppercase;
   color: var(--royal-chocolate-600);
   transition: background-color 300ms var(--ease-in-out);
 }
@@ -172,10 +173,12 @@
   width: max-content;
 }
 
+/* 324 × 410 card (Figma 1082:16919) */
 .promo-card {
   display: flex;
   flex-direction: column;
-  width: 440px;
+  width: 324px;
+  height: 410px;
   flex-shrink: 0;
   overflow: hidden;
   border: 1px solid var(--royal-chocolate-200);
@@ -185,7 +188,8 @@
 }
 
 .promo-card__image {
-  height: 250px;
+  flex-shrink: 0;
+  height: 180px;
   overflow: hidden;
   background: #d9d9d9;
 }
@@ -198,6 +202,8 @@
 }
 
 .promo-card__body {
+  flex: 1 0 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -206,13 +212,26 @@
 }
 
 .promo-card__text {
+  flex: 1 0 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
+/* Playfair Medium 18 / 1.4, smaller than the shared H4 */
+.promo-card__title {
+  font-size: 18px;
+  line-height: 1.4;
+}
 
+
+/* Two lines, then an ellipsis */
 .promo-card__description {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   color: var(--royal-chocolate-500);
 }
 
@@ -316,6 +335,6 @@
   }
 
   .promo-card {
-    width: min(440px, 80vw);
+    width: min(324px, 80vw);
   }
 }

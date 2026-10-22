@@ -70,7 +70,7 @@ export default function Promotions({ id, content }: { id: string; content: Prope
   const cardStep = () => {
     const first = trackRef.current?.children[0] as HTMLElement | undefined;
     const gap = trackRef.current ? parseFloat(getComputedStyle(trackRef.current).columnGap) || 0 : 0;
-    return (first?.offsetWidth ?? 440) + gap;
+    return (first?.offsetWidth ?? 324) + gap;
   };
 
   /** Ease the row to `left` (snapped to a card), with CSS snapping paused meanwhile. */

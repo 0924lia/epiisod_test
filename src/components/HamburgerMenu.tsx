@@ -20,11 +20,11 @@ const GROUPS: Record<'life' | 'contact' | 'blog', Link[]> = {
   ],
   contact: [
     { label: 'Contact Us', href: '/contact' },
-    { label: 'Join Waitlist', href: '#' },
+    { label: 'Join Waitlist', href: '/join-the-waitlist' },
   ],
   blog: [
-    { label: 'For Parents', href: '#' },
-    { label: 'For International Students', href: '#' },
+    { label: 'For Parents', href: '/blog/for-parents' },
+    { label: 'For International Students', href: '/blog/for-international-students' },
   ],
 };
 

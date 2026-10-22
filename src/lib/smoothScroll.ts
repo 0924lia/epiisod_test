@@ -61,12 +61,29 @@ const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2
  * (ScrollTrigger's own `snap` moves the page while Lenis holds its own target, and the
  * page springs back). Once scrolling has come to rest inside the trigger, the page eases
  * on to the next of `points` (trigger progress, 0–1) in the direction it was last
- * scrolled, so a light scroll never falls back. Returns a cleanup function.
+ * scrolled, so a light scroll never falls back — or, with `nearest`, settles on whichever
+ * is closer: a gentle magnetic pull that never carries the page on. Returns a cleanup
+ * function.
  */
 export function addStepSnap(
   trigger: ScrollTrigger,
   points: () => number[],
-  { duration = 1.1, rest = 160 }: { duration?: number; rest?: number } = {},
+  {
+    duration = 1.1,
+    rest = 160,
+    nearest = false,
+    lean = 0,
+    paused,
+  }: {
+    duration?: number;
+    rest?: number;
+    nearest?: boolean;
+    /** With `nearest`: once the page has moved this share of the way (0–1) towards the
+     *  next stop in the direction it was scrolled, it settles there rather than back. */
+    lean?: number;
+    /** While this returns true (e.g. a scrollbar is being dragged), no snapping. */
+    paused?: () => boolean;
+  } = {},
 ) {
   let timer = 0;
   let lastY = window.scrollY;
@@ -74,27 +91,46 @@ export function addStepSnap(
   let snapping = false;
 
   const snap = () => {
-    if (snapping) return;
+    if (snapping || paused?.()) return;
     const { start, end } = trigger;
     const y = window.scrollY;
     if (y <= start + 1 || y >= end - 1) return;
     const targets = points().map((p) => start + p * (end - start));
     if (targets.some((t) => Math.abs(t - y) < 2)) return;
-    const ahead = targets.filter((t) => (direction >= 0 ? t > y : t < y));
-    // Past the last step (or before the first) the page is free to move on
-    if (!ahead.length) return;
-    const target = direction >= 0 ? Math.min(...ahead) : Math.max(...ahead);
+    // Only between the stops: before the first one the page scrolls freely
+    if (y < targets[0] - 1 || y > targets[targets.length - 1] + 1) return;
+    let target: number;
+    if (nearest) {
+      target = targets.reduce((a, b) => (Math.abs(b - y) < Math.abs(a - y) ? b : a));
+      if (lean > 0) {
+        const below = Math.max(...targets.filter((t) => t <= y));
+        const above = Math.min(...targets.filter((t) => t >= y));
+        if (Number.isFinite(below) && Number.isFinite(above) && above > below) {
+          const f = (y - below) / (above - below);
+          if (direction > 0 && f >= lean) target = above;
+          else if (direction < 0 && f <= 1 - lean) target = below;
+        }
+      }
+    }
+    else {
+      const ahead = targets.filter((t) => (direction >= 0 ? t > y : t < y));
+      // Past the last step (or before the first) the page is free to move on
+      if (!ahead.length) return;
+      target = direction >= 0 ? Math.min(...ahead) : Math.max(...ahead);
+    }
     snapping = true;
+    let finished = false;
     const done = () => {
+      if (finished) return;
+      finished = true;
       snapping = false;
       lastY = window.scrollY;
     };
-    if (lenis) {
-      lenis.scrollTo(target, { duration, easing: easeInOutCubic, onComplete: done });
-    } else {
-      window.scrollTo({ top: target, behavior: 'smooth' });
-      window.setTimeout(done, duration * 1000);
-    }
+    if (lenis) lenis.scrollTo(target, { duration, easing: easeInOutCubic, onComplete: done });
+    else window.scrollTo({ top: target, behavior: 'smooth' });
+    // A new scroll can interrupt the glide, and then onComplete never comes: free up anyway
+    // so the next rest still settles
+    window.setTimeout(done, duration * 1000 + 50);
   };
 
   const onScroll = () => {

@@ -62,7 +62,7 @@ function RoomCard({ room, currency }: { room: Room; currency: string }) {
 }
 
 /**
- * Rooms (Figma 539:13413): search, filters and the room grid.
+ * Rooms (Figma 1080:5710): search, filters and the room grid, four to a row.
  * While the rooms scroll past, the search form and the filter row stay pinned just
  * below the nav on a white band (Figma 539:34605). Changing a filter while scrolled into
  * the list keeps the view on the top of the list, however much shorter it gets.
@@ -188,20 +188,35 @@ export default function Rooms({ id, content }: { id: string; content: PropertyCo
 
         <div className="rooms__results">
           <div ref={toolbarRef} className="rooms__toolbar">
-            {/* List view and sorting aren't designed yet; Grid is the only view for now */}
-            <div className="rooms__views">
-              <span className="rooms__view is-active">
-                <img src={gridIcon} width={24} height={24} alt="" />
-                Grid
-              </span>
-              <span className="rooms__view" aria-disabled>
-                <img src={listIcon} width={24} height={24} alt="" />
-                List
-              </span>
-              <span className="rooms__view" aria-disabled>
-                <img src={sortIcon} width={24} height={24} alt="" />
-                Sort
-              </span>
+            {/* Availability, then the views: list view and sorting aren't designed yet */}
+            <div className="rooms__controls">
+              <label className="rooms__available">
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={availableOnly}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    changeFilter(() => setAvailableOnly(checked));
+                  }}
+                />
+                <span className="rooms__switch" aria-hidden />
+                Available rooms only
+              </label>
+              <div className="rooms__views">
+                <span className="rooms__view is-active">
+                  <img src={gridIcon} width={24} height={24} alt="" />
+                  Grid
+                </span>
+                <span className="rooms__view" aria-disabled>
+                  <img src={listIcon} width={24} height={24} alt="" />
+                  List
+                </span>
+                <span className="rooms__view" aria-disabled>
+                  <img src={sortIcon} width={24} height={24} alt="" />
+                  Sort
+                </span>
+              </div>
             </div>
 
             <FilterTabs
@@ -211,20 +226,6 @@ export default function Rooms({ id, content }: { id: string; content: PropertyCo
               value={type}
               onChange={(t) => changeFilter(() => setType(t))}
             />
-
-            <label className="rooms__available">
-              <input
-                type="checkbox"
-                role="switch"
-                checked={availableOnly}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  changeFilter(() => setAvailableOnly(checked));
-                }}
-              />
-              <span className="rooms__switch" aria-hidden />
-              Available rooms only
-            </label>
           </div>
 
           <div ref={gridRef} className="rooms__grid">
