@@ -3,7 +3,6 @@ import wellness from '../../assets/why/hero.jpg';
 import comfort from '../../assets/property/rooms/signature-studio-flex.jpg';
 import effortless from '../../assets/why/exp-community.jpg';
 import caret from '../../assets/about/carousel-caret.svg';
-import '../about/AboutStory.css';
 import './WhyHero.css';
 
 /**
@@ -61,9 +60,6 @@ export default function WhyHero() {
           </h1>
         </div>
         <p className="type-body-l why-hero__lede">Where it all comes together.</p>
-        <a href="#experience" className="about-button">
-          The EPIISOD experience
-        </a>
       </div>
 
       <div

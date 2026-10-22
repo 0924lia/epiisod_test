@@ -6,6 +6,7 @@ import { useExitParallax } from '../../lib/useExitParallax';
 import line from '../../assets/make-it-yours-line.svg';
 import play from '../../assets/property/icon-play-white.svg';
 import type { Amenity, PropertyContent } from './propertyContent';
+import { EXPERIENCE_URL } from '../../lib/links';
 import './Amenities.css';
 
 /** Figma sizes: the opening window, then the wide frame (transition 1099:34869). */
@@ -250,7 +251,12 @@ export default function Amenities({ id, content }: { id: string; content: Proper
                 ))}
               </ul>
             </div>
-            <a href="/experience" className="amenities__button">
+            <a
+              href={EXPERIENCE_URL}
+              className="amenities__button"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <img src={play} width={24} height={24} alt="" />
               <span>Enter the EPIISOD experience</span>
             </a>

@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { gsap, useGSAP } from '../lib/smoothScroll';
+import { gsap, ScrollTrigger, useGSAP } from '../lib/smoothScroll';
 import tiktok from '../assets/footer/tiktok.svg';
 import facebook from '../assets/footer/facebook.svg';
 import instagram from '../assets/footer/instagram.svg';
@@ -84,9 +84,10 @@ function LinkGroup({ title, links }: { title: string; links: string[] }) {
 
 /**
  * Figma 539:18251: giant wordmark over a light cream footer with three link columns.
- * As the footer scrolls in, the wordmark assembles: letters rise into place at
- * alternating depths (parallax), staggered left to right, and the arcs swing in around
- * their circle centres — landing exactly as designed at the bottom of the page.
+ * As the footer scrolls in, the wordmark assembles in two beats: a faint, partial rise as
+ * it enters, then — as it nears the centre of the screen — the letters rise home at
+ * alternating depths, left to right, and the arcs swing in around their circle centres,
+ * landing as designed at the centre. The links then rise in as it carries on up.
  */
 export default function Footer() {
   const footerRef = useRef<HTMLElement>(null);
@@ -100,40 +101,89 @@ export default function Footer() {
         const arcsTop = gsap.utils.toArray<HTMLElement>('.footer__wordmark-part--arc-top');
         const arcsBottom = gsap.utils.toArray<HTMLElement>('.footer__wordmark-part--arc-bottom');
 
+        // From the wordmark coming into view until it reaches the middle of the screen
+        // clamp(): on very tall screens the page can't scroll that far, so it finishes
+        // at the bottom of the page instead
         const tl = gsap.timeline({
-          defaults: { ease: 'sine.out' },
           scrollTrigger: {
-            trigger: footer,
-            // Spread over a long stretch of scroll while the wordmark is on screen: from
-            // as it comes into view until it's well up the screen, so it assembles slowly
-            start: 'top 95%',
-            // clamp(): on very tall screens the page can't scroll that far, so it finishes
-            // at the bottom of the page instead
-            end: 'clamp(top 15%)',
+            trigger: '.footer__wordmark',
+            start: 'top bottom',
+            end: 'clamp(center center)',
             // A gentle catch-up, so the pieces glide after the scroll
             scrub: 1.2,
           },
         });
 
-        // Letters: drift up out of the wordmark's band (which clips them) at alternating
-        // depths, overlapping one another left → right.
-        letters.forEach((el, i) => {
-          tl.fromTo(
-            el,
-            { yPercent: i % 2 ? 140 : 90, opacity: 0 },
-            { yPercent: 0, opacity: 1, duration: 1 },
-            i * 0.12,
-          );
-        });
+        // 1 · Coming in: a quiet hint. The letters rise only part of the way out of the
+        // wordmark's band (which clips them) and the arcs turn half way, all faint.
+        tl.fromTo(
+          letters,
+          { yPercent: (i: number) => (i % 2 ? 150 : 110), opacity: 0 },
+          { yPercent: (i: number) => (i % 2 ? 50 : 35), opacity: 0.4, duration: 1, ease: 'sine.inOut' },
+          0,
+        ).fromTo(
+          [...arcsTop, ...arcsBottom],
+          { rotation: (i: number) => (i % 2 ? 60 : -60), opacity: 0 },
+          { rotation: (i: number) => (i % 2 ? 30 : -30), opacity: 0.4, duration: 1, ease: 'sine.inOut' },
+          0,
+        );
 
-        // Arcs: swing softly into place around their circle centres (below the top arcs,
-        // above the bottom ones), alternating direction.
-        [...arcsTop, ...arcsBottom].forEach((el, i) => {
-          tl.fromTo(
+        // 2 · Nearing the centre: the clear move. Letters rise home left → right, the arcs
+        // swing into place, landing as designed as the wordmark reaches the centre.
+        tl.to(
+          letters,
+          { yPercent: 0, opacity: 1, duration: 0.7, ease: 'power2.inOut', stagger: 0.05 },
+          1,
+        ).to(
+          [...arcsTop, ...arcsBottom],
+          { rotation: 0, opacity: 1, duration: 0.8, ease: 'power2.inOut', stagger: 0.05 },
+          1.05,
+        );
+
+      });
+
+      // 3 · Then the links. On wider screens the three columns sit side by side: they rise
+      // in, left → right, as the wordmark carries on up past the centre. If the page ends
+      // before the wordmark gets there (very tall screens), they start a short way before
+      // the bottom instead of all at once at the end.
+      gsap.matchMedia().add('(min-width: 701px) and (prefers-reduced-motion: no-preference)', () => {
+        const LINKS_SCROLL = 350;
+        const wordmarkAtCentre = () => {
+          const r = footer.querySelector('.footer__wordmark')!.getBoundingClientRect();
+          return r.top + window.scrollY + r.height / 2 - window.innerHeight / 2;
+        };
+        const linksStart = () => Math.min(wordmarkAtCentre(), ScrollTrigger.maxScroll(window) - LINKS_SCROLL);
+        gsap.fromTo(
+          '.footer__column, .footer__legal',
+          { y: 48, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            ease: 'power1.out',
+            stagger: 0.15,
+            scrollTrigger: {
+              trigger: '.footer__wordmark',
+              start: linksStart,
+              end: () => linksStart() + LINKS_SCROLL,
+              scrub: 1.2,
+            },
+          },
+        );
+      });
+
+      // Phones: the groups stack in one long column below the wordmark, so each rises in
+      // as it comes up the screen.
+      gsap.matchMedia().add('(max-width: 700px) and (prefers-reduced-motion: no-preference)', () => {
+        gsap.utils.toArray<HTMLElement>('.footer__group, .footer__legal').forEach((el) => {
+          gsap.fromTo(
             el,
-            { rotation: i % 2 ? 60 : -60, opacity: 0 },
-            { rotation: 0, opacity: 1, duration: 1.1, ease: 'sine.inOut' },
-            0.3 + i * 0.12,
+            { y: 32, autoAlpha: 0 },
+            {
+              y: 0,
+              autoAlpha: 1,
+              ease: 'power1.out',
+              scrollTrigger: { trigger: el, start: 'top 95%', end: 'clamp(top 70%)', scrub: 1.2 },
+            },
           );
         });
       });

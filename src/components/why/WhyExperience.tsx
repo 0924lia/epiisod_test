@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap, useGSAP } from '../../lib/smoothScroll';
+import { useExitParallax } from '../../lib/useExitParallax';
 import type { CSSProperties, ReactNode } from 'react';
 import VLine from '../VLine';
 import line from '../../assets/make-it-yours-line.svg';
@@ -97,10 +98,12 @@ const COLUMNS: Feature[][] = [
 ];
 
 /**
- * Scroll parallax: how far (px) each column drifts up while the grid crosses the screen,
- * from +distance/2 to −distance/2. The middle column, already set lowest, moves most.
+ * How far (px) below its place each column starts, and — mirrored — how far above its place
+ * it leaves: each keeps its own speed throughout, so the column that comes in lowest (the
+ * middle, as in the Figma stagger 912:4591) rises fastest and leaves highest, and the row
+ * reads as moving up and away rather than falling back.
  */
-const COLUMN_DRIFT = [120, 220, 60];
+const COLUMN_TRAVEL = [260, 420, 110];
 
 /** A card under the mouse opens after this pause (ms), so sweeping across doesn't flick each one open. */
 const HOVER_DELAY = 140;
@@ -110,8 +113,10 @@ const HOVER_DELAY = 140;
  * each titled over a chocolate fade. As with the reviews, hovering a card — or clicking /
  * tapping it — deepens the fade and lifts the title to reveal its description
  * (Figma 953:4887). A click keeps it open after the pointer leaves; clicking again closes it.
- * While the grid scrolls past, the columns drift at different speeds (parallax), except on
- * phones, where the cards stack in one column, and for reduced motion.
+ * The columns drift at their own steady speeds while the grid is on screen — out of line
+ * coming in, level around the centre, out of line the other way leaving — except on phones,
+ * where the cards stack in one column, and for reduced motion. The reviews then slide up
+ * over the section as it lags and dims behind them.
  */
 export default function WhyExperience({ id }: { id: string }) {
   /** Opened by click, tap or keyboard; stays open. */
@@ -120,28 +125,31 @@ export default function WhyExperience({ id }: { id: string }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const open = hovered ?? selected;
   const gridRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  useExitParallax(sectionRef);
 
   useGSAP(
     () => {
+      // One continuous drift: each column moves at its own steady speed the whole time
+      // the grid is on screen, so they come up out of line, pass level around the middle
+      // of the screen without stopping, and part the other way as they leave. Tied to the
+      // scroll, so it plays back on the way up.
       gsap.matchMedia().add('(min-width: 701px) and (prefers-reduced-motion: no-preference)', () => {
-        gsap.utils.toArray<HTMLElement>('.why-experience__column').forEach((column, i) => {
-          const distance = COLUMN_DRIFT[i] ?? 0;
-          gsap.fromTo(
-            column,
-            { y: distance / 2 },
-            {
-              y: -distance / 2,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: gridRef.current,
-                start: 'top bottom',
-                end: 'bottom top',
-                // A short catch-up keeps the drift soft
-                scrub: 0.8,
-              },
+        gsap.fromTo(
+          '.why-experience__column',
+          { y: (i: number) => COLUMN_TRAVEL[i] ?? 0 },
+          {
+            y: (i: number) => -(COLUMN_TRAVEL[i] ?? 0),
+            ease: 'none',
+            scrollTrigger: {
+              trigger: gridRef.current,
+              start: 'top bottom',
+              end: 'bottom top',
+              // A short catch-up keeps the movement soft
+              scrub: 0.8,
             },
-          );
-        });
+          },
+        );
       });
     },
     { scope: gridRef },
@@ -156,74 +164,78 @@ export default function WhyExperience({ id }: { id: string }) {
   useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
 
   return (
-    <section className="why-experience" id={id}>
-      <div className="why-experience__header">
-        <VLine src={line} length={100} />
-        <div className="heading-group">
-          <p className="eyebrow">Experience</p>
-          <h2 className="type-h2">
-            Built around <em>your story</em>
-          </h2>
+    <section ref={sectionRef} className="why-experience exit-parallax" id={id}>
+      {/* The layer that lags as the reviews slide over (useExitParallax) */}
+      <div className="why-experience__content" data-exit-content>
+        <div className="why-experience__header">
+          <VLine src={line} length={100} />
+          <div className="heading-group">
+            <p className="eyebrow">Experience</p>
+            <h2 className="type-h2">
+              Built around <em>your story</em>
+            </h2>
+          </div>
+        </div>
+
+        <div ref={gridRef} className="why-experience__grid" onPointerLeave={() => hoverSoon(null)}>
+          {COLUMNS.map((column, c) => (
+            <div key={c} className="why-experience__column">
+              {column.map((feature, i) => {
+                const key = `${c}-${i}`;
+                const isOpen = open === key;
+                const textId = `why-feature-${key}`;
+                return (
+                  <article
+                    key={key}
+                    className={`why-feature${isOpen ? ' is-open' : ''}`}
+                    onPointerEnter={(e) => e.pointerType === 'mouse' && hoverSoon(key)}
+                  >
+                    <img
+                      className="why-feature__image"
+                      src={feature.image}
+                      alt=""
+                      style={
+                        feature.crop &&
+                        ({
+                          objectPosition: feature.crop.position,
+                          transformOrigin: feature.crop.position,
+                          '--zoom': feature.crop.zoom,
+                        } as CSSProperties)
+                      }
+                    />
+                    <div className="why-feature__shade" aria-hidden />
+                    <div className="why-feature__shade why-feature__shade--open" aria-hidden />
+                    <div className="why-feature__band">
+                      <span className="why-feature__band-bg" aria-hidden />
+                      <span className="why-feature__band-bg why-feature__band-bg--open" aria-hidden />
+                      <h3 className="type-h3 why-feature__title">
+                        {/* The button covers the whole card (::after), so any spot opens it */}
+                        <button
+                          type="button"
+                          className="why-feature__toggle"
+                          aria-expanded={isOpen}
+                          aria-controls={textId}
+                          onClick={() => {
+                            setSelected((s) => (s === key ? null : key));
+                            // A click while hovering pins the card; let the hover follow the pin
+                            hoverSoon(null);
+                          }}
+                        >
+                          {feature.title}
+                        </button>
+                      </h3>
+                      <div className="why-feature__reveal" id={textId} aria-hidden={!isOpen}>
+                        <p className="why-feature__text">{feature.text}</p>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
-
-      <div ref={gridRef} className="why-experience__grid" onPointerLeave={() => hoverSoon(null)}>
-        {COLUMNS.map((column, c) => (
-          <div key={c} className="why-experience__column">
-            {column.map((feature, i) => {
-              const key = `${c}-${i}`;
-              const isOpen = open === key;
-              const textId = `why-feature-${key}`;
-              return (
-                <article
-                  key={key}
-                  className={`why-feature${isOpen ? ' is-open' : ''}`}
-                  onPointerEnter={(e) => e.pointerType === 'mouse' && hoverSoon(key)}
-                >
-                  <img
-                    className="why-feature__image"
-                    src={feature.image}
-                    alt=""
-                    style={
-                      feature.crop &&
-                      ({
-                        objectPosition: feature.crop.position,
-                        transformOrigin: feature.crop.position,
-                        '--zoom': feature.crop.zoom,
-                      } as CSSProperties)
-                    }
-                  />
-                  <div className="why-feature__shade" aria-hidden />
-                  <div className="why-feature__shade why-feature__shade--open" aria-hidden />
-                  <div className="why-feature__band">
-                    <span className="why-feature__band-bg" aria-hidden />
-                    <span className="why-feature__band-bg why-feature__band-bg--open" aria-hidden />
-                    <h3 className="type-h3 why-feature__title">
-                      {/* The button covers the whole card (::after), so any spot opens it */}
-                      <button
-                        type="button"
-                        className="why-feature__toggle"
-                        aria-expanded={isOpen}
-                        aria-controls={textId}
-                        onClick={() => {
-                          setSelected((s) => (s === key ? null : key));
-                          // A click while hovering pins the card; let the hover follow the pin
-                          hoverSoon(null);
-                        }}
-                      >
-                        {feature.title}
-                      </button>
-                    </h3>
-                    <div className="why-feature__reveal" id={textId} aria-hidden={!isOpen}>
-                      <p className="why-feature__text">{feature.text}</p>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        ))}
-      </div>
+      <div className="exit-shade" aria-hidden />
     </section>
   );
 }

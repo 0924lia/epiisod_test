@@ -6,6 +6,7 @@ import ExperienceCafe from '../components/experience/ExperienceCafe';
 import InstagramStrip from '../components/contact/InstagramStrip';
 import AboutClosing from '../components/about/AboutClosing';
 import Footer from '../components/Footer';
+import { EXPERIENCE_URL } from '../lib/links';
 import heroLeft from '../assets/experience/hero-left.jpg';
 import heroRight from '../assets/experience/hero-right.jpg';
 import '../components/about/AboutStory.css';
@@ -31,7 +32,7 @@ export default function ExperiencePage() {
           }
           photos={{ left: heroLeft, right: heroRight }}
           action={
-            <a href="#spaces" className="about-button">
+            <a href={EXPERIENCE_URL} className="about-button" target="_blank" rel="noopener noreferrer">
               Enter the experience
             </a>
           }

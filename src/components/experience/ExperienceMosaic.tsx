@@ -14,6 +14,7 @@ import play from '../../assets/property/icon-play-white.svg';
 import perks from '../../assets/why/exp-convenience.jpg';
 import privileges from '../../assets/experience/card-privileges.jpg';
 import exclusives from '../../assets/experience/card-exclusives.jpg';
+import { EXPERIENCE_URL } from '../../lib/links';
 import './ExperienceMosaic.css';
 
 type Photo = { image: string; size: 'tall' | 'short' };
@@ -188,7 +189,12 @@ export default function ExperienceMosaic({ id }: { id?: string }) {
 
             <div className="xp-mosaic__cta">
               <VLine src={line} length={50} />
-              <a href="#" className="xp-mosaic__button">
+              <a
+                href={EXPERIENCE_URL}
+                className="xp-mosaic__button"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <img src={play} width={24} height={24} alt="" />
                 <span>Enter the EPIISOD experience</span>
               </a>
