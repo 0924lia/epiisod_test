@@ -3,6 +3,7 @@ import type { CSSProperties, RefObject } from 'react';
 import VLine from '../VLine';
 import { PROPERTIES, REGIONS, type Property } from '../locationData';
 import { gsap, ScrollTrigger, scrollToY, useGSAP } from '../../lib/smoothScroll';
+import { useExitParallax } from '../../lib/useExitParallax';
 import line from '../../assets/cta-line.svg';
 import globe from '../../assets/locations/icon-globe.svg';
 import mapPin from '../../assets/locations/icon-map-pin.svg';
@@ -148,6 +149,8 @@ export default function LocationsListing({
   const sectionRef = useRef<HTMLElement>(null);
   const regionsRef = useRef<HTMLDivElement>(null);
   const introFiltersRef = useRef<HTMLDivElement>(null);
+  // The hand-over to "Stay connected": the listing lags and dims as it slides over
+  useExitParallax(sectionRef);
   const [pinned, setPinned] = useState(false);
   /** Set when a filter changes while the list is under the pinned band. */
   const anchor = useRef(false);
@@ -228,6 +231,15 @@ export default function LocationsListing({
   useGSAP(
     () => {
       gsap.matchMedia().add('(min-width: 1101px) and (prefers-reduced-motion: no-preference)', () => {
+        // The hand-over to the list: the intro's copy and filters lag behind the scroll and
+        // fade a little, and the photo frames drift up at their own pace, so the list
+        // reads as rising over the intro
+        const handover = { trigger: '.loc-intro', start: 'top top', end: 'bottom top', scrub: 0.8 };
+        gsap.to('.loc-intro__copy, .loc-intro > .vline', { y: 140, opacity: 0.25, ease: 'none', scrollTrigger: handover });
+        gsap.to('.loc-intro .loc-listing__filters--intro', { y: 90, ease: 'none', scrollTrigger: handover });
+        gsap.fromTo('.loc-intro__photo--left', { y: 0 }, { y: -60, ease: 'none', scrollTrigger: handover });
+        gsap.fromTo('.loc-intro__photo--right', { y: 0 }, { y: -110, ease: 'none', scrollTrigger: handover });
+
         gsap.utils.toArray<HTMLElement>('.loc-intro__photo img').forEach((img) => {
           gsap.fromTo(
             img,
@@ -243,6 +255,27 @@ export default function LocationsListing({
     },
     { scope: sectionRef },
   );
+
+  // The country in view: the last whose cities have reached the middle of the screen
+  const [currentRegion, setCurrentRegion] = useState<string>(REGIONS[0].id);
+  useEffect(() => {
+    const update = () => {
+      const regions = regionsRef.current?.querySelectorAll<HTMLElement>('.loc-region');
+      if (!regions?.length) return;
+      let current = regions[0].dataset.region!;
+      regions.forEach((r) => {
+        if (r.getBoundingClientRect().top <= window.innerHeight / 2) current = r.dataset.region!;
+      });
+      setCurrentRegion(current);
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, [filter.country, filter.city]);
 
   const shown = REGIONS.filter((r) => !filter.country || r.name === filter.country).map((r) => ({
     ...r,
@@ -288,11 +321,13 @@ export default function LocationsListing({
   );
 
   return (
-    <section ref={sectionRef} className="loc-listing" id="locations">
+    <section ref={sectionRef} className="loc-listing exit-parallax" id="locations">
       <div className={`loc-listing__band${pinned ? ' is-pinned' : ''}`} aria-hidden={!pinned}>
         {filters('band')}
       </div>
 
+      {/* The layer that lags in the hand-over (outside it, the band stays fixed) */}
+      <div className="loc-listing__content" data-exit-content>
       {/* Figma 1211:31095: heading and filters between two photos, then the line */}
       <div className="loc-intro">
         <span className="loc-intro__photo loc-intro__photo--left">
@@ -314,34 +349,52 @@ export default function LocationsListing({
         <VLine src={line} length={100} />
       </div>
 
-      {/* Re-keyed with the filter, so the listing fades back in when it changes */}
+      {/* Figma 1221:8889: one panel on the left naming the country in view, held at the
+          middle of the screen; it changes country with a soft cross-fade as the next
+          country's cities reach the middle. Re-keyed with the filter, so the listing fades
+          back in when it changes. */}
       <div ref={regionsRef} key={`${filter.country}-${filter.city}`} className="loc-listing__regions">
-        {shown.map((r) => (
-          <div key={r.id} className="loc-region">
-            <div className="loc-region__header">
-              <h3 className="loc-region__name">{r.name}</h3>
-              <p className="loc-region__summary">{r.summary}</p>
-            </div>
-            <div className="loc-region__cities">
-              {r.cities.map((city) => (
-                <div key={city} className="loc-city">
-                  <div className="loc-city__label">
-                    <p className="loc-city__name">{city}</p>
-                    <p className="loc-city__path">
-                      /en-{r.id}/{city.toLowerCase()}/
-                    </p>
-                  </div>
-                  <div className="loc-city__cards">
-                    {PROPERTIES.filter((p) => p.city === city).map((p) => (
-                      <PropertyCard key={p.id} property={p} index={cardIndex++} />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+        <div className="loc-listing__aside" aria-hidden>
+          <div className="loc-listing__countries">
+            {shown.map((r) => (
+              <div key={r.id} className={`loc-region__header${r.id === currentRegion ? ' is-current' : ''}`}>
+                <p className="loc-region__name">{r.name}</p>
+                <p className="loc-region__summary">{r.summary}</p>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+        <div className="loc-listing__list">
+          {shown.map((r) => (
+            <div key={r.id} className="loc-region" data-region={r.id}>
+              {/* The country's own heading: read by screen readers, shown on smaller screens */}
+              <div className="loc-region__header loc-region__header--inline">
+                <h3 className="loc-region__name">{r.name}</h3>
+                <p className="loc-region__summary">{r.summary}</p>
+              </div>
+              <div className="loc-region__cities">
+                {r.cities.map((city) => (
+                  <div key={city} className="loc-city">
+                    <div className="loc-city__label">
+                      <p className="loc-city__name">{city}</p>
+                      <p className="loc-city__path">
+                        /en-{r.id}/{city.toLowerCase()}/
+                      </p>
+                    </div>
+                    <div className="loc-city__cards">
+                      {PROPERTIES.filter((p) => p.city === city).map((p) => (
+                        <PropertyCard key={p.id} property={p} index={cardIndex++} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
+      </div>
+      <div className="exit-shade" aria-hidden />
     </section>
   );
 }

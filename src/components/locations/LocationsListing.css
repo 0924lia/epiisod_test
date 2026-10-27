@@ -1,12 +1,16 @@
 /* Locations (Figma 1182:17801): the intro, then regions 120px apart */
 .loc-listing {
+  /* 120px under the 88px nav; deep at the foot, so the list has settled before
+     "Stay connected" slides over it */
+  padding: 208px var(--page-gutter) 400px;
+  background: var(--white);
+  overflow-x: clip; /* the intro's photos run off the page's sides */
+}
+
+.loc-listing__content {
   display: flex;
   flex-direction: column;
   gap: 120px;
-  /* 120px under the 88px nav */
-  padding: 208px var(--page-gutter) 200px;
-  background: var(--white);
-  overflow-x: clip; /* the intro's photos run off the page's sides */
 }
 
 /* The intro (Figma 1211:31095): copy, filters and the line, 80px apart */
@@ -16,6 +20,8 @@
   flex-direction: column;
   align-items: center;
   gap: 80px;
+  /* Room for the intro to settle before the list rises over it */
+  padding-bottom: 200px;
 }
 
 .loc-intro__copy {
@@ -47,6 +53,13 @@
   height: min(28.97vw, 438px);
   overflow: hidden;
   animation: loc-photo-in 900ms var(--ease-in-out) both;
+  will-change: transform;
+}
+
+/* The list passes over the intro as it lags (LocationsListing.tsx) */
+.loc-listing__regions {
+  position: relative;
+  z-index: 2;
 }
 
 /* 14% taller than its frame, so the scroll drift (±6%) never shows an edge */
@@ -68,10 +81,11 @@
   animation-delay: 120ms;
 }
 
+/* `translate`, not `transform`: the scroll drift (GSAP) owns the transform */
 @keyframes loc-photo-in {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    translate: 0 24px;
   }
 }
 
@@ -289,26 +303,79 @@
 
 .loc-listing__regions {
   display: flex;
-  flex-direction: column;
-  gap: 120px;
   width: 100%;
   max-width: var(--content-max);
   margin: 0 auto;
 }
 
-.loc-region {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
+/* The panel on the left (440 wide, a sand line down its right edge), the countries' cities on the right */
+.loc-listing__regions {
+  flex-direction: row;
+  gap: 24px;
 }
 
-/* Name and summary over a sand rule (Figma 1182:19867) */
+.loc-listing__aside {
+  flex: 0 0 440px;
+  padding-right: 40px;
+  border-right: 1px solid var(--bronze-400);
+}
+
+/* The country names share one spot, held at the middle of the screen */
+.loc-listing__countries {
+  position: sticky;
+  top: calc(50vh - 45px);
+  display: grid;
+}
+
 .loc-region__header {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--bronze-500);
+  gap: 16px;
+}
+
+.loc-listing__countries .loc-region__header {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 500ms var(--ease-in-out),
+    transform 700ms var(--ease-in-out);
+}
+
+/* The one in view; the one it replaces lifts away as it fades */
+.loc-listing__countries .loc-region__header.is-current {
+  opacity: 1;
+  transform: none;
+  transition-delay: 150ms;
+}
+
+.loc-listing__countries .loc-region__header.is-current ~ .loc-region__header:not(.is-current),
+.loc-listing__countries .loc-region__header:not(.is-current):has(~ .is-current) {
+  transform: translateY(-16px);
+}
+
+/* Each country's own heading: out of sight here (the panel shows it), kept for screen
+   readers; shown on smaller screens */
+.loc-region__header--inline {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.loc-listing__list {
+  flex: 1 0 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 200px;
+}
+
+.loc-region {
+  display: flex;
+  flex-direction: column;
 }
 
 .loc-region__name {
@@ -330,24 +397,24 @@
 }
 
 .loc-region__cities {
+  flex: 1 0 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 120px;
 }
 
-/* A city: its name in a 324px column, its properties beside it (Figma 1182:19872) */
+/* A city: its name, then its properties 48px below (Figma 1221:9369) */
 .loc-city {
   display: flex;
-  align-items: flex-start;
-  gap: 24px;
+  flex-direction: column;
+  gap: 48px;
 }
 
 .loc-city__label {
-  flex: 0 0 324px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding-right: 96px;
 }
 
 .loc-city__name {
@@ -364,8 +431,6 @@
 }
 
 .loc-city__cards {
-  flex: 1 0 0;
-  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
@@ -498,6 +563,10 @@ a.loc-card:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .loc-listing__countries .loc-region__header {
+    transition: none;
+  }
+
   .loc-card,
   .loc-intro__photo,
   .loc-field__menu {
@@ -505,24 +574,34 @@ a.loc-card:focus-visible {
   }
 }
 
-/* Tablets: the city's name above its properties, two to a row; no side photos */
+/* Tablets: the country above its cities (no longer held), properties two to a row; no side photos */
 @media (max-width: 1100px) {
   .loc-intro__photo {
     display: none;
   }
 
-  .loc-city {
-    flex-direction: column;
-    gap: 24px;
+  .loc-listing__aside {
+    display: none;
   }
 
-  .loc-city__label {
-    flex: none;
-    padding-right: 0;
+  .loc-listing__list {
+    gap: 120px;
   }
 
-  .loc-city__cards {
-    width: 100%;
+  .loc-region {
+    gap: 40px;
+  }
+
+  .loc-region__header--inline {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    gap: 8px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--bronze-500);
   }
 
   .loc-card {
@@ -536,13 +615,17 @@ a.loc-card:focus-visible {
 
 /* Phones: one property per row, tighter spacing */
 @media (max-width: 700px) {
-  .loc-listing {
+  .loc-listing__content {
     gap: 64px;
-    padding: 128px var(--page-gutter) 120px;
+  }
+
+  .loc-listing {
+    padding: 128px var(--page-gutter) 200px;
   }
 
   .loc-intro {
     gap: 40px;
+    padding-bottom: 80px;
   }
 
   .loc-intro__copy {
@@ -583,7 +666,7 @@ a.loc-card:focus-visible {
     display: none;
   }
 
-  .loc-listing__regions {
+  .loc-listing__list {
     gap: 80px;
   }
 
