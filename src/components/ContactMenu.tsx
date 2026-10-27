@@ -11,10 +11,11 @@ type ContactMenuProps = {
 const LINKS = [
   { title: 'Contact Us', description: 'Get in touch with us, we’re here to help', href: '/contact' },
   { title: 'Join the Waitlist', description: 'Sign up to get notified when rooms open', href: '/join-the-waitlist' },
+  { title: 'FAQs', description: 'Everything you need to know before moving in', href: '/faqs' },
 ];
 
 /**
- * Contact mega menu, navigation option B (Figma 690:4830): two page links with a short
+ * Contact mega menu, navigation option B (Figma 1080:9042): three page links with a short
  * description, highlighting on hover (Figma 692:3822).
  */
 export default function ContactMenu({ id, open, onNavigate }: ContactMenuProps) {

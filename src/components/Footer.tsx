@@ -64,6 +64,7 @@ const LINK_HREFS: Record<string, string> = {
   'For International Students': '/blog/for-international-students',
   Blog: '/blog/for-parents',
   'Contact Us': '/contact',
+  FAQS: '/faqs',
 };
 const LEGAL_LINKS = ['Terms and Condition', 'Something something', 'Something something'];
 

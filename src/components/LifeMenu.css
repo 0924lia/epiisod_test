@@ -78,42 +78,47 @@
   font-size: 16px;
 }
 
-/* Life: Why EPIISOD (555px, ruled both sides) · Experience */
-.nav-menu-b__row--life .nav-menu-b__link:first-child {
+/* Life (Figma 1080:8880): Why EPIISOD and Experience stacked (555px, each ruled left) ·
+   the Blog column (441px, ruled left) with its two articles */
+.nav-menu-b__life {
+  display: flex;
+  align-items: stretch;
+  gap: 24px;
+  width: min(var(--content-max), 100%);
+}
+
+.nav-menu-b__pages {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
   flex-shrink: 0;
   width: 555px;
+  padding: 16px 0;
+}
+
+.nav-menu-b__pages .nav-menu-b__link {
+  flex: 1 0 auto;
   border-left: 1px solid var(--line-in-white);
-  border-right: 1px solid var(--line-in-white);
 }
 
-.nav-menu-b__row--life .nav-menu-b__link:last-child {
-  flex: 1 0 0;
-  min-width: 0;
-}
-
-/* Blog: label (208px, ruled left) · For Parents (348px) · For International Students */
-.nav-menu-b__label {
+.nav-menu-b__blog {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   flex-shrink: 0;
-  width: 208px;
-  padding: 20px 32px;
+  width: 441px;
+  padding: 16px 0;
   border-left: 1px solid var(--line-in-white);
+}
+
+.nav-menu-b__label {
+  padding: 20px 32px;
 }
 
 .nav-menu-b__link--article {
   gap: 4px;
-  padding-block: 36px;
-}
-
-.nav-menu-b__row--blog .nav-menu-b__link--article:nth-of-type(1) {
-  flex-shrink: 0;
   width: 348px;
-}
-
-.nav-menu-b__row--blog .nav-menu-b__link--article:nth-of-type(2) {
-  flex: 1 0 0;
-  min-width: 0;
+  margin: 12px 0;
+  padding-block: 16px;
 }
 
 .nav-menu-b__article-description {
@@ -139,9 +144,13 @@
   border-right: 1px solid var(--line-in-white);
 }
 
-.nav-menu-b__row--contact .nav-menu-b__link:last-child {
+.nav-menu-b__row--contact .nav-menu-b__link:not(:first-child) {
   flex-shrink: 0;
   width: 464px;
+}
+
+.nav-menu-b__row--contact .nav-menu-b__link:nth-child(2) {
+  border-right: 1px solid var(--line-in-white);
 }
 
 .nav-menu-b__row--contact {

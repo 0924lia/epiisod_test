@@ -20,14 +20,12 @@ type MenuKey = 'life' | 'locations' | 'contact';
 /**
  * Primary links; those with a `menu` toggle a mega menu instead of navigating. With both a
  * `menu` and an `href` (Locations), the word goes to the page and its caret opens the menu.
- * Navigation option B (Figma 690:3977) turns Contact us into a menu (without a caret).
+ * Contact us works the same way, its caret opening the contact menu (Figma 690:4830).
  */
 const PRIMARY_LINKS: { label: string; menu?: MenuKey; href?: string; caret?: boolean }[] = [
   { label: 'Life @ epiisod', menu: 'life' },
   { label: 'Locations', menu: 'locations', href: '/locations' },
-  NAV_VARIANT === 'b'
-    ? { label: 'Contact us', menu: 'contact', caret: false }
-    : { label: 'Contact us', href: '/contact' },
+  { label: 'Contact us', menu: 'contact', href: '/contact' },
 ];
 const menuId = (menu: MenuKey) => `nav-${menu}-menu`;
 /** A link in the sub-navigation row: scrolls to the section with this id. */
@@ -328,13 +326,11 @@ export default function Nav({
             open={openMenu === 'locations'}
             onNavigate={() => setOpenMenu(null)}
           />
-          {NAV_VARIANT === 'b' && (
-            <ContactMenu
-              id={menuId('contact')}
-              open={openMenu === 'contact'}
-              onNavigate={() => setOpenMenu(null)}
-            />
-          )}
+          <ContactMenu
+            id={menuId('contact')}
+            open={openMenu === 'contact'}
+            onNavigate={() => setOpenMenu(null)}
+          />
         </MegaMenu>
 
         {subLinks && (

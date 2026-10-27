@@ -131,7 +131,7 @@ function PropertyCard({ property, index }: { property: Property; index: number }
 /**
  * Locations (Figma 1182:17801): the intro — heading, line of copy and the Country and City
  * filters between two photos — then every property by region and city. Once the filters
- * scroll up under the nav, a copy of them stays pinned in a white band (Figma 1195:28002);
+ * scroll up to the nav, they stay there on a white band (Figma 1195:28002);
  * choosing a country or city updates the list straight away (and the page's address, so it
  * can be shared), keeping the list's top in view. `scrollTo` asks it to glide to the list,
  * after a search on the homepage.
@@ -152,20 +152,24 @@ export default function LocationsListing({
   // The hand-over to "Stay connected": the listing lags and dims as it slides over
   useExitParallax(sectionRef);
   const [pinned, setPinned] = useState(false);
+  /** The list is handing over to the next section: the held filters step away. */
+  const [leaving, setLeaving] = useState(false);
   /** Set when a filter changes while the list is under the pinned band. */
   const anchor = useRef(false);
 
   const navOffset = () =>
     parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-offset')) || 0;
 
-  // The band shows once the intro's filters have gone under the nav, while the list is still on screen
+  // The filters are held: they've reached the nav (they stay there, sticky, until the list ends)
   useEffect(() => {
     const update = () => {
-      const regions = regionsRef.current?.getBoundingClientRect();
-      const intro = introFiltersRef.current?.getBoundingClientRect();
-      if (!regions || !intro) return;
-      const top = navOffset() + BAND_HEIGHT;
-      setPinned(intro.bottom < navOffset() + 8 && regions.bottom > top + 120);
+      const filters = introFiltersRef.current?.getBoundingClientRect();
+      const section = sectionRef.current?.getBoundingClientRect();
+      if (!filters || !section) return;
+      setPinned(filters.top <= navOffset() + 1);
+      // The hand-over drift starts as the section's foot reaches the bottom of the screen:
+      // step away just before, rather than drifting down with the list
+      setLeaving(section.bottom < window.innerHeight + 120);
     };
     update();
     window.addEventListener('scroll', update, { passive: true });
@@ -235,8 +239,7 @@ export default function LocationsListing({
         // fade a little, and the photo frames drift up at their own pace, so the list
         // reads as rising over the intro
         const handover = { trigger: '.loc-intro', start: 'top top', end: 'bottom top', scrub: 0.8 };
-        gsap.to('.loc-intro__copy, .loc-intro > .vline', { y: 140, opacity: 0.25, ease: 'none', scrollTrigger: handover });
-        gsap.to('.loc-intro .loc-listing__filters--intro', { y: 90, ease: 'none', scrollTrigger: handover });
+        gsap.to('.loc-intro__copy', { y: 140, opacity: 0.25, ease: 'none', scrollTrigger: handover });
         gsap.fromTo('.loc-intro__photo--left', { y: 0 }, { y: -60, ease: 'none', scrollTrigger: handover });
         gsap.fromTo('.loc-intro__photo--right', { y: 0 }, { y: -110, ease: 'none', scrollTrigger: handover });
 
@@ -283,13 +286,12 @@ export default function LocationsListing({
   }));
   let cardIndex = 0;
 
-  // Figma 1211:31303: the title, the two fields, then Reset — in the intro, and in the band
-  const filters = (where: 'intro' | 'band') => (
+  // Figma 1211:31303: the title, the two fields, then Reset
+  const filters = (where: 'intro') => (
     <div
       className={`loc-listing__filters loc-listing__filters--${where}`}
       role="search"
       aria-label="Filter locations"
-      ref={where === 'intro' ? introFiltersRef : undefined}
     >
       <p className="loc-listing__filters-title">Locations</p>
       <SelectField
@@ -322,11 +324,7 @@ export default function LocationsListing({
 
   return (
     <section ref={sectionRef} className="loc-listing exit-parallax" id="locations">
-      <div className={`loc-listing__band${pinned ? ' is-pinned' : ''}`} aria-hidden={!pinned}>
-        {filters('band')}
-      </div>
-
-      {/* The layer that lags in the hand-over (outside it, the band stays fixed) */}
+      {/* The layer that lags in the hand-over */}
       <div className="loc-listing__content" data-exit-content>
       {/* Figma 1211:31095: heading and filters between two photos, then the line */}
       <div className="loc-intro">
@@ -345,7 +343,17 @@ export default function LocationsListing({
           </div>
           <p className="loc-intro__text">An exclusive offering designed for those who would not settle for ordinary.</p>
         </div>
+      </div>
+
+      {/* The filters scroll up with the intro and stay at the top of the screen once they
+          reach the nav, on a white band, until the list ends (Figma 1195:28002) */}
+      <div
+        ref={introFiltersRef}
+        className={`loc-listing__sticky${pinned ? ' is-pinned' : ''}${leaving ? ' is-leaving' : ''}`}
+      >
         {filters('intro')}
+      </div>
+      <div className="loc-listing__line">
         <VLine src={line} length={100} />
       </div>
 

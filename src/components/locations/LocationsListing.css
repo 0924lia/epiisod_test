@@ -10,7 +10,6 @@
 .loc-listing__content {
   display: flex;
   flex-direction: column;
-  gap: 120px;
 }
 
 /* The intro (Figma 1211:31095): copy, filters and the line, 80px apart */
@@ -20,8 +19,6 @@
   flex-direction: column;
   align-items: center;
   gap: 80px;
-  /* Room for the intro to settle before the list rises over it */
-  padding-bottom: 200px;
 }
 
 .loc-intro__copy {
@@ -89,53 +86,79 @@
   }
 }
 
-.loc-intro .loc-listing__filters--intro {
+.loc-listing__sticky .loc-listing__filters {
   position: relative;
   z-index: 3;
   width: min(672px, 100%);
 }
 
 /*
- * The filters, pinned under the nav while the list is on screen (Figma 1195:21132): a
- * full-width white band with a soft shadow below, sliding down into place. It follows
- * the nav as the nav's bar hides and returns.
+ * The filters, sticky: they scroll up with the intro, then stay under the nav until the
+ * list ends (Figma 1195:28002). Once held, a full-width white band with a soft shadow fades
+ * in behind them; it follows the nav as the nav's bar hides and returns.
  */
-.loc-listing__band {
-  position: fixed;
+.loc-listing__sticky {
+  position: sticky;
   top: var(--nav-offset, 0px);
-  left: 0;
-  right: 0;
-  z-index: 90; /* under the nav and its menus */
+  z-index: 5;
   display: flex;
   justify-content: center;
-  padding: 16px var(--page-gutter);
+  margin: 80px 0 -16px;
+  padding: 16px 0;
+  transition: top 400ms var(--ease-in-out);
+}
+
+.loc-listing__sticky::before {
+  content: '';
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
   background: var(--white);
   box-shadow: 0 24px 40px -28px rgba(0, 0, 0, 0.18);
   opacity: 0;
-  visibility: hidden;
-  transform: translateY(-12px);
-  transition:
-    top 400ms var(--ease-in-out),
-    opacity 350ms var(--ease-in-out),
-    transform 450ms var(--ease-in-out),
-    visibility 0s linear 450ms;
+  transition: opacity 300ms var(--ease-in-out);
 }
 
-.loc-listing__band.is-pinned {
+.loc-listing__sticky.is-pinned::before {
   opacity: 1;
-  visibility: visible;
-  transform: none;
+}
+
+/* Handing over to the next section: the held filters lift and fade away rather than
+   drifting down with the list */
+.loc-listing__sticky {
   transition:
     top 400ms var(--ease-in-out),
-    opacity 350ms var(--ease-in-out),
-    transform 450ms var(--ease-in-out);
+    opacity 400ms var(--ease-in-out),
+    translate 500ms var(--ease-in-out),
+    visibility 0s;
+}
+
+.loc-listing__sticky.is-leaving {
+  opacity: 0;
+  translate: 0 -24px;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    top 400ms var(--ease-in-out),
+    opacity 400ms var(--ease-in-out),
+    translate 500ms var(--ease-in-out),
+    visibility 0s linear 500ms;
+}
+
+/* The line under the filters, then room before the list */
+.loc-listing__line {
+  display: flex;
+  justify-content: center;
+  /* 80px under the filters; then room for the intro to settle before the list rises over it */
+  margin: 64px 0 320px;
 }
 
 .loc-listing__filters {
   display: flex;
   align-items: center;
   gap: 24px;
-  width: min(904px, 100%);
+  /* As in the intro, so the band reads as the intro's filters held at the top */
+  width: min(672px, 100%);
 }
 
 .loc-listing__filters-title {
@@ -615,10 +638,6 @@ a.loc-card:focus-visible {
 
 /* Phones: one property per row, tighter spacing */
 @media (max-width: 700px) {
-  .loc-listing__content {
-    gap: 64px;
-  }
-
   .loc-listing {
     padding: 128px var(--page-gutter) 200px;
   }
@@ -636,8 +655,13 @@ a.loc-card:focus-visible {
     font-size: 16px;
   }
 
-  .loc-listing__band {
-    padding: 12px var(--page-gutter);
+  .loc-listing__sticky {
+    margin: 40px 0 -12px;
+    padding: 12px 0;
+  }
+
+  .loc-listing__line {
+    margin: 40px 0 144px;
   }
 
   .loc-listing__filters {

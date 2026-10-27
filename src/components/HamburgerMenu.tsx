@@ -21,6 +21,7 @@ const GROUPS: Record<'life' | 'contact' | 'blog', Link[]> = {
   contact: [
     { label: 'Contact Us', href: '/contact' },
     { label: 'Join Waitlist', href: '/join-the-waitlist' },
+    { label: 'FAQs', href: '/faqs' },
   ],
   blog: [
     { label: 'For Parents', href: '/blog/for-parents' },

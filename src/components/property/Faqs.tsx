@@ -89,7 +89,7 @@ export default function Faqs({ id, content }: { id: string; content: PropertyCon
         })}
       </div>
 
-      <a href="#" className="faqs__cta">
+      <a href="/faqs" className="faqs__cta">
         Visit FAQ page
       </a>
     </section>
