@@ -34,10 +34,14 @@ type PropertyMapProps = {
   frame: string | null;
   /** Room (px) the finder panel takes over the map's top-left corner, kept clear when framing. */
   inset: { left: number; top: number };
+  /** The same while a photo is open, when the panel can be taller. */
+  spotlightInset: { left: number; top: number };
   /** The place under the pointer in the list, lit on the map. */
   highlight: string | null;
   /** The place picked in the list: the map moves to it and opens its card. */
   focus: { id: string } | null;
+  /** The place whose photo is open in the finder: lit, and framed a little closer with the property. */
+  spotlight: string | null;
   onMarkerClick: (id: string) => void;
 };
 
@@ -60,8 +64,10 @@ export default function PropertyMap({
   markers,
   frame,
   inset,
+  spotlightInset,
   highlight,
   focus,
+  spotlight,
   onMarkerClick,
 }: PropertyMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -149,7 +155,8 @@ export default function PropertyMap({
   }, [markers, inset]);
 
   // Frame the area (keeping the property in view, and clear of the finder panel), or
-  // go back to the property when the area is cleared
+  // go back to the property when the area is cleared. A spotlit place is framed on its
+  // own with the property: closer in, both still in view.
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -158,16 +165,33 @@ export default function PropertyMap({
       map.flyTo([center.lat, center.lng], HOME_ZOOM, { duration: 0.8 });
       return;
     }
-    const points = [L.latLng(center.lat, center.lng), ...markers.map((m) => L.latLng(m.place.lat, m.place.lng))];
+    const lit = spotlight ? markers.filter((m) => m.id === spotlight) : [];
+    const shown = lit.length ? lit : markers;
+    const points = [L.latLng(center.lat, center.lng), ...shown.map((m) => L.latLng(m.place.lat, m.place.lng))];
+    const clear = lit.length ? spotlightInset : inset;
     map.flyToBounds(L.latLngBounds(points), {
-      paddingTopLeft: [inset.left + 32, Math.max(inset.top, 150)],
+      paddingTopLeft: [clear.left + 32, Math.max(clear.top, 150)],
       paddingBottomRight: [56, 48],
       maxZoom: 16,
       duration: 0.8,
     });
-    // Only when the area changes, not when the marker list is rebuilt with it
+    // A spotlit place shows its details once the map settles, where it was framed
+    const m = lit.length ? markersRef.current.get(lit[0].id) : undefined;
+    if (!m) return;
+    const show = () => {
+      const popup = m.getPopup();
+      if (!popup) return;
+      popup.options.autoPan = false;
+      m.openPopup();
+      popup.options.autoPan = true;
+    };
+    map.once('moveend', show);
+    return () => {
+      map.off('moveend', show);
+    };
+    // Only when the area or spotlight changes, not when the marker list is rebuilt with it
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [frame, center]);
+  }, [frame, spotlight, center]);
 
   // Light the place under the pointer in the list
   useEffect(() => {

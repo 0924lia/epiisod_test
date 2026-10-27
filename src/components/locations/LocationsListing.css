@@ -603,8 +603,61 @@ a.loc-card:focus-visible {
     display: none;
   }
 
+  /* The country in view: a bar held under the filters, changing country like the panel */
+  .loc-listing__regions {
+    flex-direction: column;
+    gap: 40px;
+  }
+
   .loc-listing__aside {
-    display: none;
+    position: sticky;
+    top: calc(var(--nav-offset, 0px) + var(--loc-filters-h, 0px));
+    z-index: 4;
+    flex: none;
+    padding: 16px 0 20px;
+    border-right: 0;
+    border-bottom: 1px solid var(--bronze-500);
+    background: var(--white);
+    transition:
+      top 400ms var(--ease-in-out),
+      opacity 400ms var(--ease-in-out),
+      translate 500ms var(--ease-in-out),
+      visibility 0s;
+  }
+
+  /* Steps away with the filters at the hand-over, rather than drifting down with the list */
+  .loc-listing__aside.is-leaving {
+    opacity: 0;
+    translate: 0 -24px;
+    visibility: hidden;
+    transition:
+      top 400ms var(--ease-in-out),
+      opacity 400ms var(--ease-in-out),
+      translate 500ms var(--ease-in-out),
+      visibility 0s linear 500ms;
+  }
+
+  /* Full-bleed white behind it, with the shadow the filters' band drops on desktop */
+  .loc-listing__aside::before {
+    content: '';
+    position: absolute;
+    inset: 0 calc(50% - 50vw);
+    z-index: -1;
+    background: var(--white);
+    box-shadow: 0 24px 40px -28px rgba(0, 0, 0, 0.18);
+  }
+
+  .loc-listing__sticky.is-pinned::before {
+    box-shadow: none;
+  }
+
+  .loc-listing__countries {
+    position: static;
+    overflow: hidden;
+  }
+
+  .loc-listing__countries .loc-region__header {
+    gap: 8px;
   }
 
   .loc-listing__list {
@@ -613,18 +666,6 @@ a.loc-card:focus-visible {
 
   .loc-region {
     gap: 40px;
-  }
-
-  .loc-region__header--inline {
-    position: static;
-    width: auto;
-    height: auto;
-    overflow: visible;
-    clip-path: none;
-    white-space: normal;
-    gap: 8px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--bronze-500);
   }
 
   .loc-card {
@@ -700,6 +741,18 @@ a.loc-card:focus-visible {
 
   .loc-region__name {
     font-size: 28px;
+  }
+
+  .loc-listing__aside {
+    padding: 12px 0 16px;
+  }
+
+  .loc-listing__countries .loc-region__header {
+    gap: 4px;
+  }
+
+  .loc-listing__countries .loc-region__name {
+    font-size: 24px;
   }
 
   .loc-region__cities {

@@ -1,10 +1,42 @@
 /**
  * Places around EPIISOD Macquarie Park, by category — copied from the live site's
- * location map (epiisod.com/en-au, Sydney › EPIISOD Macquarie Park).
+ * location map (epiisod.com/en-au, Sydney › EPIISOD Macquarie Park). The schools' photos
+ * are from the design (Figma 1182:8433).
  */
 import type { MapCategory } from './propertyContent';
+import standAboutLocationBg from '../../assets/about/location-bg.jpg';
+import standAboutPlaceMacquarieUniversity from '../../assets/about/place-macquarie-university.jpg';
+import standAboutWideMacquarie from '../../assets/about/wide-macquarie.jpg';
+import standBlogArrivalSteps from '../../assets/blog/arrival-steps.jpg';
+import standBlogCampusShadows from '../../assets/blog/campus-shadows.jpg';
+import standBlogStudyCoffee from '../../assets/blog/study-coffee.jpg';
+import standExperienceCardPrivileges from '../../assets/experience/card-privileges.jpg';
+import standExperienceCoffee from '../../assets/experience/coffee.jpg';
+import standExperienceMosaicCourtyard from '../../assets/experience/mosaic-courtyard.jpg';
+import standExperienceMosaicDining from '../../assets/experience/mosaic-dining.jpg';
+import standExperienceMosaicHall from '../../assets/experience/mosaic-hall.jpg';
+import standExperienceMosaicLobbyTree from '../../assets/experience/mosaic-lobby-tree.jpg';
+import standExperienceMosaicLounge from '../../assets/experience/mosaic-lounge.jpg';
+import standExperienceMosaicTerrace from '../../assets/experience/mosaic-terrace.jpg';
+import standPromotionsCommute from '../../assets/promotions/commute.jpg';
+import standWellness1 from '../../assets/wellness-1.jpg';
+import standWhyExpApp from '../../assets/why/exp-app.jpg';
+import standWhyExpCafe from '../../assets/why/exp-cafe.jpg';
+import standWhyExpCommunity from '../../assets/why/exp-community.jpg';
+import standWhyExpConvenience from '../../assets/why/exp-convenience.jpg';
+import standWhyExpSmart from '../../assets/why/exp-smart.jpg';
+import standWhyExpWellness from '../../assets/why/exp-wellness.jpg';
+import school1 from '../../assets/property/places/school-1.jpg';
+import school2 from '../../assets/property/places/school-2.jpg';
+import school3 from '../../assets/property/places/school-3.jpg';
+import school4 from '../../assets/property/places/school-4.jpg';
+import school5 from '../../assets/property/places/school-5.jpg';
+import school6 from '../../assets/property/places/school-6.jpg';
+import school7 from '../../assets/property/places/school-7.jpg';
+import school8 from '../../assets/property/places/school-8.jpg';
+import school9 from '../../assets/property/places/school-9.jpg';
 
-export const MACQUARIE_PARK_PLACES: MapCategory[] = [
+const PLACES: MapCategory[] = [
   {
     name: "Transport",
     places: [
@@ -22,15 +54,15 @@ export const MACQUARIE_PARK_PLACES: MapCategory[] = [
   {
     name: "Education",
     places: [
-      { name: "Macquarie University", address: "Balaclava Rd, Macquarie Park NSW 2113, Australia", lat: -33.77701912355475, lng: 151.11796998764083 },
-      { name: "Excelsia University College", address: "69-71 Waterloo Rd, Macquarie Park NSW 2113, Australia", lat: -33.78205963997134, lng: 151.1259032944779 },
-      { name: "The University of Sydney", address: "Camperdown NSW 2050, Australia", lat: -33.88840409999996, lng: 151.1867648 },
-      { name: "Victoria University", address: "160 Sussex St, Sydney NSW 2000, Australia", lat: -33.86966943353582, lng: 151.20384746749028 },
-      { name: "Charles Darwin University", address: "815 George St, Haymarket NSW 2000, Australia", lat: -33.88295151030452, lng: 151.20355458876065 },
-      { name: "Western Sydney University International College", address: "Level 6/6 Hassall St, Parramatta NSW 2150, Australia", lat: -33.817865238905256, lng: 151.00767945799018 },
-      { name: "University of New South Wales Sydney", address: "Sydney NSW 2033, Australia", lat: -33.91734709511993, lng: 151.23126777863763 },
-      { name: "Southern Cross University", address: "117 Macquarie St, Sydney NSW 2000, Australia", lat: -33.86292785535452, lng: 151.21250216122675 },
-      { name: "University of Technology Sydney", address: "University of Technology Sydney Building 10, CB10/235 Jones St, Broadway NSW 2007, Australia", lat: -33.88356149235273, lng: 151.1990010454967 },
+      { name: "Macquarie University", address: "Balaclava Rd, Macquarie Park NSW 2113, Australia", lat: -33.77701912355475, lng: 151.11796998764083, image: school1 },
+      { name: "Excelsia University College", address: "69-71 Waterloo Rd, Macquarie Park NSW 2113, Australia", lat: -33.78205963997134, lng: 151.1259032944779, image: school2 },
+      { name: "The University of Sydney", address: "Camperdown NSW 2050, Australia", lat: -33.88840409999996, lng: 151.1867648, image: school3 },
+      { name: "Victoria University", address: "160 Sussex St, Sydney NSW 2000, Australia", lat: -33.86966943353582, lng: 151.20384746749028, image: school4 },
+      { name: "Charles Darwin University", address: "815 George St, Haymarket NSW 2000, Australia", lat: -33.88295151030452, lng: 151.20355458876065, image: school5 },
+      { name: "Western Sydney University International College", address: "Level 6/6 Hassall St, Parramatta NSW 2150, Australia", lat: -33.817865238905256, lng: 151.00767945799018, image: school6 },
+      { name: "University of New South Wales Sydney", address: "Sydney NSW 2033, Australia", lat: -33.91734709511993, lng: 151.23126777863763, image: school7 },
+      { name: "Southern Cross University", address: "117 Macquarie St, Sydney NSW 2000, Australia", lat: -33.86292785535452, lng: 151.21250216122675, image: school8 },
+      { name: "University of Technology Sydney", address: "University of Technology Sydney Building 10, CB10/235 Jones St, Broadway NSW 2007, Australia", lat: -33.88356149235273, lng: 151.1990010454967, image: school9 },
       { name: "Swinburne University of Technology Sydney", address: "Level 5/1-3 Fitzwilliam St, Parramatta NSW 2150, Australia", lat: -33.81824454216259, lng: 151.0046854146618 },
       { name: "Torrens University Australia, Sydney", address: "46-52 Mountain St, Ultimo NSW 2007, Australia", lat: -33.883389850013856, lng: 151.1965138584193 },
       { name: "La Trobe University Sydney", address: "255 Elizabeth St, Sydney NSW 2000, Australia", lat: -33.87564174501589, lng: 151.2093425834148 },
@@ -119,3 +151,32 @@ export const MACQUARIE_PARK_PLACES: MapCategory[] = [
     ],
   },
 ];
+
+/**
+ * Stand-in photos until each place has its own: the site's own photos, loosely matched to
+ * the area. Every fourth place without a photo is left without one, so the finder shows
+ * its placeholder (Figma 1227:12217).
+ */
+const STAND_INS: Record<string, string[]> = {
+  "Education": [standAboutPlaceMacquarieUniversity, standBlogCampusShadows, standAboutWideMacquarie],
+  "Transport": [standPromotionsCommute, standBlogArrivalSteps, standWhyExpConvenience],
+  "Food": [standExperienceMosaicDining, standWhyExpCafe, standExperienceCoffee, standBlogStudyCoffee],
+  "Shopping & Entertainment": [standWhyExpCommunity, standExperienceMosaicLounge, standExperienceMosaicHall],
+  "Medical": [standWhyExpWellness, standWellness1],
+  "Banks": [standExperienceMosaicLobbyTree, standWhyExpSmart],
+  "Telcos & Post Offices": [standWhyExpApp, standExperienceCardPrivileges],
+  "Other Landmarks": [standExperienceMosaicCourtyard, standExperienceMosaicTerrace, standAboutLocationBg],
+};
+
+export const MACQUARIE_PARK_PLACES: MapCategory[] = PLACES.map((category) => {
+  const pool = STAND_INS[category.name] ?? [];
+  let missing = 0;
+  return {
+    ...category,
+    places: category.places.map((place) => {
+      if (place.image || !pool.length) return place;
+      const n = missing++;
+      return n % 4 === 3 ? place : { ...place, image: pool[n % pool.length] };
+    }),
+  };
+});

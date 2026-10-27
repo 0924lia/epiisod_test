@@ -6,6 +6,7 @@ import pin from '../../assets/property/icon-location-pin.svg';
 import searchIcon from '../../assets/property/location/icon-search.svg';
 import pinLine from '../../assets/property/location/icon-map-pin-line.svg';
 import closeIcon from '../../assets/property/location/icon-close.svg';
+import placeholderPin from '../../assets/property/location/icon-map-pin-placeholder.svg';
 import allIcon from '../../assets/property/location/cat-all.svg';
 import schoolsIcon from '../../assets/property/location/cat-schools.svg';
 import transportIcon from '../../assets/property/location/cat-transport.svg';
@@ -51,7 +52,8 @@ type ListedPlace = MapMarker & { distance: string };
 /**
  * Location (Figma 1080:5903, states 1182:17146): the address, then the neighbourhood map
  * with the "Find nearby areas" finder over its top-left corner. The finder opens a list of
- * areas; choosing one lists its places, numbered (once across every area, so "All" reads
+ * areas; choosing one lists its places (with a photo for some, which enlarges in the
+ * panel while the map frames that place with the property), numbered (once across every area, so "All" reads
  * straight through), with their distance from the property,
  * and shows them on the map. Pointing at a place lights its marker; choosing one moves
  * the map to it. The cross clears the area.
@@ -68,6 +70,8 @@ export default function PropertyLocation({ id, content }: { id: string; content:
   const [area, setArea] = useState<string | null>(null);
   const [highlight, setHighlight] = useState<string | null>(null);
   const [focus, setFocus] = useState<{ id: string } | null>(null);
+  /** The place whose photo is enlarged in the finder (Figma 1227:12135). */
+  const [enlarged, setEnlarged] = useState<string | null>(null);
   const [phone, setPhone] = useState(() => window.matchMedia('(max-width: 700px)').matches);
 
   useEffect(() => {
@@ -124,6 +128,7 @@ export default function PropertyLocation({ id, content }: { id: string; content:
     setOpen(false);
     setHighlight(null);
     setFocus(null);
+    setEnlarged(null);
     listRef.current?.scrollTo({ top: 0 });
   };
 
@@ -131,6 +136,24 @@ export default function PropertyLocation({ id, content }: { id: string; content:
     setArea(null);
     setHighlight(null);
     setFocus(null);
+    setEnlarged(null);
+  };
+
+  // A photo opened: lit on the map, which frames it with the property
+  const enlarge = (placeId: string) => {
+    setFocus(null);
+    setHighlight(placeId);
+    setEnlarged(placeId);
+  };
+
+  // Back to the list, scrolled where it was (it stays in place, hidden, while the photo shows)
+  const shrink = () => {
+    const placeId = enlarged;
+    setEnlarged(null);
+    setHighlight(null);
+    requestAnimationFrame(() =>
+      listRef.current?.querySelector<HTMLElement>(`[data-place="${placeId}"]`)?.focus({ preventScroll: true }),
+    );
   };
 
   // A marker clicked on the map: mark its place in the list and bring it into view
@@ -146,8 +169,10 @@ export default function PropertyLocation({ id, content }: { id: string; content:
   };
 
   const current = AREAS.find((a) => a.name === area);
+  const shown = enlarged ? places.find((p) => p.id === enlarged) : undefined;
   // The corner of the map the finder covers, kept clear when framing places
   const inset = useMemo(() => (phone ? { left: 0, top: 260 } : { left: 440, top: 0 }), [phone]);
+  const spotlightInset = useMemo(() => (phone ? { left: 0, top: 380 } : inset), [phone, inset]);
 
   return (
     <section ref={sectionRef} className="property-location exit-parallax" id={id}>
@@ -169,8 +194,10 @@ export default function PropertyLocation({ id, content }: { id: string; content:
             markers={places}
             frame={area}
             inset={inset}
+            spotlightInset={spotlightInset}
             highlight={highlight}
             focus={focus}
+            spotlight={enlarged}
             onMarkerClick={onMarkerClick}
           />
 
@@ -208,16 +235,31 @@ export default function PropertyLocation({ id, content }: { id: string; content:
             )}
 
             {!open && current && (
-              <div className="location-finder__panel location-finder__results">
+              <div className={`location-finder__panel location-finder__results${shown ? ' is-enlarged' : ''}`}>
                 <div className="location-finder__chosen">
                   <span className="location-finder__icon is-current" aria-hidden>
                     <img src={current.icon} width={16} height={16} alt="" />
                   </span>
                   <span className="location-finder__chosen-name">{current.name}</span>
-                  <button type="button" className="location-finder__clear" aria-label="Clear area" onClick={clear}>
+                  {/* With a photo open, the cross goes back to the list; otherwise it clears the area */}
+                  <button
+                    type="button"
+                    className="location-finder__clear"
+                    aria-label={shown ? `Close ${shown.place.name} photo` : 'Clear area'}
+                    onClick={shown ? shrink : clear}
+                  >
                     <img src={closeIcon} width={24} height={24} alt="" />
                   </button>
                 </div>
+                {shown?.place.image && (
+                  <figure className="location-finder__photo" key={shown.id}>
+                    <img src={shown.place.image} alt="" />
+                    <figcaption>
+                      <span className="location-finder__photo-name">{shown.place.name}</span>
+                      <span className="location-finder__distance">{shown.distance}</span>
+                    </figcaption>
+                  </figure>
+                )}
                 {/* Scrolls on its own: the page's smooth scroll leaves the wheel to it */}
                 <ul
                   ref={listRef}
@@ -226,7 +268,22 @@ export default function PropertyLocation({ id, content }: { id: string; content:
                   data-lenis-prevent
                 >
                   {places.map((p) => (
-                    <li key={p.id}>
+                    <li key={p.id} className="location-finder__row">
+                      {p.place.image ? (
+                        <button
+                          type="button"
+                          className="location-finder__thumb"
+                          aria-label={`Enlarge photo of ${p.place.name}`}
+                          onClick={() => enlarge(p.id)}
+                        >
+                          <img src={p.place.image} width={64} height={64} alt="" loading="lazy" />
+                        </button>
+                      ) : (
+                        // No photo yet (Figma 1227:12217)
+                        <span className="location-finder__thumb location-finder__thumb--empty" aria-hidden>
+                          <img src={placeholderPin} width={24} height={24} alt="" />
+                        </span>
+                      )}
                       <button
                         type="button"
                         data-place={p.id}

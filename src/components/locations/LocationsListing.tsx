@@ -180,6 +180,16 @@ export default function LocationsListing({
     };
   }, []);
 
+  // Tablets and phones hold the country bar just under the filters: publish their height
+  useEffect(() => {
+    const filters = introFiltersRef.current;
+    const section = sectionRef.current;
+    if (!filters || !section) return;
+    const ro = new ResizeObserver(() => section.style.setProperty('--loc-filters-h', `${filters.offsetHeight}px`));
+    ro.observe(filters);
+    return () => ro.disconnect();
+  }, []);
+
   const countries = REGIONS.map((r) => r.name);
   const region = REGIONS.find((r) => r.name === filter.country) ?? null;
   const cities = region ? region.cities : REGIONS.flatMap((r) => r.cities);
@@ -359,10 +369,11 @@ export default function LocationsListing({
 
       {/* Figma 1221:8889: one panel on the left naming the country in view, held at the
           middle of the screen; it changes country with a soft cross-fade as the next
-          country's cities reach the middle. Re-keyed with the filter, so the listing fades
+          country's cities reach the middle. On tablets and phones it's a bar held under the
+          filters, changing the same way. Re-keyed with the filter, so the listing fades
           back in when it changes. */}
       <div ref={regionsRef} key={`${filter.country}-${filter.city}`} className="loc-listing__regions">
-        <div className="loc-listing__aside" aria-hidden>
+        <div className={`loc-listing__aside${leaving ? ' is-leaving' : ''}`} aria-hidden>
           <div className="loc-listing__countries">
             {shown.map((r) => (
               <div key={r.id} className={`loc-region__header${r.id === currentRegion ? ' is-current' : ''}`}>

@@ -1,4 +1,3 @@
-import lifeDivider from '../assets/life-divider.svg';
 import life1 from '../assets/life-1.jpg';
 import life2 from '../assets/life-2.jpg';
 import life3 from '../assets/life-3.jpg';
@@ -21,7 +20,6 @@ export default function LifeIntro({ onNext }: LifeIntroProps) {
             student life
           </h2>
         </div>
-        <img src={lifeDivider} width={208.5} height={7.36} alt="" draggable={false} />
         <button type="button" className="visually-hidden" onClick={onNext}>
           Explore student life
         </button>

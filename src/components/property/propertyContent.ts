@@ -69,7 +69,8 @@ export type Amenity = {
 
 export type Faq = { question: string; answer: string };
 
-export type MapPlace = { name: string; address: string; lat: number; lng: number };
+/** A place near the property; `image` is its photo in the finder, where there is one. */
+export type MapPlace = { name: string; address: string; lat: number; lng: number; image?: string };
 export type MapCategory = { name: string; places: MapPlace[] };
 
 export type PropertyContent = {
