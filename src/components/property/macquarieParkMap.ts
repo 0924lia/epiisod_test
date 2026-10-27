@@ -72,7 +72,7 @@ export const MACQUARIE_PARK_PLACES: MapCategory[] = [
       { name: "Coles Macquarie Centre", address: "Macquarie centre, Macquarie Centre, 197/223 Herring Rd, Macquarie Park NSW 2113, Australia'", lat: -33.77835451471874, lng: 151.1206118248631 },
       { name: "Midway Shopping Centre", address: "117 North Rd, Denistone East NSW 2112, Australia", lat: -33.795265757249304, lng: 151.10260036574002 },
       { name: "Cox Road Mall Shopping Centre", address: "202/215 Coxs Rd, North Ryde NSW 2113, Australia", lat: -33.79410280441895, lng: 151.12158015115443 },
-      { name: "Lanchlan Square Village", address: "17 Halifax St, Macquarie Park NSW 2113, Australia", lat: -33.7934957313267, lng: 151.13430869999993 },
+      { name: "Lachlan Square Village", address: "17 Halifax St, Macquarie Park NSW 2113, Australia", lat: -33.7934957313267, lng: 151.13430869999993 },
       { name: "Myer Macquarie", address: "Macquarie centre, Herring Rd, North Ryde NSW 2113, Australia", lat: -33.776718687913046, lng: 151.1205177117024 },
       { name: "JB Hi-Fi Macquarie", address: "Macquarie Centre Store 429, Level 4, Corner Herring & Waterloo Roads North, North Ryde NSW 2113, Australia", lat: -33.776718699995094, lng: 151.12051623670345 },
       { name: "BIG W Macquarie", address: "109 Waterloo Rd, North Ryde NSW 2113, Australia", lat: -33.77792333953915, lng: 151.11957605889563 },

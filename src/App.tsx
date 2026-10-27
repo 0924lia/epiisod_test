@@ -15,6 +15,8 @@ import PromotionsPage from './pages/PromotionsPage';
 import WhyPage from './pages/WhyPage';
 import ExperiencePage from './pages/ExperiencePage';
 import WaitlistPage from './pages/WaitlistPage';
+import LocationsPage from './pages/LocationsPage';
+import RoomPage from './pages/RoomPage';
 import BlogListPage from './pages/BlogListPage';
 import BlogPostPage from './pages/BlogPostPage';
 import { AUDIENCES, POSTS } from './components/blog/blogData';
@@ -56,12 +58,22 @@ export default function App() {
   if (path === '/why-epiisod') return <WhyPage />;
   if (path === '/experience') return <ExperiencePage />;
   if (path === '/join-the-waitlist') return <WaitlistPage />;
+  if (path === '/locations') return <LocationsPage />;
   // Blogs: /blog/<audience> lists a blog; /blog/<audience>/<post> is a post
   const blog = path.match(/^\/blog(?:\/([^/]+))?(?:\/([^/]+))?$/);
   if (blog) {
     const audience = AUDIENCES.find((a) => a.id === blog[1]) ?? AUDIENCES[0];
     const post = blog[2] && POSTS.find((p) => p.audience === audience.id && p.slug === blog[2]);
     return post ? <BlogPostPage key={path} post={post} audience={audience} /> : <BlogListPage key={path} audience={audience} />;
+  }
+  // A room's page: /locations/<property>/<room>
+  const roomMatch = path.match(/^(\/locations\/[^/]+)\/([^/]+)$/);
+  if (roomMatch) {
+    const owner = PROPERTIES.find((p) => p.href === roomMatch[1]);
+    const ownerContent = owner && PROPERTY_PAGES[owner.id];
+    const details = ownerContent?.roomDetails.find((d) => d.slug === roomMatch[2]);
+    if (ownerContent && details)
+      return <RoomPage key={path} content={ownerContent} details={details} propertyHref={roomMatch[1]} />;
   }
   const property = PROPERTIES.find((p) => p.href === path);
   if (!property) return <HomePage />;

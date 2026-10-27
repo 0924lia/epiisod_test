@@ -1,26 +1,58 @@
 import { useRef, useState } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import VLine from './VLine';
 import { gsap, useGSAP } from '../lib/smoothScroll';
 import heroImage from '../assets/hero.jpg';
 import heroLine from '../assets/hero-line.svg';
 import dropdown from '../assets/dropdown.svg';
 import arrowRight from '../assets/arrow-right-white.svg';
+import { REGIONS } from './locationData';
 import './Hero.css';
 
-/** Cities per country, taken from the footer's location list. */
-const CITIES: Record<string, string[]> = {
-  Australia: ['Sydney', 'Perth', 'Melbourne'],
-  'United Kingdom': ['London'],
+/** Cities per country, in the order of the Locations page. */
+const CITIES: Record<string, string[]> = Object.fromEntries(REGIONS.map((r) => [r.name, r.cities]));
+
+/** The Locations page, showing one country's city. */
+export const locationsHref = (country: string, city: string) =>
+  `/locations?${new URLSearchParams({ country, city })}`;
+
+type HeroProps = {
+  image?: string;
+  title?: ReactNode;
+  subtitle?: ReactNode;
+  /** The line between the title and the subtitle (Locations, Figma 1182:17842) rather than above the search. */
+  lineAfterTitle?: boolean;
+  /** What the search does; by default it opens the Locations page for the chosen city. */
+  onSearch?: (country: string, city: string) => void;
 };
 
-export default function Hero() {
+/**
+ * The full-screen hero with the "Start your story" search: the homepage's, and — with its
+ * own photo and copy — the Locations page's.
+ */
+export default function Hero({
+  image = heroImage,
+  title = (
+    <>
+      Thoughtfully designed <em>student living</em>
+    </>
+  ),
+  subtitle = 'Modern spaces, all-inclusive amenities, and a vibrant student community—all in the cities where you study.',
+  lineAfterTitle = false,
+  onSearch = (country, city) => window.location.assign(locationsHref(country, city)),
+}: HeroProps) {
   const sectionRef = useRef<HTMLElement>(null);
-  const [country, setCountry] = useState('Australia');
-  const [city, setCity] = useState('Sydney');
+  const [country, setCountry] = useState(REGIONS[0].name);
+  const [city, setCity] = useState(REGIONS[0].cities[0]);
 
   const onCountryChange = (next: string) => {
     setCountry(next);
     setCity(CITIES[next][0]);
+  };
+
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    onSearch(country, city);
   };
 
   // Exit parallax: as the hero scrolls away the photo drifts at half speed (so the next
@@ -44,24 +76,28 @@ export default function Hero() {
 
   return (
     <section ref={sectionRef} className="hero">
-      <img className="hero__image" src={heroImage} alt="" />
+      <img className="hero__image" src={image} alt="" />
       <div className="hero__overlay" aria-hidden />
       <div className="hero__shade" aria-hidden />
 
       <div className="hero__content">
-        <div className="hero__copy">
-          <h1 className="type-h1 hero__title">
-            Thoughtfully designed <em>student living</em>
-          </h1>
-          <p className="type-lead hero__subtitle">
-            Modern spaces, all-inclusive amenities, and a vibrant student community—all in the
-            cities where you study.
-          </p>
-        </div>
+        {lineAfterTitle ? (
+          <>
+            <h1 className="type-h1 hero__title">{title}</h1>
+            <VLine src={heroLine} length={50} />
+            <p className="type-lead hero__subtitle">{subtitle}</p>
+          </>
+        ) : (
+          <>
+            <div className="hero__copy">
+              <h1 className="type-h1 hero__title">{title}</h1>
+              <p className="type-lead hero__subtitle">{subtitle}</p>
+            </div>
+            <VLine src={heroLine} length={50} />
+          </>
+        )}
 
-        <VLine src={heroLine} length={50} />
-
-        <form className="hero-search" onSubmit={(e) => e.preventDefault()}>
+        <form className="hero-search" onSubmit={onSubmit}>
           <div className="hero-search__cell">
             <div className="hero-search__field hero-search__field--intro">Start your story</div>
           </div>

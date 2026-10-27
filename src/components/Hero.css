@@ -52,6 +52,13 @@
   text-align: center;
 }
 
+/* Locations: title and subtitle sit straight in the column, with the line between them */
+.hero__content > .hero__title,
+.hero__content > .hero__subtitle {
+  width: 100%;
+  text-align: center;
+}
+
 .hero__title {
   font-size: clamp(32px, 8svh, 64px);
   color: var(--white);
@@ -234,7 +241,9 @@
     display: none;
   }
 
-  .hero__copy {
+  .hero__copy,
+  .hero__content > .hero__title,
+  .hero__content > .hero__subtitle {
     gap: 16px;
     text-align: left;
   }

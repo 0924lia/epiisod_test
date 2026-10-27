@@ -1,0 +1,623 @@
+/* Locations (Figma 1182:17801): the intro, then regions 120px apart */
+.loc-listing {
+  display: flex;
+  flex-direction: column;
+  gap: 120px;
+  /* 120px under the 88px nav */
+  padding: 208px var(--page-gutter) 200px;
+  background: var(--white);
+  overflow-x: clip; /* the intro's photos run off the page's sides */
+}
+
+/* The intro (Figma 1211:31095): copy, filters and the line, 80px apart */
+.loc-intro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 80px;
+}
+
+.loc-intro__copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  width: min(904px, 100%);
+  text-align: center;
+}
+
+.loc-intro__copy .heading-group {
+  width: min(672px, 100%);
+}
+
+.loc-intro__text {
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--grey-700);
+}
+
+/* 505 × 438 at 1512, 72px down, each running 201px off its side of the page */
+.loc-intro__photo {
+  position: absolute;
+  top: -48px;
+  width: min(33.4vw, 505px);
+  height: min(28.97vw, 438px);
+  overflow: hidden;
+  animation: loc-photo-in 900ms var(--ease-in-out) both;
+}
+
+/* 14% taller than its frame, so the scroll drift (±6%) never shows an edge */
+.loc-intro__photo img {
+  position: absolute;
+  top: -7%;
+  left: 0;
+  width: 100%;
+  height: 114%;
+  object-fit: cover;
+}
+
+.loc-intro__photo--left {
+  left: calc(-1 * var(--page-gutter) - min(13.29vw, 201px));
+}
+
+.loc-intro__photo--right {
+  right: calc(-1 * var(--page-gutter) - min(13.29vw, 201px));
+  animation-delay: 120ms;
+}
+
+@keyframes loc-photo-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+.loc-intro .loc-listing__filters--intro {
+  position: relative;
+  z-index: 3;
+  width: min(672px, 100%);
+}
+
+/*
+ * The filters, pinned under the nav while the list is on screen (Figma 1195:21132): a
+ * full-width white band with a soft shadow below, sliding down into place. It follows
+ * the nav as the nav's bar hides and returns.
+ */
+.loc-listing__band {
+  position: fixed;
+  top: var(--nav-offset, 0px);
+  left: 0;
+  right: 0;
+  z-index: 90; /* under the nav and its menus */
+  display: flex;
+  justify-content: center;
+  padding: 16px var(--page-gutter);
+  background: var(--white);
+  box-shadow: 0 24px 40px -28px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-12px);
+  transition:
+    top 400ms var(--ease-in-out),
+    opacity 350ms var(--ease-in-out),
+    transform 450ms var(--ease-in-out),
+    visibility 0s linear 450ms;
+}
+
+.loc-listing__band.is-pinned {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    top 400ms var(--ease-in-out),
+    opacity 350ms var(--ease-in-out),
+    transform 450ms var(--ease-in-out);
+}
+
+.loc-listing__filters {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: min(904px, 100%);
+}
+
+.loc-listing__filters-title {
+  flex: 0 0 80px;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--royal-chocolate-500);
+}
+
+/* Clears both fields; faded while there's nothing to clear */
+.loc-listing__reset {
+  flex: 0 0 80px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 16px;
+  line-height: 24px;
+  white-space: nowrap;
+  color: var(--royal-chocolate-500);
+  cursor: pointer;
+  transition: opacity 250ms var(--ease-in-out);
+}
+
+.loc-listing__reset img {
+  transition: transform 500ms var(--ease-in-out);
+}
+
+.loc-listing__reset:hover:not(:disabled) img {
+  transform: rotate(180deg);
+}
+
+.loc-listing__reset:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.loc-listing__reset:focus-visible {
+  outline: 2px solid var(--bronze-700);
+  outline-offset: 2px;
+}
+
+/* Filter field: icon, value, caret; its list opens below */
+.loc-field {
+  position: relative;
+  flex: 1 0 0;
+  min-width: 0;
+  height: 46px;
+  border: 1px solid var(--line-in-white);
+  background: var(--bronze-100);
+  transition:
+    border-color 250ms var(--ease-in-out),
+    background-color 250ms var(--ease-in-out);
+}
+
+.loc-field:hover {
+  border-color: var(--bronze-600);
+}
+
+.loc-field.is-open,
+.loc-field:focus-within {
+  border-color: var(--bronze-700);
+  background: var(--white);
+}
+
+.loc-field__button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  padding: 0 16px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 16px;
+  line-height: 24px;
+  text-align: left;
+  color: var(--royal-chocolate-600);
+  cursor: pointer;
+}
+
+.loc-field__button:focus-visible {
+  outline: none;
+}
+
+.loc-field__value {
+  color: var(--royal-chocolate-500); /* the prompt; a chosen value is darker */
+  flex: 1 0 0;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.loc-field.has-value .loc-field__value {
+  color: var(--royal-chocolate-600);
+}
+
+.loc-field__caret {
+  transition: transform 300ms var(--ease-in-out);
+}
+
+.loc-field.is-open .loc-field__caret {
+  transform: rotate(180deg);
+}
+
+.loc-field__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: -1px;
+  right: -1px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  border: 1px solid var(--line-in-white);
+  background: var(--white);
+  box-shadow:
+    0 5px 10px rgba(0, 0, 0, 0.12),
+    0 19px 19px rgba(0, 0, 0, 0.1),
+    0 43px 26px rgba(0, 0, 0, 0.05);
+  animation: loc-menu-in 240ms var(--ease-in-out);
+}
+
+@keyframes loc-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.loc-field__option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.3;
+  text-align: left;
+  color: var(--royal-chocolate-600);
+  cursor: pointer;
+  transition: background-color 200ms var(--ease-in-out);
+}
+
+.loc-field__option:hover,
+.loc-field__option:focus-visible {
+  outline: none;
+  background: var(--bronze-100);
+}
+
+.loc-field__option.is-current {
+  font-weight: 600;
+  color: var(--royal-chocolate-700);
+}
+
+/* ---- Regions and cities ---- */
+
+.loc-listing__regions {
+  display: flex;
+  flex-direction: column;
+  gap: 120px;
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.loc-region {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Name and summary over a sand rule (Figma 1182:19867) */
+.loc-region__header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--bronze-500);
+}
+
+.loc-region__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 40px;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--royal-chocolate-600);
+}
+
+.loc-region__summary {
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--bronze-700);
+}
+
+.loc-region__cities {
+  display: flex;
+  flex-direction: column;
+  gap: 120px;
+}
+
+/* A city: its name in a 324px column, its properties beside it (Figma 1182:19872) */
+.loc-city {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.loc-city__label {
+  flex: 0 0 324px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 96px;
+}
+
+.loc-city__name {
+  font-family: var(--font-display);
+  font-size: 36px;
+  line-height: 1.2;
+  color: var(--royal-chocolate-700);
+}
+
+.loc-city__path {
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--grey-600);
+}
+
+.loc-city__cards {
+  flex: 1 0 0;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+/* ---- Property card (Figma 1182:19879): 440 × 400 ---- */
+.loc-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 440px;
+  max-width: 100%;
+  height: 400px;
+  overflow: hidden;
+  background: #d9d9d9;
+  color: var(--white);
+  animation: loc-card-in 560ms var(--ease-in-out) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+@keyframes loc-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+.loc-card__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 900ms var(--ease-in-out);
+}
+
+a.loc-card:hover .loc-card__image {
+  transform: scale(1.03);
+}
+
+/* Clear over the top half, deep chocolate at the foot */
+.loc-card__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(25, 21, 11, 0) 50%, #19150b 80.75%);
+  mix-blend-mode: multiply;
+}
+
+/* Coming soon: the photo dimmed over chocolate, a label in the middle */
+.loc-card.is-soon {
+  background: var(--royal-chocolate-700);
+}
+
+.loc-card.is-soon .loc-card__image {
+  opacity: 0.4;
+}
+
+.loc-card__badge {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - 22px);
+  padding: 12px;
+  border: 1px solid var(--white);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+}
+
+.loc-card__overlay {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+}
+
+a.loc-card:not(.is-soon) .loc-card__overlay {
+  gap: 16px;
+}
+
+.loc-card__name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.loc-card__address {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--bronze-300);
+}
+
+.loc-card__link,
+.loc-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  text-transform: uppercase;
+}
+
+.loc-card__link {
+  color: var(--bronze-500);
+}
+
+.loc-card__link img {
+  transition: transform 300ms var(--ease-in-out);
+}
+
+a.loc-card:hover .loc-card__link img {
+  transform: translateX(4px);
+}
+
+.loc-card__status {
+  color: var(--royal-chocolate-500);
+}
+
+a.loc-card:focus-visible {
+  outline: 2px solid var(--bronze-700);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loc-card,
+  .loc-intro__photo,
+  .loc-field__menu {
+    animation: none;
+  }
+}
+
+/* Tablets: the city's name above its properties, two to a row; no side photos */
+@media (max-width: 1100px) {
+  .loc-intro__photo {
+    display: none;
+  }
+
+  .loc-city {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .loc-city__label {
+    flex: none;
+    padding-right: 0;
+  }
+
+  .loc-city__cards {
+    width: 100%;
+  }
+
+  .loc-card {
+    flex: 1 1 calc(50% - 12px);
+    width: auto;
+    max-width: calc(50% - 12px);
+    height: auto;
+    aspect-ratio: 440 / 400;
+  }
+}
+
+/* Phones: one property per row, tighter spacing */
+@media (max-width: 700px) {
+  .loc-listing {
+    gap: 64px;
+    padding: 128px var(--page-gutter) 120px;
+  }
+
+  .loc-intro {
+    gap: 40px;
+  }
+
+  .loc-intro__copy {
+    gap: 24px;
+  }
+
+  .loc-intro__text {
+    font-size: 16px;
+  }
+
+  .loc-listing__band {
+    padding: 12px var(--page-gutter);
+  }
+
+  .loc-listing__filters {
+    gap: 12px;
+  }
+
+  /* Phones: the fields take the width; Reset keeps only its icon */
+  .loc-listing__filters-title {
+    display: none;
+  }
+
+  .loc-listing__reset {
+    flex: 0 0 auto;
+    font-size: 0;
+    gap: 0;
+  }
+
+  .loc-field__button {
+    gap: 6px;
+    padding: 0 12px;
+    font-size: 15px;
+  }
+
+  /* No room for the icon here: the value gets the width */
+  .loc-field__button > img:first-child {
+    display: none;
+  }
+
+  .loc-listing__regions {
+    gap: 80px;
+  }
+
+  .loc-region {
+    gap: 32px;
+  }
+
+  .loc-region__name {
+    font-size: 28px;
+  }
+
+  .loc-region__cities {
+    gap: 56px;
+  }
+
+  .loc-city {
+    gap: 16px;
+  }
+
+  .loc-city__name {
+    font-size: 28px;
+  }
+
+  .loc-city__path {
+    font-size: 16px;
+  }
+
+  .loc-card {
+    flex-basis: 100%;
+    max-width: 100%;
+    aspect-ratio: 342 / 360;
+  }
+
+  .loc-card__name {
+    font-size: 26px;
+  }
+}

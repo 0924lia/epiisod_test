@@ -9,6 +9,13 @@ import heroFairway from '../assets/coming-soon/hero-fairway.jpg';
 import heroStirling from '../assets/coming-soon/hero-stirling.jpg';
 import heroEuston from '../assets/coming-soon/hero-euston.jpg';
 
+import cardMacquarie from '../assets/locations/card-macquarie-park.jpg';
+import cardBedford from '../assets/locations/card-bedford.jpg';
+import cardMackenzie from '../assets/locations/card-mackenzie.jpg';
+import cardFairway from '../assets/locations/card-fairway.jpg';
+import cardStirling from '../assets/locations/card-stirling.jpg';
+import cardEuston from '../assets/locations/card-euston.jpg';
+
 export type Property = {
   id: string;
   name: string;
@@ -18,6 +25,8 @@ export type Property = {
   comingSoon?: boolean;
   /** Property page, once one exists. */
   href?: string;
+  /** Its photo on the Locations page (Figma 1182:19860), where it differs from `image`. */
+  listingImage?: string;
   /** Coming-soon page: full-width hero photo and the year it opens. */
   heroImage?: string;
   openingYear?: string;
@@ -53,6 +62,7 @@ export const PROPERTIES: Property[] = [
     address: '17 Lachlan Ave, Macquarie Park NSW 2113',
     city: 'Sydney',
     image: macquarie,
+    listingImage: cardMacquarie,
     href: '/locations/macquarie-park',
   },
   {
@@ -61,13 +71,15 @@ export const PROPERTIES: Property[] = [
     address: '2 Ascot Vale Road, Flemington VIC 3031',
     city: 'Melbourne',
     image: bedford,
+    listingImage: cardBedford,
   },
   {
     id: 'mackenzie',
     name: 'EPIISOD MacKenzie',
-    address: 'Mckenzie Street, Melbourne VIC',
+    address: 'MacKenzie Street, Melbourne VIC',
     city: 'Melbourne',
     image: mckenzie,
+    listingImage: cardMackenzie,
     comingSoon: true,
     href: '/locations/mackenzie',
     heroImage: heroMckenzie,
@@ -76,9 +88,10 @@ export const PROPERTIES: Property[] = [
   {
     id: 'fairway',
     name: 'EPIISOD Fairway',
-    address: 'Perth WA',
+    address: 'Perth, WA',
     city: 'Perth',
     image: fairway,
+    listingImage: cardFairway,
     comingSoon: true,
     href: '/locations/fairway',
     heroImage: heroFairway,
@@ -87,9 +100,10 @@ export const PROPERTIES: Property[] = [
   {
     id: 'stirling',
     name: 'EPIISOD Stirling',
-    address: 'Perth WA',
+    address: 'Perth, WA',
     city: 'Perth',
     image: stirling,
+    listingImage: cardStirling,
     comingSoon: true,
     href: '/locations/stirling',
     heroImage: heroStirling,
@@ -101,6 +115,7 @@ export const PROPERTIES: Property[] = [
     address: 'Euston, London NW1',
     city: 'London',
     image: euston,
+    listingImage: cardEuston,
     comingSoon: true,
     href: '/locations/euston',
     heroImage: heroEuston,

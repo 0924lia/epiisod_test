@@ -72,8 +72,9 @@ function Group({ label, links, onNavigate }: { label: string; links: Link[]; onN
 
 /**
  * Hamburger menu (Figma 652:9490): a white panel sliding in from the right over the
- * blurred page. Life @ EPIISOD, Contact and Blog expand in place; Locations opens a second panel
- * over the first, listing every property by country and city. The main navigation
+ * blurred page. Life @ EPIISOD, Contact and Blog expand in place; Locations links to its
+ * page, and its arrow opens a second panel over the first, listing every property by country
+ * and city. The main navigation
  * on tablets and phones, and the ☰ menu on desktop.
  */
 export default function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
@@ -149,9 +150,18 @@ export default function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
             <nav aria-label="Menu">
               <ul className="menu-panel__items">
                 <Group label="Life @ EPIISOD" links={GROUPS.life} onNavigate={onClose} />
-                <li>
-                  <button ref={locationsButtonRef} type="button" className="menu-panel__item" onClick={() => showLocations(true)}>
+                {/* The word opens the Locations page; the arrow, every property by country and city */}
+                <li className="menu-panel__split">
+                  <a href="/locations" className="menu-panel__item" onClick={onClose}>
                     <span>Locations</span>
+                  </a>
+                  <button
+                    ref={locationsButtonRef}
+                    type="button"
+                    className="menu-panel__split-caret"
+                    aria-label="Locations menu"
+                    onClick={() => showLocations(true)}
+                  >
                     <img src={caretRight} width={16} height={16} alt="" />
                   </button>
                 </li>

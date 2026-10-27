@@ -1,5 +1,6 @@
 .rooms {
-  padding: 120px var(--page-gutter);
+  /* Deep at the foot, so the hand-over's dimming waits until the last cards have risen */
+  padding: 120px var(--page-gutter) 200px;
   background: var(--white);
 }
 
@@ -8,23 +9,25 @@
   z-index: 5;
 }
 
+/* The line, the heading and the search fields 48px apart (Figma 1080:5711), then the
+   results 80px below */
 .rooms__content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 40px;
+  gap: 48px;
 }
 
-/* 48px between the heading and the search form (40px column gap + 8px) */
-.rooms__heading {
-  margin-bottom: 8px;
+/* No box of its own: the search must sit directly in the section's column to stay
+   pinned all the way down the results */
+.rooms__overview {
+  display: contents;
 }
-
 
 /*
- * Search: two fields and a solid bronze button. Pinned below the nav while the rooms
- * scroll; its full-width white band (::before) then reaches down behind the pinned
- * filter row too. The 24px padding (cancelled by the margins) is the band's breathing room.
+ * Search: two fields (Figma 1080:5717), pinned below the sub-navigation while the rooms
+ * scroll, on a full-width white band (::before) with 16px above and below (Figma
+ * 1182:17149). The padding is cancelled by the margins, so the layout keeps its spacing.
  */
 .rooms__search {
   position: sticky;
@@ -33,9 +36,9 @@
   display: flex;
   align-items: flex-start;
   gap: 24px;
-  width: min(904px, 100%);
-  margin: -24px 0;
-  padding: 24px 0;
+  width: min(672px, 100%);
+  margin: -16px 0;
+  padding: 16px 0;
   transition: top 400ms var(--ease-in-out);
 }
 
@@ -45,99 +48,181 @@
   inset: 0 calc(50% - 50vw);
   z-index: -1;
   background: var(--white);
-  transition: bottom 200ms var(--ease-in-out);
-}
-
-/* Pinned: the band also covers the filter row (36px) and 24px below it */
-.rooms__search.is-stuck::before {
-  bottom: -60px;
 }
 
 .rooms__field {
   position: relative;
   flex: 1 0 0;
   min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
   height: 46px;
-  padding: 0 16px;
   border: 1px solid var(--line-in-white);
   background: var(--bronze-100);
-  cursor: pointer;
-  transition: border-color 250ms var(--ease-in-out);
+  transition:
+    border-color 250ms var(--ease-in-out),
+    background-color 250ms var(--ease-in-out);
 }
 
 .rooms__field:hover {
   border-color: var(--bronze-600);
 }
 
+.rooms__field.is-open,
 .rooms__field:focus-within {
   border-color: var(--bronze-700);
   background: var(--white);
 }
 
-.rooms__field select,
-.rooms__field input {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  appearance: none;
-  font-size: 16px;
-  line-height: 24px;
-  color: var(--royal-chocolate-600);
-  outline: none;
-  cursor: pointer;
-}
-
-.rooms__field input::placeholder {
-  color: var(--royal-chocolate-600);
-  opacity: 1;
-}
-
-/* The field draws its own caret */
-.rooms__field input::-webkit-calendar-picker-indicator {
-  display: none;
-}
-
-.rooms__field img {
-  flex-shrink: 0;
-  pointer-events: none;
-}
-
-.rooms__submit {
+.rooms__field-button {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
-  height: 44px;
-  padding: 0 24px 0 40px;
+  width: 100%;
+  height: 100%;
+  padding: 0 16px;
   border: 0;
-  background: var(--bronze-700);
+  background: none;
+  font: inherit;
   font-size: 16px;
-  line-height: 20px;
-  text-transform: uppercase;
-  color: var(--white);
+  line-height: 24px;
+  text-align: left;
+  color: var(--royal-chocolate-600);
   cursor: pointer;
-  transition: background-color 300ms var(--ease-in-out);
 }
 
-.rooms__submit img {
-  transition: transform 300ms var(--ease-in-out);
+.rooms__field.has-value .rooms__field-button {
+  padding-right: 48px;
 }
 
-.rooms__submit:hover {
-  background: #7a5f37;
+.rooms__field-button:focus-visible {
+  outline: none;
 }
 
-.rooms__submit:hover img {
-  transform: translateX(4px);
+.rooms__field-text {
+  flex: 1 0 0;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.rooms__field-button img {
+  flex-shrink: 0;
+}
+
+/* Clears a chosen value, in the caret's place */
+.rooms__field-clear {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  display: flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: opacity 200ms ease;
+}
+
+.rooms__field-clear:hover {
+  opacity: 0.6;
+}
+
+/* The native date picker opens from the field; its own input stays out of sight */
+.rooms__date-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Lists opening below a field or Sort: white, soft shadow, fading down into place */
+.rooms__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: -1px;
+  right: -1px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  border: 1px solid var(--line-in-white);
+  background: var(--white);
+  box-shadow:
+    0 5px 10px rgba(0, 0, 0, 0.12),
+    0 19px 19px rgba(0, 0, 0, 0.1),
+    0 43px 26px rgba(0, 0, 0, 0.05);
+  animation: rooms-menu-in 240ms var(--ease-in-out);
+}
+
+@keyframes rooms-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.rooms__stays {
+  max-height: 380px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-in-white) transparent;
+}
+
+.rooms__stay-group + .rooms__stay-group {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--bronze-300);
+}
+
+.rooms__stay-heading {
+  padding: 10px 16px 4px;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bronze-700);
+}
+
+.rooms__option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.3;
+  text-align: left;
+  color: var(--royal-chocolate-600);
+  cursor: pointer;
+  transition: background-color 200ms var(--ease-in-out);
+}
+
+.rooms__option:hover,
+.rooms__option:focus-visible {
+  outline: none;
+  background: var(--bronze-100);
+}
+
+.rooms__option.is-current {
+  font-weight: 600;
+  color: var(--royal-chocolate-700);
+}
+
+/* The chosen stay's check-in window, under the fields */
+.rooms__window {
+  margin-top: -32px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--royal-chocolate-500);
 }
 
 .rooms__results {
+  margin-top: 32px;
   display: flex;
   flex-direction: column;
   gap: 48px;
@@ -145,43 +230,41 @@
   max-width: var(--content-max);
 }
 
-/* Toolbar: views · types · availability. Pins 24px below the pinned search fields. */
+/* Availability and Sort on the left (Figma 1080:5762); room types on the right */
 .rooms__toolbar {
-  position: sticky;
-  top: calc(var(--nav-offset, 0px) + 24px + 46px + 24px);
-  z-index: 4;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
-  transition: top 400ms var(--ease-in-out);
 }
 
-/* Availability, Grid, List, Sort on the left (Figma 1080:5762); room types on the right */
 .rooms__controls {
   display: flex;
   align-items: center;
   gap: 24px;
 }
 
-.rooms__views {
-  display: flex;
-  align-items: center;
-  gap: 24px;
+.rooms__sort {
+  position: relative;
 }
 
-.rooms__view {
+.rooms__sort-button {
   display: flex;
   align-items: center;
   gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
   font-size: 18px;
   line-height: 1.2;
   color: var(--royal-chocolate-600);
-  opacity: 0.5;
+  cursor: pointer;
 }
 
-.rooms__view.is-active {
-  opacity: 1;
+.rooms__sorts {
+  right: auto;
+  width: 220px;
 }
 
 .rooms__available {
@@ -242,6 +325,26 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 32px 24px;
+}
+
+/* Cards rise softly into place whenever the list changes, a beat apart */
+.room-card {
+  animation: room-in 520ms var(--ease-in-out) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+@keyframes room-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-card,
+  .rooms__menu {
+    animation: none;
+  }
 }
 
 .rooms__empty {
@@ -380,9 +483,8 @@
 }
 
 @media (max-width: 1100px) {
-  /* The controls wrap onto several rows here, so they scroll normally */
-  .rooms__search,
-  .rooms__toolbar {
+  /* The fields stack here, so they scroll normally */
+  .rooms__search {
     position: relative;
     top: auto;
   }
@@ -425,10 +527,6 @@
     flex: none;
   }
 
-  .rooms__submit {
-    justify-content: center;
-  }
-
   .rooms__grid {
     grid-template-columns: 1fr;
   }
@@ -441,19 +539,19 @@
 /* Phones: tighter section and cards, so the list reads as a list */
 @media (max-width: 700px) {
   .rooms {
-    padding: 80px var(--page-gutter);
+    padding: 80px var(--page-gutter) 120px;
   }
 
   .rooms__content {
     gap: 32px;
   }
 
-  .rooms__heading {
-    margin-bottom: 0;
-  }
-
   .rooms__search {
     gap: 12px;
+  }
+
+  .rooms__window {
+    margin-top: -16px;
   }
 
   .rooms__results {
@@ -464,7 +562,7 @@
     gap: 20px;
   }
 
-  .rooms__view,
+  .rooms__sort-button,
   .rooms__available {
     font-size: 16px;
   }
@@ -499,4 +597,14 @@
   .room-card__features.is-empty {
     display: none;
   }
+}
+
+/* Cards open their room's page */
+a.room-card {
+  color: inherit;
+}
+
+a.room-card:focus-visible {
+  outline: 2px solid var(--bronze-700);
+  outline-offset: 3px;
 }

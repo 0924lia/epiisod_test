@@ -18,12 +18,13 @@ import './Nav.css';
 type MenuKey = 'life' | 'locations' | 'contact';
 
 /**
- * Primary links; those with a `menu` toggle a mega menu instead of navigating.
+ * Primary links; those with a `menu` toggle a mega menu instead of navigating. With both a
+ * `menu` and an `href` (Locations), the word goes to the page and its caret opens the menu.
  * Navigation option B (Figma 690:3977) turns Contact us into a menu (without a caret).
  */
 const PRIMARY_LINKS: { label: string; menu?: MenuKey; href?: string; caret?: boolean }[] = [
   { label: 'Life @ epiisod', menu: 'life' },
-  { label: 'Locations', menu: 'locations' },
+  { label: 'Locations', menu: 'locations', href: '/locations' },
   NAV_VARIANT === 'b'
     ? { label: 'Contact us', menu: 'contact', caret: false }
     : { label: 'Contact us', href: '/contact' },
@@ -242,7 +243,23 @@ export default function Nav({
         <nav ref={barRef} className="nav__inner" aria-label="Main">
           <div className="nav__links">
             {PRIMARY_LINKS.map(({ label, menu, href = '#', caret = true }) =>
-              menu ? (
+              menu && href !== '#' ? (
+                <span key={label} className="nav__split">
+                  <a href={href} className={`nav__link${openMenu === menu ? ' is-active' : ''}`}>
+                    <span>{label}</span>
+                  </a>
+                  <button
+                    type="button"
+                    className="nav__link nav__caret"
+                    aria-label={`${label} menu`}
+                    aria-expanded={openMenu === menu}
+                    aria-controls={menuId(menu)}
+                    onClick={() => setOpenMenu((current) => (current === menu ? null : menu))}
+                  >
+                    <Icon light={caretLight} dark={caretDark} size={16} />
+                  </button>
+                </span>
+              ) : menu ? (
                 <button
                   key={label}
                   type="button"

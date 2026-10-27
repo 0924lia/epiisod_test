@@ -15,6 +15,7 @@ import coffee from '../../assets/experience/coffee.jpg';
 import socialTable from '../../assets/property/amenity-social.jpg';
 import { OFFERS } from '../promotions/promotionsData';
 import { MACQUARIE_PARK_PLACES } from './macquarieParkMap';
+import { MACQUARIE_PARK_ROOM_DETAILS, type RoomDetails } from './roomDetails';
 
 export type RoomType = 'Studio' | 'Shared';
 
@@ -32,8 +33,25 @@ export type Room = {
   tag: RoomTag;
   /** Views, e.g. "Garden/Urban/Pool/City", where known. */
   features?: string;
+  /** Weekly price with no length of stay chosen. */
   price: number;
   available: boolean;
+};
+
+/**
+ * A length of stay (lease term) a room can be booked for, as offered on the live site's
+ * "Preferred Length of Stay" list. Each has its own check-in window and weekly prices.
+ */
+export type Stay = {
+  id: string;
+  /** The term's heading in the list, e.g. "Academic Year 2027". */
+  group: string;
+  /** e.g. "52 weeks". */
+  label: string;
+  /** Check-in is open between these dates (ISO, inclusive). */
+  checkIn: { from: string; to: string };
+  /** Weekly price per room id; rooms missing here aren't offered for this stay. */
+  prices: Record<string, number>;
 };
 
 export type Promo = { id: string; title: string; text: string; image: string };
@@ -63,8 +81,11 @@ export type PropertyContent = {
   hero: string;
   amenities: Amenity[];
   rooms: Room[];
+  /** Each room's details page (Figma 1195:26614), by room id. */
+  roomDetails: RoomDetails[];
   roomCurrency: string;
-  stayLengths: string[];
+  /** Lengths of stay, in the order listed. */
+  stays: Stay[];
   /** The property's own pin. */
   mapCenter: { lat: number; lng: number };
   /** Nearby places, by category: the map's markers and its filter tabs. */
@@ -73,6 +94,29 @@ export type PropertyContent = {
   promos: Promo[];
   faqs: Faq[];
 };
+
+/** Room ids in the order of the price lists below. */
+const ROOM_ORDER = ['quad', 'quint', 'signature', 'signature-flex', 'aspect', 'aspect-e', 'empowered', 'premier-empowered'];
+const priceList = (...weekly: number[]) => Object.fromEntries(weekly.map((p, i) => [ROOM_ORDER[i], p]));
+
+/**
+ * Lengths of stay at EPIISOD Macquarie Park, with the weekly prices from the live site
+ * (epiisod.com, October 2026). The AY 2027 check-in window is the live site's; the AY 2026
+ * and Short Stay windows aren't published there, so these are assumptions to confirm —
+ * Short Stay's follows its "min 12 weeks, move out by 12th Feb 2027".
+ */
+const MACQUARIE_PARK_STAYS: Stay[] = [
+  { id: '4175', group: 'Academic Year 2027', label: '52 weeks', checkIn: { from: '2026-12-01', to: '2027-03-31' }, prices: priceList(615, 615, 725, 727, 745, 840, 873, 893) },
+  { id: '4174', group: 'Academic Year 2027', label: '48 weeks', checkIn: { from: '2026-12-01', to: '2027-03-31' }, prices: priceList(615, 615, 725, 727, 745, 840, 873, 893) },
+  { id: '4173', group: 'Academic Year 2027', label: '44 weeks', checkIn: { from: '2026-12-01', to: '2027-03-31' }, prices: priceList(615, 615, 725, 727, 745, 840, 873, 893) },
+  { id: '4172', group: 'Academic Year 2027', label: '24 weeks', checkIn: { from: '2026-12-01', to: '2027-03-31' }, prices: priceList(655, 655, 765, 767, 785, 880, 913, 933) },
+  { id: '4165', group: 'Academic Year 2026', label: '52 weeks', checkIn: { from: '2026-01-01', to: '2026-11-30' }, prices: priceList(599, 599, 699, 786, 786, 832, 865, 893) },
+  { id: '4164', group: 'Academic Year 2026', label: '48 weeks', checkIn: { from: '2026-01-01', to: '2026-11-30' }, prices: priceList(599, 599, 699, 786, 786, 832, 865, 893) },
+  { id: '4170', group: 'Academic Year 2026', label: '44 weeks', checkIn: { from: '2026-01-01', to: '2026-11-30' }, prices: priceList(599, 599, 699, 786, 786, 832, 865, 893) },
+  { id: '4163', group: 'Academic Year 2026', label: '24 weeks', checkIn: { from: '2026-01-01', to: '2026-11-30' }, prices: priceList(639, 639, 816, 826, 826, 872, 905, 933) },
+  // Only these two studios are offered for a short stay
+  { id: 'short-stay-term', group: 'Short Stay', label: 'Min 12 weeks, move out by 12 Feb 2027', checkIn: { from: '2026-01-01', to: '2026-11-20' }, prices: { signature: 816, aspect: 826 } },
+];
 
 // TODO: replace with the real answers — the design only lists the questions.
 const PENDING_ANSWER =
@@ -135,13 +179,14 @@ export const MACQUARIE_PARK: PropertyContent = {
     { id: 'quint', type: 'Shared', typeLabel: 'Shared Apartment', name: 'Quint 5 Bedroom Ensuite', image: roomQuad, tag: 'popular', price: 615, available: true },
     { id: 'signature', type: 'Studio', typeLabel: 'Studio', name: 'Signature Studio', image: roomSignature, tag: 'promotion', features: 'Garden/Urban/Pool/City', price: 725, available: true },
     { id: 'signature-flex', type: 'Studio', typeLabel: 'Studio', name: 'Signature Studio Flex', image: roomSignatureFlex, tag: 'promotion', price: 727, available: true },
-    { id: 'aspect', type: 'Studio', typeLabel: 'Studio', name: 'Aspect Studio', image: roomAspect, tag: 'soldOut', features: 'Garden/Urban/Pool/City', price: 745, available: false },
+    { id: 'aspect', type: 'Studio', typeLabel: 'Studio', name: 'Aspect Studio', image: roomAspect, tag: 'promotion', features: 'Garden/Urban/Pool/City', price: 745, available: true },
     { id: 'aspect-e', type: 'Studio', typeLabel: 'Studio', name: 'Aspect Studio E', image: roomAspectE, tag: 'promotion', features: 'Garden/Pool', price: 840, available: true },
     { id: 'empowered', type: 'Studio', typeLabel: 'Studio', name: 'Empowered Studio', image: roomEmpowered, tag: 'soldOut', price: 873, available: false },
     { id: 'premier-empowered', type: 'Studio', typeLabel: 'Studio', name: 'Premier Empowered Studio', image: roomPremier, tag: 'value', price: 893, available: true },
   ],
+  roomDetails: MACQUARIE_PARK_ROOM_DETAILS,
   roomCurrency: 'AU$',
-  stayLengths: ['12 weeks', '6 months', '12 months'],
+  stays: MACQUARIE_PARK_STAYS,
   mapCenter: { lat: -33.77917242506175, lng: 151.11718975214868 },
   mapPlaces: MACQUARIE_PARK_PLACES,
   promotion: {

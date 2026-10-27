@@ -146,6 +146,30 @@
   cursor: pointer;
 }
 
+/* Locations: the word links to its page; the arrow on the right opens its panel */
+.menu-panel__split {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-panel__split .menu-panel__item {
+  flex: 1;
+}
+
+.menu-panel__split-caret {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-right: -9px; /* the arrow stays in line with the other carets */
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
 .menu-panel__item span {
   flex: 1;
 }

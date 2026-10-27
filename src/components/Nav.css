@@ -38,9 +38,10 @@
   transform: none;
 }
 
-/* Over the hero: white type with Figma's soft text shadow for legibility */
-.nav:not(.is-scrolled):not(.is-open) .nav__inner,
-.nav:not(.is-scrolled):not(.is-open) .nav__sub {
+/* Over the hero: white type with Figma's soft text shadow for legibility (not on the
+   solid cream and dark bars, which have no photo behind them) */
+.nav:not(.nav--cream):not(.nav--dark):not(.is-scrolled):not(.is-open) .nav__inner,
+.nav:not(.nav--cream):not(.nav--dark):not(.is-scrolled):not(.is-open) .nav__sub {
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7));
 }
 
@@ -153,6 +154,27 @@ button.nav__link {
   font-weight: 700;
 }
 
+/* Locations: the word links to its page, the caret beside it opens the menu */
+.nav__split {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* A larger target than the 16px caret, 8px from the word like the other carets */
+button.nav__link.nav__caret {
+  margin-right: -6px;
+  padding: 0 6px;
+}
+
+.nav__caret .nav__icon {
+  transition: transform 300ms var(--ease-in-out);
+}
+
+.nav__caret[aria-expanded='true'] .nav__icon {
+  transform: rotate(180deg);
+}
+
 .nav__link:hover {
   opacity: 0.75;
 }
@@ -252,7 +274,8 @@ button.nav__link {
   gap: 24px;
   width: calc(100% + 2 * var(--page-gutter));
   max-height: 80px;
-  padding: 4px var(--page-gutter);
+  /* None below, so the current section's bar sits on the row's bottom edge */
+  padding: 4px var(--page-gutter) 0;
   background: rgba(248, 245, 239, 0);
   transition:
     background-color 400ms var(--ease-in-out),
@@ -264,6 +287,20 @@ button.nav__link {
 .nav.is-scrolled .nav__sub {
   --nav-text: var(--royal-chocolate-700);
   background: var(--bronze-200);
+}
+
+/* The section in view: a 4px sand bar under its link (Figma 1182:17374), growing up from
+   the row's edge. On tablets and phones the row scrolls sideways and keeps it in sight. */
+.nav__sub-link {
+  box-shadow: inset 0 0 0 var(--bronze-500);
+  transition:
+    color 400ms var(--ease-in-out),
+    opacity 200ms ease,
+    box-shadow 350ms var(--ease-in-out);
+}
+
+.nav__sub-link.is-current {
+  box-shadow: inset 0 -4px 0 var(--bronze-500);
 }
 
 /* A mega menu takes over: the sub-navigation folds away while it's open */
@@ -353,19 +390,6 @@ button.nav__link {
     display: none;
   }
 
-  /* The row scrolls sideways here: underline the section in view, which the row keeps
-     scrolled into sight (Nav.tsx) */
-  .nav__sub-link {
-    box-shadow: inset 0 -1px 0 transparent;
-    transition:
-      color 400ms var(--ease-in-out),
-      opacity 200ms ease,
-      box-shadow 300ms var(--ease-in-out);
-  }
-
-  .nav__sub-link.is-current {
-    box-shadow: inset 0 -1px 0 currentColor;
-  }
 }
 
 @media (max-width: 700px) {
