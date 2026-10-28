@@ -38,6 +38,18 @@
   transform-origin: 50% 0%;
 }
 
+.footer__emblem-lobe {
+  position: absolute;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.footer__emblem-lobe img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .footer__wordmark-part img {
   display: block;
   width: 100%;
@@ -220,5 +232,36 @@
 
   .footer__legal span + span::before {
     content: none;
+  }
+}
+
+/*
+ * Option B: extra quiet space (300px; 160px on phones) between the opened-out wordmark
+ * and the links. The wordmark stays near the top of the screen while the links come up
+ * (see Footer.tsx), so the band clips only sideways, never cutting it off as it's held.
+ */
+.footer__drift {
+  width: 100%;
+  max-width: var(--content-max);
+}
+
+.footer--logo-b {
+  /* From the wordmark's foot to the top of the links' area (read by Footer.tsx) */
+  --logo-b-space: 300px;
+}
+
+.footer--logo-b .footer__brand {
+  margin-bottom: calc(var(--logo-b-space) - 100px);
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+@media (max-width: 700px) {
+  .footer--logo-b {
+    --logo-b-space: 220px;
+  }
+
+  .footer--logo-b .footer__brand {
+    margin-bottom: calc(var(--logo-b-space) - 60px);
   }
 }

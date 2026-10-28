@@ -7,6 +7,9 @@
  * The Locations menu has its own pair: A lists every property by city; B (Figma
  * 1081:16430) lists the open ones and names the coming-soon ones beside them, as
  * information only. `?locations=b` / `?locations=a` switches it the same way.
+ *
+ * The footer logo has a pair too: A assembles the wordmark; B (Figma 1254:7885) starts
+ * from the emblem and opens it out into the wordmark. `?footer=b` / `?footer=a`.
  */
 export type NavVariant = 'a' | 'b';
 
@@ -30,3 +33,4 @@ function readVariant(param: string, storageKey: string): NavVariant {
 /** Read once per page load (the choice only changes through the URL). */
 export const NAV_VARIANT: NavVariant = readVariant('nav', 'epiisod-nav-variant');
 export const LOCATIONS_MENU_VARIANT: NavVariant = readVariant('locations', 'epiisod-locations-menu-variant');
+export const FOOTER_VARIANT: NavVariant = readVariant('footer', 'epiisod-footer-variant');
