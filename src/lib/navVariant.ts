@@ -8,12 +8,12 @@
  * 1081:16430) lists the open ones and names the coming-soon ones beside them, as
  * information only. `?locations=b` / `?locations=a` switches it the same way.
  *
- * The footer logo has a pair too: A assembles the wordmark; B (Figma 1254:7885) starts
- * from the emblem and opens it out into the wordmark. `?footer=b` / `?footer=a`.
+ * The footer logo has a pair too: B (Figma 1254:7885, the default) starts from the emblem
+ * and opens it out into the wordmark; A assembles the wordmark. `?footer=a` / `?footer=b`.
  */
 export type NavVariant = 'a' | 'b';
 
-function readVariant(param: string, storageKey: string): NavVariant {
+function readVariant(param: string, storageKey: string, fallback: NavVariant = 'a'): NavVariant {
   const fromUrl = new URLSearchParams(window.location.search).get(param)?.toLowerCase();
   if (fromUrl === 'a' || fromUrl === 'b') {
     try {
@@ -24,13 +24,14 @@ function readVariant(param: string, storageKey: string): NavVariant {
     return fromUrl;
   }
   try {
-    return window.localStorage.getItem(storageKey) === 'b' ? 'b' : 'a';
+    const stored = window.localStorage.getItem(storageKey);
+    return stored === 'a' || stored === 'b' ? stored : fallback;
   } catch {
-    return 'a';
+    return fallback;
   }
 }
 
 /** Read once per page load (the choice only changes through the URL). */
 export const NAV_VARIANT: NavVariant = readVariant('nav', 'epiisod-nav-variant');
 export const LOCATIONS_MENU_VARIANT: NavVariant = readVariant('locations', 'epiisod-locations-menu-variant');
-export const FOOTER_VARIANT: NavVariant = readVariant('footer', 'epiisod-footer-variant');
+export const FOOTER_VARIANT: NavVariant = readVariant('footer', 'epiisod-footer-variant', 'b');
