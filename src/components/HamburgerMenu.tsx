@@ -17,6 +17,7 @@ const GROUPS: Record<'life' | 'contact' | 'blog', Link[]> = {
   life: [
     { label: 'Why EPIISOD', href: '/why-epiisod' },
     { label: 'Experience', href: '/experience' },
+    { label: 'Promotions', href: '/promotions' },
   ],
   contact: [
     { label: 'Contact Us', href: '/contact' },

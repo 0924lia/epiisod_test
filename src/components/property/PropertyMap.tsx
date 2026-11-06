@@ -32,10 +32,13 @@ type PropertyMapProps = {
   markers: MapMarker[];
   /** Changing this re-frames the map around the markers (or back on the property). */
   frame: string | null;
-  /** Room (px) the finder panel takes over the map's top-left corner, kept clear when framing. */
-  inset: { left: number; top: number };
+  /** Room (px) the finder takes over the map's top-left corner (or its foot, `bottom`, on
+   *  the full-screen phone map), kept clear when framing. */
+  inset: Inset;
   /** The same while a photo is open, when the panel can be taller. */
-  spotlightInset: { left: number; top: number };
+  spotlightInset: Inset;
+  /** Full screen on a phone: one finger moves the map (there's no page to scroll). */
+  full?: boolean;
   /** The place under the pointer in the list, lit on the map. */
   highlight: string | null;
   /** The place picked in the list: the map moves to it and opens its card. */
@@ -44,6 +47,8 @@ type PropertyMapProps = {
   spotlight: string | null;
   onMarkerClick: (id: string) => void;
 };
+
+type Inset = { left: number; top: number; bottom?: number };
 
 const escape = (text: string) =>
   text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -68,6 +73,7 @@ export default function PropertyMap({
   highlight,
   focus,
   spotlight,
+  full = false,
   onMarkerClick,
 }: PropertyMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -171,7 +177,7 @@ export default function PropertyMap({
     const clear = lit.length ? spotlightInset : inset;
     map.flyToBounds(L.latLngBounds(points), {
       paddingTopLeft: [clear.left + 32, Math.max(clear.top, 150)],
-      paddingBottomRight: [56, 48],
+      paddingBottomRight: [56, Math.max(48, (clear.bottom ?? 0) + 24)],
       maxZoom: 16,
       duration: 0.8,
     });
@@ -206,9 +212,20 @@ export default function PropertyMap({
     const map = mapRef.current;
     const m = focus && markersRef.current.get(focus.id);
     if (!map || !m) return;
-    map.panInside(m.getLatLng(), { paddingTopLeft: [inset.left + 40, 160], paddingBottomRight: [60, 60] });
+    map.panInside(m.getLatLng(), {
+      paddingTopLeft: [inset.left + 40, 160],
+      paddingBottomRight: [60, Math.max(60, (inset.bottom ?? 0) + 40)],
+    });
     m.openPopup();
   }, [focus, inset]);
+
+  // Touch screens: one finger moves the map only while it fills the screen
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !L.Browser.mobile) return;
+    if (full) map.dragging.enable();
+    else map.dragging.disable();
+  }, [full]);
 
   return (
     <div

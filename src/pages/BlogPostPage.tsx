@@ -5,6 +5,7 @@ import BlogCard from '../components/blog/BlogCard';
 import WhyLiving from '../components/why/WhyLiving';
 import AboutClosing from '../components/about/AboutClosing';
 import Footer from '../components/Footer';
+import ToTop from '../components/ToTop';
 import { scrollToY } from '../lib/smoothScroll';
 import { POSTS, postMeta } from '../components/blog/blogData';
 import type { Audience, BlogPost } from '../components/blog/blogData';
@@ -12,6 +13,8 @@ import linkIcon from '../assets/blog/share-link.svg';
 import tiktok from '../assets/blog/share-tiktok.svg';
 import facebook from '../assets/blog/share-facebook.svg';
 import instagram from '../assets/blog/share-instagram.svg';
+import dropdownIcon from '../assets/blog/section-dropdown.svg';
+import shareIcon from '../assets/blog/share-network.svg';
 import '../components/blog/Blog.css';
 
 const sectionId = (i: number) => `section-${i + 1}`;
@@ -25,10 +28,15 @@ const sectionId = (i: number) => `section-${i + 1}`;
 export default function BlogPostPage({ post, audience }: { post: BlogPost; audience: Audience }) {
   const [current, setCurrent] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [barShown, setBarShown] = useState(false);
   const articleRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
   const related = POSTS.filter((p) => p.audience === post.audience && p.slug !== post.slug).slice(0, 3);
 
-  // The section in view: the last whose heading has passed a third of the way down
+  // The section in view: the last whose heading has passed a third of the way down.
+  // Phones: the section bar shows from the title's passing under the nav to the article's end.
   useEffect(() => {
     const update = () => {
       const heads = articleRef.current?.querySelectorAll<HTMLElement>('.blog-post__section-title');
@@ -38,6 +46,9 @@ export default function BlogPostPage({ post, audience }: { post: BlogPost; audie
         if (h.getBoundingClientRect().top <= window.innerHeight / 3) i = n;
       });
       setCurrent(i);
+      const header = headerRef.current?.getBoundingClientRect();
+      const main = mainRef.current?.getBoundingClientRect();
+      setBarShown(!!header && !!main && header.bottom < 64 && main.bottom > 64 + (barRef.current?.offsetHeight ?? 0));
     };
     update();
     window.addEventListener('scroll', update, { passive: true });
@@ -47,8 +58,19 @@ export default function BlogPostPage({ post, audience }: { post: BlogPost; audie
   const goTo = (i: number) => {
     const el = document.getElementById(sectionId(i));
     if (!el) return;
-    const offset = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-offset')) || 88;
-    scrollToY(el.getBoundingClientRect().top + window.scrollY - offset - 32);
+    const nav = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-offset')) || 88;
+    // Phones: clear the section bar too (it's not displayed on larger screens)
+    const bar = barRef.current?.offsetParent ? barRef.current.offsetHeight : 0;
+    scrollToY(el.getBoundingClientRect().top + window.scrollY - nav - bar - 32);
+  };
+
+  const share = async () => {
+    try {
+      if (navigator.share) await navigator.share({ title: post.title, url: window.location.href });
+      else await copyLink();
+    } catch {
+      // Sharing cancelled: nothing to do
+    }
   };
 
   const copyLink = async () => {
@@ -61,11 +83,69 @@ export default function BlogPostPage({ post, audience }: { post: BlogPost; audie
     }
   };
 
-  const share = encodeURIComponent(window.location.href);
+  const shareUrl = encodeURIComponent(window.location.href);
+
+  // In the side panel, and on phones below the article instead
+  const sharePanel = (
+    <>
+      <p className="eyebrow blog-post__label">Share</p>
+      <ul className="blog-post__share">
+        <li>
+          <button type="button" aria-label="Copy link" onClick={copyLink}>
+            <img src={linkIcon} width={24} height={24} alt="" />
+          </button>
+        </li>
+        <li>
+          <a href="#" aria-label="TikTok">
+            <img src={tiktok} width={24} height={24} alt="" />
+          </a>
+        </li>
+        <li>
+          <a
+            href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Share on Facebook"
+          >
+            <img src={facebook} width={24} height={24} alt="" />
+          </a>
+        </li>
+        <li>
+          <a href="#" aria-label="Instagram">
+            <img src={instagram} width={24} height={24} alt="" />
+          </a>
+        </li>
+      </ul>
+      <p className="blog-post__copied" role="status">
+        {copied ? 'Link copied' : ''}
+      </p>
+    </>
+  );
 
   return (
     <>
       <Nav tone="cream" />
+      {/* Phones (Figma 1361:27930): the section in view, to jump between them, and sharing */}
+      <div
+        ref={barRef}
+        className={`blog-post__bar${barShown ? ' is-shown' : ''}`}
+        aria-hidden={!barShown}
+      >
+        <label className="blog-post__jump">
+          <span className="visually-hidden">Jump to section</span>
+          <select value={current} onChange={(e) => goTo(Number(e.target.value))}>
+            {post.sections.map((s, i) => (
+              <option key={s.title} value={i}>
+                {s.title}
+              </option>
+            ))}
+          </select>
+          <img src={dropdownIcon} width={24} height={24} alt="" />
+        </label>
+        <button type="button" className="blog-post__bar-share" aria-label="Share" onClick={share}>
+          <img src={shareIcon} width={24} height={24} alt="" />
+        </button>
+      </div>
       <main>
         <section className="blog-post">
           <nav className="blog-post__crumbs" aria-label="Breadcrumb">
@@ -78,9 +158,9 @@ export default function BlogPostPage({ post, audience }: { post: BlogPost; audie
             <span aria-current="page">Blog content</span>
           </nav>
 
-          <div className="blog-post__main">
+          <div ref={mainRef} className="blog-post__main">
             <article ref={articleRef} className="blog-post__article">
-              <header className="blog-post__header">
+              <header ref={headerRef} className="blog-post__header">
                 <h1 className="type-h3 blog-post__title">{post.title}</h1>
                 <p className="blog-meta">{postMeta(post)}</p>
               </header>
@@ -133,41 +213,11 @@ export default function BlogPostPage({ post, audience }: { post: BlogPost; audie
                 </div>
               </div>
 
-              <div className="blog-post__panel">
-                <p className="eyebrow blog-post__label">Share</p>
-                <ul className="blog-post__share">
-                  <li>
-                    <button type="button" aria-label="Copy link" onClick={copyLink}>
-                      <img src={linkIcon} width={24} height={24} alt="" />
-                    </button>
-                  </li>
-                  <li>
-                    <a href="#" aria-label="TikTok">
-                      <img src={tiktok} width={24} height={24} alt="" />
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href={`https://www.facebook.com/sharer/sharer.php?u=${share}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Share on Facebook"
-                    >
-                      <img src={facebook} width={24} height={24} alt="" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" aria-label="Instagram">
-                      <img src={instagram} width={24} height={24} alt="" />
-                    </a>
-                  </li>
-                </ul>
-                <p className="blog-post__copied" role="status">
-                  {copied ? 'Link copied' : ''}
-                </p>
-              </div>
+              <div className="blog-post__panel">{sharePanel}</div>
             </aside>
           </div>
+
+          <div className="blog-post__panel blog-post__share-end">{sharePanel}</div>
 
           {related.length > 0 && (
             <div className="blog-post__related">
@@ -186,6 +236,7 @@ export default function BlogPostPage({ post, audience }: { post: BlogPost; audie
         <AboutClosing />
       </main>
       <Footer />
+      <ToTop />
     </>
   );
 }

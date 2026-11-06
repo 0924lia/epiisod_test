@@ -110,6 +110,18 @@
   border-left: 1px solid var(--line-in-white);
 }
 
+/* Promotions (Figma 1361:28011): one link, ruled left, sized to its text */
+.nav-menu-b__promos {
+  flex-shrink: 0;
+  align-self: flex-start;
+  width: 324px;
+  padding: 16px 0;
+}
+
+.nav-menu-b__promos .nav-menu-b__link {
+  border-left: 1px solid var(--line-in-white);
+}
+
 .nav-menu-b__label {
   padding: 20px 32px;
 }

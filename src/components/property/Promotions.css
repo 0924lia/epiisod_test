@@ -60,6 +60,7 @@
 }
 
 .promo-banner__button {
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   height: 44px;
@@ -114,6 +115,7 @@
 
 
 .promotions__all {
+  border-radius: 4px;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
@@ -329,12 +331,55 @@
     padding-bottom: 80px;
   }
 
+  /* Featured promotion (Figma 1275:9798): the copy first, then the arched photo */
+  .promo-banner {
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+  }
+
+  .promo-banner__copy {
+    padding: 24px;
+  }
+
+  .promo-banner__eyebrow {
+    color: var(--bronze-400);
+  }
+
+  .promo-banner__title {
+    font-size: 24px;
+    line-height: 1.4;
+  }
+
+  .promo-banner__body {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  /* Both buttons across the width, one above the other */
+  .promo-banner__actions {
+    flex-direction: column;
+  }
+
+  .promo-banner__button {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .promo-banner__image {
+    height: 240px;
+    border-top-left-radius: 240px;
+  }
+
+  /* "Latest promotion" and its button centred, 40px apart (Figma 1275:9813) */
   .promotions__header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    gap: 40px;
+    text-align: center;
   }
 
   .promo-card {
-    width: min(324px, 80vw);
+    width: min(300px, 80vw);
   }
 }

@@ -92,6 +92,7 @@
 
 /* Solid chocolate button (Figma 735:15231), shared with the sign-up */
 .about-button {
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 8px;

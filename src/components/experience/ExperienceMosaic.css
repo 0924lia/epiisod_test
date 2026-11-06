@@ -108,6 +108,7 @@
 }
 
 .xp-mosaic__button {
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -317,5 +318,95 @@
 
   .xp-mosaic__card-text {
     font-size: 16px;
+  }
+}
+
+/*
+ * Phones, animated (Figma 1275:8431): the 3-column wall at Figma's 390 scale, wider than
+ * the screen, sticks while the lobby frame grows to fill it; the Exclusives content then
+ * scrolls up over the darkened lobby, which stays behind it as the background.
+ */
+@media (max-width: 700px) {
+  .xp-mosaic.is-unfolding {
+    --u: calc(100vw / 390);
+    /* The lobby frame's height, 176.36 → the screen's */
+    --feature-h: calc((1 - var(--p)) * 176.36 * var(--u) + var(--p) * (100svh + 6px));
+  }
+
+  .xp-mosaic.is-unfolding .xp-mosaic__grid {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: calc(8 * var(--u));
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .xp-mosaic.is-unfolding .xp-mosaic__column {
+    gap: calc(8 * var(--u));
+  }
+
+  /* The side columns narrow as the middle one widens, the wall keeping its 460 width
+     (Figma 1275:8709: 148 → 82 → 50), until they're beyond the screen's edges */
+  .xp-mosaic.is-unfolding .xp-mosaic__column--left,
+  .xp-mosaic.is-unfolding .xp-mosaic__column--right {
+    flex: 0 0 calc((148 - var(--p) * 121) * var(--u) - var(--p) * 6px);
+  }
+
+  /* 148 → the full width, plus a few pixels to cover the edges */
+  .xp-mosaic.is-unfolding .xp-mosaic__column--middle {
+    flex: 0 0 auto;
+    width: calc((148 + var(--p) * 242) * var(--u) + var(--p) * 12px);
+  }
+
+  .xp-mosaic.is-unfolding .xp-mosaic__photo {
+    aspect-ratio: auto;
+    box-shadow: 0 19px 8px -13px rgba(0, 0, 0, 0.18);
+  }
+
+  /* The side rows grow with the lobby, so each side column stays as tall as the middle
+     one (short + lobby + short) */
+  .xp-mosaic.is-unfolding .xp-mosaic__photo--tall {
+    height: calc((var(--feature-h) + 176.36 * var(--u)) / 2);
+  }
+
+  .xp-mosaic.is-unfolding .xp-mosaic__photo--short {
+    aspect-ratio: auto;
+    height: calc(83.37 * var(--u));
+  }
+
+  .xp-mosaic.is-unfolding .xp-mosaic__photo--feature {
+    height: var(--feature-h);
+    border-width: 0;
+  }
+
+  /* The lobby photo holds still at the screen's size; its frame uncovers it */
+  .xp-mosaic.is-unfolding .xp-mosaic__photo--feature > img {
+    inset: auto;
+    left: 50%;
+    top: 50%;
+    width: calc(100vw + 6px);
+    height: calc(100svh + 6px);
+    transform: translate(-50%, -50%);
+  }
+
+  /* Starts below the screen, so it arrives once the lobby has filled it (the
+     timeline in ExperienceMosaic.tsx runs over 80% of a screen) */
+  .xp-mosaic.is-unfolding .xp-mosaic__content {
+    margin-top: 90svh;
+    padding-top: 0;
+    /* The button sits in the middle of the screen on the bare lobby (Figma 1275:8709)
+       as the section ends, so the hand-over's parallax carries it under the café */
+    padding-bottom: calc(50svh - 22px);
+    background: none;
+  }
+
+  /* About 300px of bare lobby between the last card and the line (40 gap + 260) */
+  .xp-mosaic.is-unfolding .xp-mosaic__cta {
+    margin-top: 260px;
   }
 }

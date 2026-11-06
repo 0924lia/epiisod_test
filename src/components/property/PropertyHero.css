@@ -62,6 +62,7 @@
 }
 
 .property-hero__cta {
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 8px;

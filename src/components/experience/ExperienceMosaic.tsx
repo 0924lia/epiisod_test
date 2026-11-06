@@ -82,8 +82,9 @@ function Column({ photos, side }: { photos: Photo[]; side: 'left' | 'right' }) {
  * arrives with the Perks, Privileges and Exclusives cards rising in turn (1058:4900);
  * further on the cards lift away and the line and button take their place (1058:5278).
  *
- * Without the animation — phones, reduced motion — the wall stays a plain grid and the
- * Exclusives content follows it on the darkened lobby photo.
+ * On phones the wall sticks while the lobby fills the screen, and the content scrolls up
+ * over it. With reduced motion the wall stays a plain grid and the Exclusives content
+ * follows it on the darkened lobby photo.
  */
 export default function ExperienceMosaic({ id }: { id?: string }) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -128,9 +129,35 @@ export default function ExperienceMosaic({ id }: { id?: string }) {
           .fromTo('.xp-mosaic__button', { autoAlpha: 0, y: 80 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 3.15)
           .to('.xp-mosaic__cta .vline', { y: -8, duration: 0.45 }, 3.55)
           .to('.xp-mosaic__button', { y: -16, duration: 0.45 }, 3.65)
-          // Hold on the finished frame, the button in view, before the page moves on
-          .to({}, { duration: 0.7 });
+          // Hold on the finished frame, the button in view, then the line and button lift
+          // away before the page moves on
+          .to({}, { duration: 0.5 })
+          .to(
+            ['.xp-mosaic__cta .vline', '.xp-mosaic__button'],
+            { autoAlpha: 0, y: '-=40', duration: 0.45, ease: 'power1.in', stagger: 0.08 },
+          )
+          .to({}, { duration: 0.25 });
         return () => section.classList.remove('is-animated');
+      });
+
+      // Phones (Figma 1275:8431): the wall sticks (CSS) while the lobby frame grows to fill
+      // the screen and darkens; the content then scrolls up over it as its background
+      gsap.matchMedia().add('(max-width: 700px) and (prefers-reduced-motion: no-preference)', () => {
+        section.classList.add('is-unfolding');
+        gsap
+          .timeline({
+            defaults: { ease: 'none' },
+            scrollTrigger: {
+              trigger: section.querySelector<HTMLElement>('.xp-mosaic__inner'),
+              start: 'top top',
+              end: () => `+=${window.innerHeight * 0.8}`,
+              scrub: 0.8,
+              invalidateOnRefresh: true,
+            },
+          })
+          .fromTo(section, { '--p': 0 }, { '--p': 1, duration: 1, ease: 'power1.inOut' }, 0)
+          .fromTo(section, { '--shade': 0 }, { '--shade': 1, duration: 0.35 }, 0.7);
+        return () => section.classList.remove('is-unfolding');
       });
     },
     { scope: sectionRef },

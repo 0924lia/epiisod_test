@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { FormEvent, UIEvent } from 'react';
 import Nav, { scrollToSection } from '../components/Nav';
 import type { SubLink } from '../components/Nav';
 import PropertyLocation from '../components/property/PropertyLocation';
@@ -18,6 +18,9 @@ import tagGift from '../assets/property/rooms/tag-gift.svg';
 import photosIcon from '../assets/property/room-details/icons/photos.svg';
 import shareIcon from '../assets/property/room-details/icons/share.svg';
 import arrowRight from '../assets/property/room-details/icons/arrow-right.svg';
+import arrowLeft16 from '../assets/property/room-details/icons/arrow-left-16.svg';
+import arrowRight16 from '../assets/property/room-details/icons/arrow-right-16.svg';
+import share16 from '../assets/property/room-details/icons/share-16.svg';
 import arrowWhite from '../assets/arrow-right-white.svg';
 import sizeIcon from '../assets/property/room-details/icons/size.svg';
 import checkIcon from '../assets/property/room-details/icons/check-circle.svg';
@@ -469,7 +472,22 @@ export default function RoomPage({
   };
 
   const gallery = details.photos.slice(0, 5);
+  // Phones: the photo the carousel has settled on, for its counter
+  const [slide, setSlide] = useState(0);
+  const onCarouselScroll = (e: UIEvent<HTMLDivElement>) => {
+    const track = e.currentTarget;
+    setSlide(Math.round(track.scrollLeft / Math.max(1, track.clientWidth)));
+  };
   const bookRef = useRef<HTMLDivElement>(null);
+  // The bar below steps aside while the card it leads to is on screen
+  const [bookInView, setBookInView] = useState(false);
+  useEffect(() => {
+    const card = bookRef.current;
+    if (!card) return;
+    const io = new IntersectionObserver(([entry]) => setBookInView(entry.isIntersecting));
+    io.observe(card);
+    return () => io.disconnect();
+  }, []);
   const crumbs = [
     { label: 'Home', href: '/' },
     { label: 'Locations', href: '/locations' },
@@ -516,6 +534,53 @@ export default function RoomPage({
               <img src={photosIcon} width={24} height={24} alt="" />
               See all photos
             </button>
+          </div>
+
+          {/* Phones (Figma 1328:15867): every photo full width, swiped through, with the way
+              back, the virtual tour and sharing over the top and the count below */}
+          <div className="room-carousel">
+            <div className="room-carousel__track" onScroll={onCarouselScroll}>
+              {details.photos.map((photo, i) => (
+                <button
+                  key={photo}
+                  type="button"
+                  className="room-carousel__photo"
+                  aria-label={`Open photo ${i + 1} of ${details.photos.length}`}
+                  onClick={() => setLightbox(i)}
+                >
+                  <img src={photo} alt="" loading={i > 1 ? 'lazy' : undefined} />
+                </button>
+              ))}
+            </div>
+            <div className="room-carousel__top">
+              <a href={`${propertyHref}#rooms`} className="room-chip room-chip--icon" aria-label={`Back to ${content.brand} ${content.place} rooms`}>
+                <img src={arrowLeft16} width={16} height={16} alt="" />
+              </a>
+              <div className="room-carousel__actions">
+                <a href={details.virtualTour} className="room-chip" target="_blank" rel="noopener noreferrer">
+                  Virtual tour
+                  <img src={arrowRight16} width={16} height={16} alt="" />
+                </a>
+                <button
+                  type="button"
+                  className={`room-chip${copied ? '' : ' room-chip--icon'}`}
+                  aria-label={copied ? undefined : 'Share'}
+                  onClick={share}
+                >
+                  {copied && 'Link copied'}
+                  <img src={share16} width={16} height={16} alt="" />
+                </button>
+              </div>
+            </div>
+            <div className="room-carousel__bottom">
+              <span className={`room-tag room-tag--${room.available ? room.tag : 'soldOut'}`}>
+                <img src={tag.icon} width={16} height={16} alt="" />
+                {tag.label}
+              </span>
+              <span className="room-carousel__count" aria-live="polite">
+                {Math.min(slide, details.photos.length - 1) + 1}/{details.photos.length}
+              </span>
+            </div>
           </div>
         </section>
 
@@ -690,7 +755,7 @@ export default function RoomPage({
         </div>
 
         {/* Tablets and phones: the price and Book stay in reach, leading to the card */}
-        <div className="room-bookbar">
+        <div className={`room-bookbar${bookInView ? ' room-bookbar--hidden' : ''}`}>
           <p className="room-bookbar__price">
             <span>From</span>
             <strong>

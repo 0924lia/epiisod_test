@@ -9,6 +9,23 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 // scroll animation then makes pinned sections jump, so only real resizes count.
 ScrollTrigger.config({ ignoreMobileResize: true });
 
+// Images and web fonts that arrive after the scroll animations have measured the page
+// change its height, and every pinned section below then starts early and jumps when it
+// catches. Re-measure whenever the page's height changes on its own; the height the last
+// re-measure left (pin spacing included) doesn't count, so it settles after one pass.
+if (typeof ResizeObserver !== 'undefined') {
+  let measured = 0;
+  let timer = 0;
+  ScrollTrigger.addEventListener('refresh', () => {
+    measured = document.body.offsetHeight;
+  });
+  new ResizeObserver(() => {
+    if (document.body.offsetHeight === measured) return;
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => ScrollTrigger.refresh(), 200);
+  }).observe(document.body);
+}
+
 let lenis: Lenis | null = null;
 
 /**

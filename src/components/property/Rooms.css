@@ -571,31 +571,39 @@
     gap: 24px;
   }
 
-  .room-card {
-    box-shadow: 0 48px 40px -40px rgba(57, 29, 19, 0.2);
-  }
-
+  /* Cards as on larger screens (Figma 1314:14223): 180px photo, the views line kept
+     even when empty, so every price sits at the same height */
   .room-card__image {
-    height: auto;
-    aspect-ratio: 342 / 220;
+    height: 180px;
   }
 
-  .room-card__body {
-    gap: 16px;
-    padding: 16px;
+  /* Filters (Figma 1314:14208): the type tabs centred first, then the switch and Sort
+     across the width */
+  .rooms__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 32px;
   }
 
-  .room-card__type {
-    font-size: 14px;
+  .rooms__types {
+    order: -1;
+    align-self: center;
   }
 
-  .room-card__features {
-    font-size: 14px;
+  .rooms__controls {
+    justify-content: space-between;
   }
 
-  /* One card per row, so there's no price line to keep level: drop the empty views line */
-  .room-card__features.is-empty {
-    display: none;
+  /* Pinned again under the sub-navigation while the rooms scroll (Figma 1314:14421) */
+  .rooms__search {
+    position: sticky;
+    top: var(--nav-offset, 0px);
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rooms__search > .rooms__field {
+    width: 100%;
   }
 }
 

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 import VLine from '../VLine';
-import { addStepSnap, gsap, scrollToY, useGSAP } from '../../lib/smoothScroll';
+import { addStepSnap, gsap, ScrollTrigger, scrollToY, useGSAP } from '../../lib/smoothScroll';
 import { useExitParallax } from '../../lib/useExitParallax';
 import line from '../../assets/make-it-yours-line.svg';
 import play from '../../assets/property/icon-play-white.svg';
@@ -12,6 +12,9 @@ import './Amenities.css';
 /** Figma sizes: the opening window, then the wide frame (transition 1099:34869). */
 const WINDOW = { w: 324, h: 276 };
 const WIDE = { w: 992, h: 454 };
+/** Phones (Figma 1314:14065): the window under the lede, the frame it grows to as it rises,
+ *  then the carousel's photo frame and the gap to the next one. */
+const PHONE = { window: { w: 162, h: 140 }, wide: { w: 342, h: 297 }, card: { w: 342, h: 276 }, gap: 8 };
 
 const cropStyle = (a: Amenity) =>
   (a.crop ? { '--pos': a.crop.position, '--zoom': a.crop.zoom } : undefined) as CSSProperties | undefined;
@@ -25,7 +28,12 @@ const cropStyle = (a: Amenity) =>
  * fluidly, 70% of a screen of scroll per amenity; when the scroll comes to rest in the list it
  * eases to the nearer amenity.
  *
- * Phones, tablets and reduced motion get the heading, the photo, then the whole list.
+ * On phones (Figma 1314:14065) the window sits under the lede and widens as it rises; the
+ * stage pins and it opens to the whole screen and darkens. Over it, the amenities become a
+ * carousel: each one's photo slides in from the right, the bar across fills, and its copy
+ * hands over, a step of scroll per amenity, easing to the nearer one when it rests.
+ *
+ * Tablets and reduced motion get the heading, the photo, then the whole list.
  */
 export default function Amenities({ id, content }: { id: string; content: PropertyContent }) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -146,6 +154,108 @@ export default function Amenities({ id, content }: { id: string; content: Proper
     { scope: sectionRef, dependencies: [items.length] },
   );
 
+  useGSAP(
+    () => {
+      const section = sectionRef.current;
+      if (!section) return;
+      gsap.matchMedia().add('(max-width: 700px) and (prefers-reduced-motion: no-preference)', () => {
+        section.classList.add('is-carousel');
+        const q = gsap.utils.selector(section);
+        const stage = q('.amenities__stage')[0] as HTMLElement;
+        const media = q('.amenities__media')[0] as HTMLElement;
+        const cards = q('.amenities__card') as HTMLElement[];
+        const entries = q('.amenities__item') as HTMLElement[];
+
+        /** A frame of `w × h` Figma px, centred across the stage and at its top. */
+        const frame = ({ w, h }: { w: number; h: number }) => () => {
+          const k = stage.clientWidth / 390;
+          const x = (stage.clientWidth - w * k) / 2;
+          return `inset(0px ${x}px ${stage.clientHeight - h * k}px ${x}px)`;
+        };
+        const cardW = () => q('.amenities__cards')[0].clientWidth;
+        /** The photo's centre: the frame's centre while it's at the stage's top. */
+        const middle = ({ h }: { h: number }) => () => `${(h * stage.clientWidth) / 390 / 2}px`;
+
+        // One timeline from the moment the stage comes on screen, so the window's widening
+        // and its opening can't fight over the clip-path (two scrubbed tweens on the same
+        // property would let the late one win when scrolling fast). The pin is separate.
+        // Units: 70% of a screen of scroll each; the approach is a whole screen.
+        const UNIT = 0.7;
+        const A = 1 / UNIT;
+        const PINNED = 1.6 + items.length - 1 + 0.3;
+        ScrollTrigger.create({
+          trigger: stage,
+          start: 'top top',
+          end: () => `+=${window.innerHeight * UNIT * PINNED}`,
+          pin: true,
+          invalidateOnRefresh: true,
+        });
+        const tl = gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: {
+            trigger: stage,
+            start: 'top bottom',
+            end: () => `+=${window.innerHeight * (1 + UNIT * PINNED)}`,
+            scrub: 0.4,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        tl.set(cards, { width: cardW })
+          .set(entries.slice(1), { autoAlpha: 0, x: 40 })
+          .set('.amenities__progress-bar', { scaleX: 1 / items.length })
+          // 0) On the way up, the window under the lede widens to the content width
+          .fromTo(
+            media,
+            { clipPath: frame(PHONE.window), '--cy': middle(PHONE.window) },
+            { clipPath: frame(PHONE.wide), '--cy': middle(PHONE.wide), duration: A, ease: 'power1.inOut' },
+            0,
+          )
+          // 1) Pinned: the frame opens to the whole screen and darkens
+          // From an explicit four-edge start (the browser reports the frame in short form,
+          // which tweened against four values opens the left edge first)
+          .fromTo(
+            media,
+            { clipPath: frame(PHONE.wide), '--cy': middle(PHONE.wide) },
+            {
+              clipPath: 'inset(0px 0px 0px 0px)',
+              '--cy': () => `${stage.clientHeight / 2}px`,
+              duration: 0.8,
+              ease: 'power2.inOut',
+              immediateRender: false,
+            },
+            A,
+          )
+          .fromTo('.amenities__overlay', { opacity: 0 }, { opacity: 0.95, duration: 0.4 }, A + 0.5)
+          // 2) The carousel rises in over it
+          .fromTo('.amenities__copy', { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.4, ease: 'power2.out' }, A + 1)
+          .addLabel('step0', A + 1.6);
+        // 3) A unit of scroll per amenity: photos slide across, copy hands over, the bar fills
+        for (let i = 1; i < items.length; i++) {
+          const at = A + 1.6 + i - 1 + 0.15;
+          tl.to('.amenities__track', { x: () => -i * (cardW() + PHONE.gap), duration: 0.7, ease: 'power2.inOut' }, at)
+            .to(entries[i - 1], { autoAlpha: 0, x: -40, duration: 0.3, ease: 'power1.in' }, at)
+            .to(entries[i], { autoAlpha: 1, x: 0, duration: 0.4, ease: 'power2.out' }, at + 0.3)
+            .to('.amenities__progress-bar', { scaleX: (i + 1) / items.length, duration: 0.7, ease: 'power2.inOut' }, at)
+            .addLabel(`step${i}`, A + 1.6 + i);
+        }
+        tl.to({}, { duration: 0.3 }, A + 1.6 + items.length - 1);
+
+        const removeSnap = addStepSnap(
+          tl.scrollTrigger!,
+          () => items.map((_, i) => tl.labels[`step${i}`] / tl.duration()),
+          { nearest: true, lean: 0.1, duration: 0.6, rest: 120 },
+        );
+
+        return () => {
+          removeSnap();
+          section.classList.remove('is-carousel');
+        };
+      });
+    },
+    { scope: sectionRef, dependencies: [items.length] },
+  );
+
   /**
    * The bar beside the list doubles as a scrollbar: press or drag along it to move through
    * the amenities. The page follows the pointer between stops; letting go settles on the
@@ -222,6 +332,16 @@ export default function Amenities({ id, content }: { id: string; content: Proper
           </div>
 
           <div className="amenities__copy">
+            {/* Phones: the amenities' photos in a row, slid across one at a time */}
+            <div className="amenities__cards" aria-hidden>
+              <div className="amenities__track">
+                {items.map((a) => (
+                  <div key={a.lead + a.rest} className="amenities__card">
+                    <img src={a.image} alt="" />
+                  </div>
+                ))}
+              </div>
+            </div>
             <p className="eyebrow amenities__eyebrow">Amenities</p>
             <div className="amenities__list-row">
               <div

@@ -113,6 +113,11 @@
   background: var(--bronze-200);
 }
 
+/* Phones only: the full-width photo carousel (Figma 1328:15867) */
+.room-carousel {
+  display: none;
+}
+
 /* Status tags, as on the room cards */
 .room-tag {
   display: inline-flex;
@@ -238,6 +243,7 @@ a.room-button:hover img {
 
 /* Outlined buttons */
 .room-button {
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -882,6 +888,7 @@ a.room-button:hover img {
 }
 
 .room-book__submit {
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -1082,6 +1089,16 @@ a.room-button:hover img {
     border-top: 1px solid var(--bronze-300);
     background: var(--white);
     box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
+    transition:
+      transform 400ms var(--ease-in-out),
+      visibility 0s;
+  }
+  .room-bookbar--hidden {
+    visibility: hidden;
+    transform: translateY(100%);
+    transition:
+      transform 400ms var(--ease-in-out),
+      visibility 0s 400ms;
   }
 
   .room-bookbar__price {
@@ -1112,76 +1129,193 @@ a.room-button:hover img {
   }
 }
 
-/* Phones */
+/* Phones (Figma 1326:15569) */
 @media (max-width: 700px) {
+  /* The carousel runs edge to edge straight under the 64px nav; no breadcrumbs */
   .room-top {
-    gap: 24px;
-    padding-top: 127px; /* 24px under the 103px nav */
+    gap: 0;
+    padding: 64px 0 0;
   }
 
-  .room-crumbs {
-    font-size: 12px;
-  }
-
+  .room-crumbs,
   .room-gallery {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 240px 120px;
+    display: none;
   }
 
-  .room-gallery__photo--1 {
-    grid-column: 1 / span 2;
-    grid-row: 1;
+  .room-carousel {
+    position: relative;
+    display: block;
+    height: 300px;
+    border: 1px solid var(--bronze-300);
+    background: #d9d9d9;
+  }
+
+  .room-carousel__track {
+    display: flex;
+    height: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .room-carousel__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .room-carousel__photo {
+    flex: 0 0 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    cursor: zoom-in;
+  }
+
+  .room-carousel__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .room-carousel__top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px var(--page-gutter);
+    pointer-events: none;
+  }
+
+  .room-carousel__actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Frosted cream chips (Figma 1328:16670): text with an arrow, or a 36px square icon */
+  .room-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 36px;
+    padding: 8px 12px 8px 16px;
+    border: 0;
+    background: rgba(251, 250, 247, 0.8);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    font: inherit;
+    font-size: 14px;
+    line-height: 20px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--royal-chocolate-700);
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .room-chip--icon {
+    justify-content: center;
+    width: 36px;
+    padding: 0;
+  }
+
+  .room-carousel__bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-right: var(--page-gutter);
+    pointer-events: none;
+  }
+
+  /* Lifted 8px off the photo's bottom edge, unlike the tag (Figma 1328:16631) */
+  .room-carousel__count {
+    margin-bottom: 8px;
+    min-width: 52px;
+    padding: 4px 12px;
+    background: rgba(0, 0, 0, 0.5);
+    font-size: 14px;
+    line-height: 18px;
+    text-align: center;
+    color: var(--white);
   }
 
   .room-body {
-    padding-top: 48px;
+    padding-top: 24px;
   }
 
-  .room-main,
+  .room-main {
+    gap: 48px;
+  }
+
   .room-section {
-    gap: 40px;
+    padding-bottom: 48px;
   }
 
-  .room-section {
-    padding-bottom: 40px;
+  /* Overview (Figma 1328:16146): eyebrow, heading, text 32 apart, the offers 40 below */
+  .room-section#overview,
+  .room-overview {
+    gap: 32px;
   }
 
-  .room-section__head {
-    flex-direction: column;
-    align-items: flex-start;
+  .room-offers {
+    margin-top: 8px;
   }
 
-  .room-link {
-    padding: 0 12px;
+  /* Share and the virtual tour sit on the carousel instead */
+  .room-actions {
+    display: none;
   }
 
   .room-overview__name {
-    font-size: 32px;
+    font-size: 24px;
   }
 
-  .room-overview__subtitle,
+  .room-overview__subtitle {
+    font-size: 14px;
+  }
+
   .room-overview__size,
-  .room-overview__text,
   .room-features li {
     font-size: 16px;
   }
 
+  .room-overview__size {
+    align-items: flex-start;
+  }
+
+  .room-overview__text {
+    font-size: 16px;
+    line-height: 1.2;
+  }
+
+  .room-offers__list {
+    gap: 24px;
+    padding: 16px;
+  }
+
+  .room-section#whats-included {
+    gap: 40px;
+  }
+
   .room-offers__list,
-  .room-amenities__list,
   .room-views {
     grid-template-columns: 1fr;
   }
 
   .room-view {
-    height: 220px;
-  }
-
-  .room-amenities {
-    gap: 40px;
+    height: 200px;
   }
 
   .room-amenity {
-    font-size: 16px;
     white-space: normal;
   }
 
@@ -1193,8 +1327,8 @@ a.room-button:hover img {
   .room-plan__image {
     flex: none;
     width: 100%;
-    height: 420px;
-    padding: 12px;
+    height: 300px;
+    padding: 13px;
   }
 
   .room-disclaimer {

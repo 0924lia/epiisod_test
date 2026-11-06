@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import { scrollToY } from '../lib/smoothScroll';
 import { FAQ_TOPICS } from '../components/faq/faqContent';
 import caretDown from '../assets/property/caret-down-grey.svg';
+import dropdownIcon from '../assets/blog/section-dropdown.svg';
 import '../components/property/Faqs.css';
 import './FaqPage.css';
 
@@ -15,7 +16,8 @@ const COMPACT_BAR_HEIGHT = 69;
 /**
  * FAQs (Figma 1227:11041), reached from Contact in the nav, the menu and the footer: the
  * topics in a card that stays pinned beside their questions, one answer open at a time;
- * then the "Write your story" band, the closing fold and the footer.
+ * then the "Write your story" band, the closing fold and the footer. Phones (Figma
+ * 1417:8541) choose the topic from a dropdown that stays pinned under the nav (1417:8978).
  */
 export default function FaqPage() {
   const [topicId, setTopicId] = useState(FAQ_TOPICS[0].id);
@@ -24,12 +26,12 @@ export default function FaqPage() {
   const bodyRef = useRef<HTMLDivElement>(null);
   const topic = FAQ_TOPICS.find((t) => t.id === topicId)!;
 
-  const choose = (id: string, tab: HTMLElement) => {
+  const choose = (id: string, tab?: HTMLElement) => {
     if (id === topicId) return;
     setTopicId(id);
     setOpen(null);
-    // Phones: the chosen topic glides to the middle of its sideways-scrolling row
-    const row = tab.parentElement;
+    // Tablets: the chosen topic glides to the middle of its sideways-scrolling row
+    const row = tab?.parentElement;
     if (row && row.scrollWidth > row.clientWidth) {
       row.scrollTo({ left: tab.offsetLeft - (row.clientWidth - tab.offsetWidth) / 2, behavior: 'smooth' });
     }
@@ -64,6 +66,20 @@ export default function FaqPage() {
                   {t.label}
                 </button>
               ))}
+            </div>
+
+            <div className="faq-page__picker">
+              <label className="faq-page__jump">
+                <span className="visually-hidden">Topic</span>
+                <select value={topicId} onChange={(e) => choose(e.target.value)}>
+                  {FAQ_TOPICS.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+                <img src={dropdownIcon} width={24} height={24} alt="" />
+              </label>
             </div>
 
             <div

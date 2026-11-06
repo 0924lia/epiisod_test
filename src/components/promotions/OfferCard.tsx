@@ -29,7 +29,7 @@ export default function OfferCard({ offer }: { offer: Offer }) {
           <h3 className="offer-card__title">{offer.title}</h3>
           <p className="type-body-m offer-card__description">{offer.text}</p>
         </div>
-        <a href="#" className="offer-card__link">
+        <a href={`/promotions/${offer.id}`} className="offer-card__link">
           <span>Learn more</span>
           <img src={arrowRight} width={24} height={24} alt="" />
         </a>

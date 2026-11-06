@@ -12,6 +12,8 @@ import ComingSoonPage from './pages/ComingSoonPage';
 import ContactPage from './pages/ContactPage';
 import AboutPage from './pages/AboutPage';
 import PromotionsPage from './pages/PromotionsPage';
+import PromoDetailPage from './pages/PromoDetailPage';
+import { OFFERS } from './components/promotions/promotionsData';
 import WhyPage from './pages/WhyPage';
 import ExperiencePage from './pages/ExperiencePage';
 import WaitlistPage from './pages/WaitlistPage';
@@ -56,6 +58,9 @@ export default function App() {
   if (path === '/contact') return <ContactPage />;
   if (path === '/about') return <AboutPage />;
   if (path === '/promotions') return <PromotionsPage />;
+  // An offer's page: /promotions/<offer>
+  const offer = OFFERS.find((o) => path === `/promotions/${o.id}`);
+  if (offer) return <PromoDetailPage key={path} offer={offer} />;
   if (path === '/why-epiisod') return <WhyPage />;
   if (path === '/experience') return <ExperiencePage />;
   if (path === '/join-the-waitlist') return <WaitlistPage />;

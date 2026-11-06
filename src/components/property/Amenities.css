@@ -168,6 +168,7 @@
 }
 
 .amenities__button {
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -319,4 +320,154 @@
 /* Plain layout lists every amenity, so the bar is full */
 .amenities:not(.is-animated) .amenities__progress-bar {
   height: 100%;
+}
+
+/* Phones only: the carousel's photos */
+.amenities__cards {
+  display: none;
+}
+
+/* ---- Phones, animated (Figma 1314:14065): the photo opens, then a carousel ---- */
+@media (max-width: 700px) {
+  /* The window sits 40px under the lede */
+  .amenities.is-carousel .amenities__intro {
+    padding: 72px var(--page-gutter) 40px;
+    gap: 40px;
+  }
+
+  .amenities.is-carousel .amenities__stage {
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    background: linear-gradient(var(--white), var(--bronze-200));
+  }
+
+  .amenities.is-carousel .amenities__inner {
+    position: absolute;
+    inset: 0;
+  }
+
+  .amenities.is-carousel .amenities__media {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+    will-change: clip-path;
+  }
+
+  /* The opening photo at Figma's size (1512 × 800 on a 390 screen, or the screen's
+     height if taller), centred on the window as it grows and moves (--cy, set by
+     Amenities.tsx), so the window always shows the building */
+  .amenities.is-carousel .amenities__photo {
+    inset: auto;
+    left: 50%;
+    top: var(--cy, 50%);
+    width: auto;
+    max-width: none;
+    height: max(calc(800 * 100vw / 390), 100%);
+    object-position: 50% 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Figma's overlay: chocolate at 95%, multiplied */
+  .amenities.is-carousel .amenities__overlay {
+    background: var(--royal-chocolate-700);
+    opacity: 0;
+  }
+
+  /* Photo row, bar, eyebrow, copy, button: 24px apart, centred on the screen */
+  .amenities.is-carousel .amenities__copy {
+    position: absolute;
+    inset: 0;
+    justify-content: center;
+    align-items: stretch;
+    gap: 24px;
+    padding: 48px var(--page-gutter);
+    visibility: hidden;
+  }
+
+  .amenities.is-carousel .amenities__list-row {
+    display: contents;
+  }
+
+  .amenities.is-carousel .amenities__cards {
+    display: block;
+    flex-shrink: 0;
+    order: 1;
+    /* 342 × 276 at the content width (a set height: aspect-ratio would grow to the photo) */
+    height: calc((100vw - 2 * var(--page-gutter)) * 276 / 342);
+  }
+
+  .amenities.is-carousel .amenities__track {
+    display: flex;
+    gap: 8px;
+    height: 100%;
+    will-change: transform;
+  }
+
+  .amenities.is-carousel .amenities__card {
+    flex-shrink: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .amenities.is-carousel .amenities__card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* 4px bar across; GSAP fills it a share per amenity */
+  .amenities.is-carousel .amenities__progress {
+    order: 2;
+    width: 100%;
+    height: 4px;
+    background: var(--royal-chocolate-500);
+  }
+
+  .amenities.is-carousel .amenities__progress-bar {
+    inset: 0;
+    height: auto;
+    transform-origin: left;
+    transition: none;
+  }
+
+  .amenities.is-carousel .amenities__eyebrow {
+    order: 3;
+    margin-bottom: -8px;
+    color: var(--bronze-400);
+  }
+
+  /* Amenities stacked in one place; GSAP hands over between them */
+  .amenities.is-carousel .amenities__list {
+    order: 4;
+    display: grid;
+  }
+
+  .amenities.is-carousel .amenities__item {
+    grid-area: 1 / 1;
+  }
+
+  .amenities.is-carousel .amenities__title {
+    font-size: 36px;
+    color: var(--white);
+  }
+
+  .amenities.is-carousel .amenities__lead {
+    font-style: italic;
+  }
+
+  .amenities.is-carousel .amenities__text-wrap {
+    margin-top: 16px;
+  }
+
+  .amenities.is-carousel .amenities__text {
+    color: var(--bronze-200);
+  }
+
+  .amenities.is-carousel .amenities__button {
+    order: 5;
+    justify-content: center;
+    width: 100%;
+  }
 }

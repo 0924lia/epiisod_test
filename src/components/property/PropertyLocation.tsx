@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import PropertyMap from './PropertyMap';
 import type { MapMarker } from './PropertyMap';
 import { useExitParallax } from '../../lib/useExitParallax';
+import { setScrollLocked } from '../../lib/smoothScroll';
 import pin from '../../assets/property/icon-location-pin.svg';
 import searchIcon from '../../assets/property/location/icon-search.svg';
 import pinLine from '../../assets/property/location/icon-map-pin-line.svg';
@@ -57,6 +58,10 @@ type ListedPlace = MapMarker & { distance: string };
  * straight through), with their distance from the property,
  * and shows them on the map. Pointing at a place lights its marker; choosing one moves
  * the map to it. The cross clears the area.
+ *
+ * Phones (Figma 1275:10498): the field sits at the map's foot; tapping it opens the map
+ * full screen with the area list rising from the bottom. A chosen area's places, and a
+ * place's photo, take the same spot at the foot; the cross in the corner closes it all.
  */
 export default function PropertyLocation({ id, content }: { id: string; content: PropertyContent }) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -73,6 +78,9 @@ export default function PropertyLocation({ id, content }: { id: string; content:
   /** The place whose photo is enlarged in the finder (Figma 1227:12135). */
   const [enlarged, setEnlarged] = useState<string | null>(null);
   const [phone, setPhone] = useState(() => window.matchMedia('(max-width: 700px)').matches);
+  /** Phones: the map fills the screen, with the finder at its foot. */
+  const [full, setFull] = useState(false);
+  const isFull = phone && full;
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 700px)');
@@ -80,6 +88,19 @@ export default function PropertyLocation({ id, content }: { id: string; content:
     mq.addEventListener('change', update);
     return () => mq.removeEventListener('change', update);
   }, []);
+
+  // Full screen: the page stays still behind it; Escape closes it
+  useEffect(() => {
+    if (!isFull) return;
+    setScrollLocked(true);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeFull();
+    document.addEventListener('keydown', onKey);
+    return () => {
+      setScrollLocked(false);
+      document.removeEventListener('keydown', onKey);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFull]);
 
   // Every place in the finder, numbered once across all the areas in their order (Schools
   // 01–16, then Transport…), so a place keeps its number in its own area and under "All"
@@ -139,6 +160,12 @@ export default function PropertyLocation({ id, content }: { id: string; content:
     setEnlarged(null);
   };
 
+  const closeFull = () => {
+    setFull(false);
+    setOpen(false);
+    clear();
+  };
+
   // A photo opened: lit on the map, which frames it with the property
   const enlarge = (placeId: string) => {
     setFocus(null);
@@ -171,8 +198,19 @@ export default function PropertyLocation({ id, content }: { id: string; content:
   const current = AREAS.find((a) => a.name === area);
   const shown = enlarged ? places.find((p) => p.id === enlarged) : undefined;
   // The corner of the map the finder covers, kept clear when framing places
-  const inset = useMemo(() => (phone ? { left: 0, top: 260 } : { left: 440, top: 0 }), [phone]);
-  const spotlightInset = useMemo(() => (phone ? { left: 0, top: 380 } : inset), [phone, inset]);
+  // (full-screen phones: the panel at the foot, about 40% of the screen; a photo, 250px)
+  const inset = useMemo(
+    () =>
+      isFull
+        ? { left: 0, top: 64, bottom: window.innerHeight * 0.4 + 52 }
+        : phone
+          ? { left: 0, top: 0, bottom: 80 }
+          : { left: 440, top: 0 },
+    [phone, isFull],
+  );
+  const spotlightInset = useMemo(() => (isFull ? { left: 0, top: 64, bottom: 260 } : inset), [isFull, inset]);
+  /** Inline on a phone the map shows only the field; the lists open full screen. */
+  const panels = !phone || isFull;
 
   return (
     <section ref={sectionRef} className="property-location exit-parallax" id={id}>
@@ -185,7 +223,7 @@ export default function PropertyLocation({ id, content }: { id: string; content:
           </p>
         </div>
 
-        <div className="property-location__map">
+        <div className={`property-location__map${isFull ? ' is-full' : ''}`}>
           <PropertyMap
             brand={content.brand}
             place={content.place}
@@ -198,8 +236,15 @@ export default function PropertyLocation({ id, content }: { id: string; content:
             highlight={highlight}
             focus={focus}
             spotlight={enlarged}
+            full={isFull}
             onMarkerClick={onMarkerClick}
           />
+
+          {isFull && (
+            <button type="button" className="property-location__close" aria-label="Close map" onClick={closeFull}>
+              <img src={closeIcon} width={24} height={24} alt="" />
+            </button>
+          )}
 
           <div ref={finderRef} className="location-finder">
             <button
@@ -207,14 +252,20 @@ export default function PropertyLocation({ id, content }: { id: string; content:
               className="location-finder__field"
               aria-expanded={open}
               aria-controls={`${id}-areas`}
-              onClick={() => setOpen((o) => !o)}
+              onClick={() => {
+                // Phones: the field opens the map full screen, with the areas
+                if (phone && !full) {
+                  setFull(true);
+                  setOpen(true);
+                } else setOpen((o) => !o);
+              }}
             >
               <img src={searchIcon} width={24} height={24} alt="" />
               <span className="location-finder__placeholder">Find nearby areas</span>
               <img src={pinLine} width={24} height={24} alt="" />
             </button>
 
-            {open && (
+            {panels && open && (
               <ul className="location-finder__panel location-finder__areas" id={`${id}-areas`}>
                 {AREAS.map((a) => (
                   <li key={a.name}>
@@ -234,7 +285,7 @@ export default function PropertyLocation({ id, content }: { id: string; content:
               </ul>
             )}
 
-            {!open && current && (
+            {panels && !open && current && (
               <div className={`location-finder__panel location-finder__results${shown ? ' is-enlarged' : ''}`}>
                 <div className="location-finder__chosen">
                   <span className="location-finder__icon is-current" aria-hidden>
@@ -254,6 +305,15 @@ export default function PropertyLocation({ id, content }: { id: string; content:
                 {shown?.place.image && (
                   <figure className="location-finder__photo" key={shown.id}>
                     <img src={shown.place.image} alt="" />
+                    {/* Full-screen phones: the cross sits on the photo (Figma 1275:10499) */}
+                    <button
+                      type="button"
+                      className="location-finder__photo-close"
+                      aria-label={`Close ${shown.place.name} photo`}
+                      onClick={shrink}
+                    >
+                      <img src={closeIcon} width={24} height={24} alt="" />
+                    </button>
                     <figcaption>
                       <span className="location-finder__photo-name">{shown.place.name}</span>
                       <span className="location-finder__distance">{shown.distance}</span>

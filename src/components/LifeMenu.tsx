@@ -33,7 +33,7 @@ const LINKS = [
 /**
  * Life @ EPIISOD mega menu (Figma 539:20915): page links with a short description,
  * highlighting on hover (Figma 539:21311). Navigation option B (Figma 1080:8880) stacks
- * them beside a Blog column, which in option A lives in the hamburger menu.
+ * them beside a Blog column, which in option A lives in the hamburger menu, then Promotions.
  */
 export default function LifeMenu({ id, open, onNavigate, variant = 'a' }: LifeMenuProps) {
   if (variant === 'b') {
@@ -63,6 +63,12 @@ export default function LifeMenu({ id, open, onNavigate, variant = 'a' }: LifeMe
                 <span className="type-body-s nav-menu-b__article-description">{description}</span>
               </a>
             ))}
+          </div>
+          <div className="nav-menu-b__promos">
+            <a href="/promotions" className="nav-menu-b__link" onClick={onNavigate}>
+              <span className="life-menu__title">Promotions</span>
+              <span className="life-menu__description">EPIISOD’s exclusive deals</span>
+            </a>
           </div>
         </div>
       </MegaMenuPanel>

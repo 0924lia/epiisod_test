@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { gsap, useGSAP } from '../../lib/smoothScroll';
+import { gsap, ScrollTrigger, useGSAP } from '../../lib/smoothScroll';
 import { useExitParallax } from '../../lib/useExitParallax';
 import type { CSSProperties, ReactNode } from 'react';
 import VLine from '../VLine';
@@ -99,11 +99,11 @@ const COLUMNS: Feature[][] = [
 
 /**
  * How far (px) below its place each column starts, and — mirrored — how far above its place
- * it leaves: each keeps its own speed throughout, so the column that comes in lowest (the
- * middle, as in the Figma stagger 912:4591) rises fastest and leaves highest, and the row
- * reads as moving up and away rather than falling back.
+ * it leaves: each keeps its own speed throughout. A step from left to right (Figma
+ * 1256:8328): the left column scrolls as normal, the right one fastest, so the grid comes in
+ * stepping down to the right, levels out, and leaves stepping up — a fan.
  */
-const COLUMN_TRAVEL = [260, 420, 110];
+const COLUMN_TRAVEL = [0, 200, 400];
 
 /** A card under the mouse opens after this pause (ms), so sweeping across doesn't flick each one open. */
 const HOVER_DELAY = 140;
@@ -113,9 +113,11 @@ const HOVER_DELAY = 140;
  * each titled over a chocolate fade. As with the reviews, hovering a card — or clicking /
  * tapping it — deepens the fade and lifts the title to reveal its description
  * (Figma 953:4887). A click keeps it open after the pointer leaves; clicking again closes it.
- * The columns drift at their own steady speeds while the grid is on screen — out of line
- * coming in, level around the centre, out of line the other way leaving — except on phones,
- * where the cards stack in one column, and for reduced motion. The reviews then slide up
+ * The headline shows first and the columns fade in beneath it, one after another, as they
+ * drift at their own steady speeds — stepped down to the right, level around the centre,
+ * stepped up leaving (Figma 1256:8328) — except on phones,
+ * where the cards stack in one column, and for reduced motion. On phones, with no hover,
+ * the card crossing the middle of the screen opens by itself as it arrives. The reviews then slide up
  * over the section as it lags and dims behind them.
  */
 export default function WhyExperience({ id }: { id: string }) {
@@ -123,7 +125,9 @@ export default function WhyExperience({ id }: { id: string }) {
   const [selected, setSelected] = useState<string | null>(null);
   /** Under the mouse; wins over `selected` while the pointer is on the grid. */
   const [hovered, setHovered] = useState<string | null>(null);
-  const open = hovered ?? selected;
+  /** Phones: the card across the middle of the screen, opened as it arrives. */
+  const [focused, setFocused] = useState<string | null>(null);
+  const open = hovered ?? focused ?? selected;
   const gridRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   useExitParallax(sectionRef);
@@ -131,9 +135,11 @@ export default function WhyExperience({ id }: { id: string }) {
   useGSAP(
     () => {
       // One continuous drift: each column moves at its own steady speed the whole time
-      // the grid is on screen, so they come up out of line, pass level around the middle
-      // of the screen without stopping, and part the other way as they leave. Tied to the
-      // scroll, so it plays back on the way up.
+      // the grid is on screen, so they come up stepped down to the right, pass level
+      // around the middle of the screen without stopping, and part the other way as they
+      // leave. Over it, the headline shows first: the columns stay clear until the grid is
+      // well up the screen, then fade in one after another. Tied to the scroll, so it all
+      // plays back on the way up.
       gsap.matchMedia().add('(min-width: 701px) and (prefers-reduced-motion: no-preference)', () => {
         gsap.fromTo(
           '.why-experience__column',
@@ -150,6 +156,46 @@ export default function WhyExperience({ id }: { id: string }) {
             },
           },
         );
+        gsap.fromTo(
+          '.why-experience__column',
+          { opacity: 0 },
+          {
+            opacity: 1,
+            ease: 'power1.inOut',
+            stagger: 0.25,
+            scrollTrigger: {
+              trigger: gridRef.current,
+              start: 'top 85%',
+              end: 'top 30%',
+              scrub: 0.6,
+            },
+          },
+        );
+      });
+
+      // Phones: no hover, so the card crossing the middle of the screen opens on its own,
+      // one at a time. Each card's stretch runs on to the next one's top, so one hands
+      // straight over to the next with no closed gap between them.
+      gsap.matchMedia().add('(max-width: 700px)', () => {
+        const cards = gsap.utils.toArray<HTMLElement>('.why-feature');
+        const triggers = cards.map((card) =>
+          ScrollTrigger.create({
+            trigger: card,
+            start: 'top center',
+            end: 'bottom+=24 center',
+            onToggle: ({ isActive }) => {
+              const key = card.dataset.key!;
+              if (isActive) {
+                setFocused(key);
+                setSelected(null);
+              } else setFocused((f) => (f === key ? null : f));
+            },
+          }),
+        );
+        return () => {
+          triggers.forEach((t) => t.kill());
+          setFocused(null);
+        };
       });
     },
     { scope: gridRef },
@@ -187,6 +233,7 @@ export default function WhyExperience({ id }: { id: string }) {
                 return (
                   <article
                     key={key}
+                    data-key={key}
                     className={`why-feature${isOpen ? ' is-open' : ''}`}
                     onPointerEnter={(e) => e.pointerType === 'mouse' && hoverSoon(key)}
                   >

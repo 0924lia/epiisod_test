@@ -277,6 +277,7 @@
 }
 
 .contact-form__submit {
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 8px;

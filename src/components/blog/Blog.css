@@ -7,6 +7,7 @@
 }
 
 .blog-button {
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   height: 44px;
@@ -368,6 +369,12 @@
   gap: 48px;
 }
 
+/* Phones only: sharing below the article, and the section bar (below) */
+.blog-post__share-end,
+.blog-post__bar {
+  display: none;
+}
+
 /* ---- Smaller screens ---- */
 @media (max-width: 1100px) {
   .blog-grid {
@@ -428,20 +435,138 @@
     flex-wrap: wrap;
   }
 
+  /* Post (Figma 1361:27193): crumbs, the article, then sharing, 40 apart */
+  .blog-post {
+    gap: 40px;
+    padding: calc(64px + 24px) var(--page-gutter) 72px;
+  }
+
   .blog-post__crumbs {
-    font-size: 13px;
+    line-height: 1.5;
   }
 
   .blog-post__image {
-    height: 240px;
+    height: 200px;
   }
 
-  .blog-post__article,
-  .blog-post__section {
-    gap: 32px;
+  .blog-post__article {
+    gap: 48px;
+  }
+
+  .blog-post__paragraph {
+    line-height: 1.2;
   }
 
   .blog-post__main {
-    padding-bottom: 64px;
+    padding-bottom: 48px;
+  }
+
+  .blog-post__aside {
+    display: none;
+  }
+
+  .blog-post__share-end {
+    display: flex;
+    align-items: center;
+    text-align: center;
+  }
+
+  .blog-post__share-end .blog-post__copied {
+    margin-top: -16px;
+  }
+
+  /* Related blogs: their own band, 72 below sharing; the heading 64 above the cards */
+  .blog-post__related {
+    gap: 64px;
+    margin-top: 104px;
+  }
+
+  .blog-post__related .type-h3 {
+    font-size: 36px;
+  }
+
+  .blog-post__related .blog-card {
+    height: 448px;
+  }
+
+  .blog-post__related .blog-card__title {
+    font-size: 24px;
+  }
+
+  /*
+   * Section bar (Figma 1361:27930): once the title has scrolled away, the section in
+   * view as a dropdown beside a share button, just below the nav and following it as it
+   * hides. Slides away again after the article.
+   */
+  .blog-post__bar {
+    position: fixed;
+    top: var(--nav-offset, 64px);
+    left: 0;
+    right: 0;
+    z-index: 95;
+    display: flex;
+    gap: 8px;
+    padding: 8px var(--page-gutter);
+    background: var(--white);
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-100%);
+    transition:
+      top 400ms var(--ease-in-out),
+      transform 400ms var(--ease-in-out),
+      opacity 400ms var(--ease-in-out),
+      visibility 0s linear 400ms;
+  }
+
+  .blog-post__bar.is-shown {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition:
+      top 400ms var(--ease-in-out),
+      transform 400ms var(--ease-in-out),
+      opacity 400ms var(--ease-in-out);
+  }
+
+  .blog-post__jump {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .blog-post__jump select,
+  .blog-post__bar-share {
+    height: 44px;
+    border: 1px solid var(--bronze-400);
+    border-radius: 0;
+    background: var(--bronze-100);
+  }
+
+  .blog-post__jump select {
+    width: 100%;
+    padding: 0 48px 0 16px;
+    -webkit-appearance: none;
+    appearance: none;
+    font: inherit;
+    font-size: 16px;
+    line-height: 24px;
+    color: var(--royal-chocolate-600);
+    text-overflow: ellipsis;
+  }
+
+  .blog-post__jump img {
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    pointer-events: none;
+  }
+
+  .blog-post__bar-share {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    padding: 0;
+    cursor: pointer;
   }
 }

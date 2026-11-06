@@ -428,3 +428,151 @@
   width: 24px;
   height: 24px;
 }
+
+/* Only on the full-screen phone map */
+.property-location__close,
+.location-finder__photo-close {
+  display: none;
+}
+
+/* ---- Phones (Figma 1275:10498) ---- */
+@media (max-width: 700px) {
+  /* "Location" centred over the address */
+  .property-location__header {
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .property-location__address {
+    align-self: stretch;
+  }
+
+  .property-location__map {
+    height: 500px;
+  }
+
+  /* Pinch to zoom; no buttons */
+  .property-location__map .leaflet-control-zoom {
+    display: none;
+  }
+
+  /* The field at the map's foot */
+  .location-finder {
+    top: auto;
+    bottom: 0;
+    padding: 24px;
+  }
+
+  /* Full screen: over the whole page, nav included. The section's drift (a transform)
+     would hold a fixed map inside it, so it's let go while the map is open. */
+  .property-location:has(.is-full) [data-exit-content] {
+    transform: none !important;
+    will-change: auto;
+  }
+
+  .property-location__map.is-full {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    height: 100vh;
+    height: 100dvh;
+    max-width: none;
+    border: 0;
+  }
+
+  .property-location__map.is-full .location-finder {
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding: 0;
+    gap: 8px;
+  }
+
+  .property-location__map.is-full .location-finder__field {
+    width: auto;
+    margin: 0 24px;
+  }
+
+  /* No panel open: the field rests 24px above the foot */
+  .property-location__map.is-full .location-finder:not(:has(.location-finder__panel)) .location-finder__field {
+    margin-bottom: 24px;
+  }
+
+  /* Panels run edge to edge along the foot, rising in */
+  .property-location__map.is-full .location-finder__panel {
+    padding: 24px 32px;
+    border: 0;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
+    animation: finder-rise 380ms var(--ease-in-out);
+  }
+
+  .property-location__map.is-full .location-finder__results {
+    max-height: 40svh;
+    padding-right: 24px;
+  }
+
+  /* A photo open: the field steps aside; the photo, its name and distance (Figma 1275:10499) */
+  .property-location__map.is-full .location-finder:has(.is-enlarged) .location-finder__field,
+  .property-location__map.is-full .location-finder__results.is-enlarged .location-finder__chosen {
+    display: none;
+  }
+
+  .property-location__map.is-full .location-finder__results.is-enlarged {
+    max-height: none;
+    padding: 16px;
+  }
+
+  .property-location__map.is-full .location-finder__photo {
+    position: relative;
+    margin: 0;
+  }
+
+  .property-location__map.is-full .location-finder__photo img {
+    height: 150px;
+  }
+
+  .property-location__map.is-full .location-finder__photo-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    background: rgba(36, 18, 12, 0.5);
+    cursor: pointer;
+  }
+
+  .property-location__map.is-full .location-finder__photo-close img {
+    width: 24px;
+    height: 24px;
+    filter: brightness(0) invert(1);
+  }
+
+  /* The cross in the corner closes the full-screen map */
+  .property-location__map.is-full .property-location__close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 600;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    background: var(--white);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+  }
+}
+
+@keyframes finder-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}

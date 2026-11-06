@@ -200,6 +200,7 @@ button.nav__link.nav__caret {
 }
 
 .nav__cta {
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   padding: 12px 24px;
@@ -390,11 +391,60 @@ button.nav__link.nav__caret {
     display: none;
   }
 
+  /* More links past an edge: that edge fades out (Nav.tsx sets the classes) */
+  .nav__sub.has-more-right {
+    mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent);
+  }
+
+  .nav__sub.has-more-left {
+    mask-image: linear-gradient(to right, transparent, #000 56px);
+  }
+
+  .nav__sub.has-more-left.has-more-right {
+    mask-image: linear-gradient(to right, transparent, #000 56px, #000 calc(100% - 56px), transparent);
+  }
+
+  /* A mouse can drag the row along */
+  @media (hover: hover) {
+    .nav__sub.has-more-left,
+    .nav__sub.has-more-right {
+      cursor: grab;
+    }
+  }
+
+  .nav__sub.is-dragging {
+    cursor: grabbing;
+    user-select: none;
+  }
+
+  .nav__sub.is-dragging .nav__sub-link {
+    cursor: grabbing;
+  }
+
 }
 
 @media (max-width: 700px) {
   .nav__sub {
     gap: 20px;
+  }
+
+  /* Phones: over the hero, just the logo and menu (Figma 1275:9080); the sub-navigation
+     unfolds once the page scrolls, then stays */
+  .nav--sub:not(.is-scrolled):not(.is-open) .nav__inner {
+    border-bottom-color: transparent;
+  }
+
+  .nav:not(.is-scrolled) .nav__sub {
+    max-height: 0;
+    padding-block: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      max-height 400ms var(--ease-in-out),
+      padding 400ms var(--ease-in-out),
+      opacity 150ms var(--ease-in-out),
+      visibility 0s linear 400ms;
   }
 
   .nav__sub-link {

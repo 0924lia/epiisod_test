@@ -46,18 +46,20 @@ const pageTop = (el: HTMLElement) => el.getBoundingClientRect().top + window.scr
  * Scroll so `id`'s section lands just below the nav — below the sub-navigation alone
  * when the main bar will be hidden by the time it arrives.
  */
-export function scrollToSection(id: string) {
+export function scrollToSection(id: string, { immediate = false }: { immediate?: boolean } = {}) {
   const section = document.getElementById(id);
   const header = document.querySelector<HTMLElement>('.nav');
   if (!section || !header) return;
-  const sub = header.querySelector<HTMLElement>('.nav__sub')?.offsetHeight ?? 0;
+  // Its full height, even while folded away over a phone's hero
+  const subNav = header.querySelector<HTMLElement>('.nav__sub');
+  const sub = subNav ? Math.max(subNav.offsetHeight, subNav.scrollHeight) : 0;
   const hideAfter = header.dataset.hideAfter && document.getElementById(header.dataset.hideAfter);
   const top = pageTop(section);
   const goingDown = top - sub > window.scrollY;
   const barHides =
     (header.dataset.barHiddenIn?.split(',') ?? []).includes(id) ||
     (!!hideAfter && goingDown && top - sub >= pageTop(hideAfter) - sub - COMPACT_BAR_HEIGHT);
-  scrollToY(top - sub - (barHides ? 0 : COMPACT_BAR_HEIGHT));
+  scrollToY(top - sub - (barHides ? 0 : COMPACT_BAR_HEIGHT), { immediate });
 }
 
 /** An icon in both colourways, cross-fading with the nav's state. */
@@ -134,7 +136,10 @@ export default function Nav({
       const section = hideBarAfter ? document.getElementById(hideBarAfter) : null;
       if (hideBarAfter && !section) return;
       const hideFrom = section ? pageTop(section) - header.offsetHeight : HIDE_AFTER;
+      // Phones keep the sub-navigation on screen throughout, even over full-screen stages
+      const phone = window.matchMedia('(max-width: 700px)').matches;
       setHidden(
+        !phone &&
         (hiddenIn ?? []).some((id) => {
           const r = document.getElementById(id)?.getBoundingClientRect();
           return !!r && r.top <= 1 && r.bottom > header.offsetHeight;
@@ -214,6 +219,69 @@ export default function Nav({
     const r = row.getBoundingClientRect();
     row.scrollBy({ left: l.left + l.width / 2 - (r.left + r.width / 2), behavior: 'smooth' });
   }, [currentSub]);
+
+  // Where the row scrolls sideways: fade whichever edge has more links beyond it, and let
+  // a mouse drag it along (touch already swipes it). A drag doesn't count as a click.
+  useEffect(() => {
+    const row = subRef.current;
+    if (!row) return;
+    const edges = () => {
+      const max = row.scrollWidth - row.clientWidth;
+      row.classList.toggle('has-more-left', row.scrollLeft > 2);
+      row.classList.toggle('has-more-right', row.scrollLeft < max - 2);
+    };
+    let startX = 0;
+    let startLeft = 0;
+    let pointer: number | null = null;
+    let dragged = false;
+    const down = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse' || e.button !== 0 || row.scrollWidth <= row.clientWidth) return;
+      pointer = e.pointerId;
+      dragged = false;
+      startX = e.clientX;
+      startLeft = row.scrollLeft;
+    };
+    const move = (e: PointerEvent) => {
+      if (e.pointerId !== pointer) return;
+      const dx = e.clientX - startX;
+      if (!dragged && Math.abs(dx) > 4) {
+        dragged = true;
+        row.setPointerCapture(e.pointerId);
+        row.classList.add('is-dragging');
+      }
+      if (dragged) row.scrollLeft = startLeft - dx;
+    };
+    const up = (e: PointerEvent) => {
+      if (e.pointerId !== pointer) return;
+      pointer = null;
+      row.classList.remove('is-dragging');
+    };
+    // Captured before the link's own click, so a drag never jumps to a section
+    const click = (e: MouseEvent) => {
+      if (!dragged) return;
+      dragged = false;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    edges();
+    const ro = new ResizeObserver(edges);
+    ro.observe(row);
+    row.addEventListener('scroll', edges, { passive: true });
+    row.addEventListener('pointerdown', down);
+    row.addEventListener('pointermove', move);
+    row.addEventListener('pointerup', up);
+    row.addEventListener('pointercancel', up);
+    row.addEventListener('click', click, true);
+    return () => {
+      ro.disconnect();
+      row.removeEventListener('scroll', edges);
+      row.removeEventListener('pointerdown', down);
+      row.removeEventListener('pointermove', move);
+      row.removeEventListener('pointerup', up);
+      row.removeEventListener('pointercancel', up);
+      row.removeEventListener('click', click, true);
+    };
+  }, [subLinks]);
 
   // Close the open menu on Escape or a click anywhere outside the nav
   useEffect(() => {
@@ -339,6 +407,8 @@ export default function Nav({
               <a
                 key={target}
                 href={`#${target}`}
+                // So a mouse drag moves the row rather than picking up the link
+                draggable={false}
                 className={`nav__link nav__sub-link${target === currentSub ? ' is-current' : ''}`}
                 aria-current={target === currentSub ? 'location' : undefined}
                 onClick={(e) => {

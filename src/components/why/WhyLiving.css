@@ -53,6 +53,7 @@
 }
 
 .why-living__button {
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   height: 44px;

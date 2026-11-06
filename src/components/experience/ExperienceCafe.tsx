@@ -13,6 +13,8 @@ type Moment = {
   image: string;
   /** Figma's crop: object-position, with a zoom about that same point. */
   crop: { position: string; zoom: number };
+  /** The crop in the phones' 342 × 276 frame (Figma 1275:8537). */
+  phoneCrop: { position: string; zoom: number };
 };
 
 const cropStyle = ({ position, zoom }: Moment['crop']) =>
@@ -26,6 +28,7 @@ const MOMENTS: Moment[] = [
     text: 'Your go-to spot to start the day, catch up with friends, or take a break in between at every EPIISOD.',
     image: coffee,
     crop: { position: '50% 100%', zoom: 1 },
+    phoneCrop: { position: '50% 84%', zoom: 1.252 },
   },
   {
     eyebrow: 'Support, whenever you need it',
@@ -33,6 +36,7 @@ const MOMENTS: Moment[] = [
     text: '24/7 access to safety and wellbeing support, right at your fingertips.',
     image: sonder,
     crop: { position: '91% 0%', zoom: 1.208 },
+    phoneCrop: { position: '78% 26%', zoom: 1.569 },
   },
 ];
 
@@ -40,6 +44,8 @@ const MOMENTS: Moment[] = [
 const WINDOW = { w: 324, h: 276, centreX: 394 };
 const PHOTO = { w: 672, h: 562.84 };
 const GAP = 24;
+/** Phones (Figma 1275:8537): the frame, the opening window inside it, the gap to the next. */
+const PHONE = { w: 342, h: 276, winW: 176.09, winH: 150, gap: 8 };
 
 /**
  * Everyday moments (transition, Figma 1071:5417), stepped like the homepage's student
@@ -48,7 +54,9 @@ const GAP = 24;
  * photos up to the next moment while its copy rises in and the bar beside it fills.
  * When the reader stops, the scroll eases on to the next step: window, first, second.
  *
- * Phones and reduced motion get each moment as a plain photo with its copy.
+ * On phones (Figma 1275:8537) the window opens the same way above the copy and a bar
+ * across, then the photos slide sideways to the next moment, the next one peeking in
+ * from the screen's edge. Reduced motion gets each moment as a plain photo with its copy.
  */
 export default function ExperienceCafe() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -148,6 +156,92 @@ export default function ExperienceCafe() {
         return () => {
           removeSnap();
           section.classList.remove('is-animated');
+        };
+      });
+
+      gsap.matchMedia().add('(max-width: 700px) and (prefers-reduced-motion: no-preference)', () => {
+        section.classList.add('is-carousel');
+        const q = gsap.utils.selector(section);
+        const stage = q('.xp-cafe__stage')[0] as HTMLElement;
+        const column = q('.xp-cafe__media')[0] as HTMLElement;
+        const track = q('.xp-cafe__track')[0] as HTMLElement;
+        const items = q('.xp-cafe__item') as HTMLElement[];
+
+        /** The frame's size, the window's inset in it, and the page gutter beside it. */
+        const geo = () => {
+          const w = column.clientWidth;
+          const k = w / PHONE.w;
+          const h = PHONE.h * k;
+          const x = (w - PHONE.winW * k) / 2;
+          const y = (h - PHONE.winH * k) / 2;
+          return { w, h, x, y, gutter: (stage.clientWidth - w) / 2 };
+        };
+
+        gsap.set(q('.xp-cafe__photo img'), {
+          objectPosition: (i: number) => MOMENTS[i].phoneCrop.position,
+          transformOrigin: (i: number) => MOMENTS[i].phoneCrop.position,
+          scale: (i: number) => MOMENTS[i].phoneCrop.zoom,
+        });
+
+        const tl = gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: {
+            trigger: stage,
+            start: 'top top',
+            end: '+=200%',
+            pin: true,
+            scrub: 0.6,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        tl.set('.xp-cafe__photo', { width: () => geo().w, height: () => geo().h })
+          .set(items.slice(1), { autoAlpha: 0, x: 40 })
+          .addLabel('window')
+          // 1) The window opens into the full frame, and out to the screen's edges so the
+          //    next photo peeks in
+          .fromTo(
+            column,
+            {
+              clipPath: () => {
+                const g = geo();
+                return `inset(${g.y}px ${g.x}px ${g.y}px ${g.x}px)`;
+              },
+            },
+            {
+              clipPath: () => `inset(0px ${-geo().gutter}px 0px ${-geo().gutter}px)`,
+              duration: 1,
+              ease: 'power2.inOut',
+            },
+          )
+          // The bar and copy only rise in once the photo has opened
+          .fromTo(
+            ['.xp-cafe__progress', items[0]],
+            { autoAlpha: 0, y: 24 },
+            { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out', stagger: 0.1 },
+          )
+          .addLabel('moment0')
+          .to({}, { duration: 0.3 })
+          // 2) On to the next moment: photos slide across, copy hands over, the bar fills
+          .to(track, { x: () => -(geo().w + PHONE.gap), duration: 1, ease: 'power2.inOut' })
+          .to(items[0], { autoAlpha: 0, x: -40, duration: 0.45, ease: 'power1.in' }, '<')
+          .to(items[1], { autoAlpha: 1, x: 0, duration: 0.55, ease: 'power2.out' }, '<0.4')
+          .fromTo(
+            '.xp-cafe__progress-bar',
+            { scaleX: 1 / MOMENTS.length },
+            { scaleX: 1, duration: 1, ease: 'power2.inOut' },
+            '<-0.4',
+          )
+          .addLabel('moment1')
+          .to({}, { duration: 0.3 });
+
+        const removeSnap = addStepSnap(tl.scrollTrigger!, () =>
+          ['window', 'moment0', 'moment1'].map((l) => tl.labels[l] / tl.duration()),
+        );
+
+        return () => {
+          removeSnap();
+          section.classList.remove('is-carousel');
         };
       });
     },

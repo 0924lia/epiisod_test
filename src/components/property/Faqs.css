@@ -115,6 +115,7 @@
 }
 
 .faqs__cta {
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   height: 44px;
