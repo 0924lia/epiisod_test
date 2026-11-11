@@ -20,8 +20,6 @@ import photosIcon from '../../assets/property/room-details/icons/photos.svg';
 import shareIcon from '../../assets/property/room-details/icons/share.svg';
 import arrowRight from '../../assets/property/room-details/icons/arrow-right.svg';
 import arrowLeft16 from '../../assets/property/room-details/icons/arrow-left-16.svg';
-import arrowRight16 from '../../assets/property/room-details/icons/arrow-right-16.svg';
-import share16 from '../../assets/property/room-details/icons/share-16.svg';
 import arrowWhite from '../../assets/arrow-right-white.svg';
 import sizeIcon from '../../assets/property/room-details/icons/size.svg';
 import dotIcon from '../../assets/property/room-details/icons/dot.svg';
@@ -31,7 +29,8 @@ import dropdownIcon from '../../assets/property/room-details/icons/dropdown.svg'
 import calendarIcon from '../../assets/property/room-details/icons/calendar.svg';
 import infoIcon from '../../assets/property/room-details/icons/info.svg';
 import closeIcon from '../../assets/menu/close.svg';
-import offerStar from '../../assets/v2/property/icon-offer-star.svg';
+import offerCheck from '../../assets/v2/property/icon-offer-check.svg';
+import infoNote from '../../assets/v2/property/icon-info-note.svg';
 import './RoomPage.css';
 
 /** Section ids, shared by the sub-navigation and the sections themselves (Figma 1195:30270). */
@@ -63,12 +62,12 @@ const TAGS: Record<RoomTag, { label: string; icon: string }> = {
   value: { label: 'Best Value', icon: tagGift },
 };
 
-/** The offers on every room (as on the live room pages); Short Stay only on the studios that have it. */
+/** The offers on every room, as tied to its booking rate (Figma 1465:13303). */
 const ROOM_OFFERS = [
-  { title: 'Limited Time Free Weeks Offer', text: 'Get up to 2 weeks free for selected room types; up to 6 weeks for Signature Studio (City & Pool)' },
-  { title: 'Refer a Friend - Double the Joy, $600 in Rewards!', text: 'Double the Joy, $600 in Rewards!' },
-  { title: 'Pay in Full, Save $500', text: 'Pay in Full, Save $500 — Your Best Start to Student Living' },
+  { title: 'Save 3% with Direct Debit', text: 'Pay via Direct Debit and enjoy discounted weekly rates' },
   { title: 'Save Up to $40/week on Your Commute', text: 'Up to $40/week transportation allowance (T&C apply)' },
+  { title: 'Pay in Full, Save $500', text: 'Pay in Full, Save $500 — Your Best Start to Student Living' },
+  { title: 'Refer a Friend - Double the Joy, $600 in Rewards!', text: 'Double the Joy, $600 in Rewards!' },
 ];
 
 /** Each amenity's icon (Figma 1220:8424), by name. */
@@ -104,7 +103,18 @@ const today = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 const latest = (a: string, b: string) => (a > b ? a : b);
+/** A term, short enough for the half-width field once chosen: "AY27 · 52 wks", "Short Stay". */
+const stayShort = (s: Stay) =>
+  s.group === 'Short Stay' ? 'Short Stay' : `${s.group.replace(/Academic Year 20(\d\d)/, 'AY$1')} · ${s.label.replace('weeks', 'wks')}`;
 const stayLabel = (s: Stay) => (s.group === 'Short Stay' ? `Short Stay · ${s.label}` : `${s.group.replace('Academic Year', 'AY')} · ${s.label}`);
+
+/** The full rate behind a discounted price (the room's own discount, else Direct Debit), or
+ *  undefined where there's none — shared by the booking card and the phone's price bar. */
+const fullRate = (content: PropertyContent, room: Room, price: number) => {
+  if (content.opening) return undefined;
+  const pct = room.discountPercent ?? content.directDebitPercent;
+  return pct ? price / (1 - pct / 100) : undefined;
+};
 
 /** The live site's booking for this room, term and date (until this site has its own). */
 const liveBookingHref = (liveUrl: string, slug: string, stay: Stay, date: string) =>
@@ -244,12 +254,14 @@ function BookingCard({
   date,
   setDate,
   content,
+  offers,
 }: {
   room: Room;
   details: RoomDetails;
   stays: Stay[];
   currency: string;
   content: PropertyContent;
+  offers: { title: string; text: string }[];
   stayId: string;
   setStayId: (id: string) => void;
   date: string;
@@ -257,8 +269,29 @@ function BookingCard({
 }) {
   const [view, setView] = useState('');
   const [tried, setTried] = useState(false);
+  // Whether the middle has more to scroll to (shows a fade and a rule above the price)
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [more, setMore] = useState(false);
+  const measure = useCallback(() => {
+    const el = bodyRef.current;
+    if (el) setMore(el.scrollHeight - el.scrollTop - el.clientHeight > 2);
+  }, []);
+  useEffect(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    [...el.children].forEach((c) => ro.observe(c));
+    return () => ro.disconnect();
+  }, [measure]);
   const stay = stays.find((s) => s.id === stayId) ?? null;
   const price = stay ? stay.prices[room.id] : room.price;
+  // The price before a discount, where the room has one (none on the live site yet)
+  const was = fullRate(content, room, price);
+  // The price shown is the Direct Debit rate (marked **, explained under the card)
+  const viaDirectDebit =
+    !!was && !!content.directDebitPercent && (room.discountPercent ?? content.directDebitPercent) === content.directDebitPercent;
   const min = stay ? latest(today(), stay.checkIn.from) : today();
   const max = stay?.checkIn.to;
   const groups = [...new Set(stays.map((s) => s.group))];
@@ -280,13 +313,19 @@ function BookingCard({
 
   return (
     <form className="room-book" onSubmit={onSubmit} noValidate>
-      <h2 className="room-book__title">
-        <em>Book</em> this room
-      </h2>
-      <p className="room-book__required">
-        <span>*</span> <em>Required field</em>
-      </p>
+      <div className="room-book__head">
+        <h2 className="room-book__title">
+          <em>Book</em> this room
+        </h2>
+        <p className="room-book__required">
+          <span>*</span> <em>Required</em>
+        </p>
+      </div>
+      {/* Everything between the heading and the price scrolls when the card would be taller
+          than the screen, so the price and Book always show (the card is pinned) */}
+      <div ref={bodyRef} className="room-book__body" data-lenis-prevent onScroll={measure}>
 
+      <div className="room-book__pair">
       <label className={`room-book__field${tried && missing.term ? ' has-error' : ''}`}>
         <span className="room-book__label">
           Term <span>*</span>
@@ -299,10 +338,11 @@ function BookingCard({
               setStayId(e.target.value);
               if (next && date && (date < next.checkIn.from || date > next.checkIn.to)) setDate('');
             }}
-            className={stayId ? '' : 'is-empty'}
+            className={`room-book__select${stayId ? ' has-value' : ' is-empty'}`}
+            title={stay ? stayLabel(stay) : undefined}
           >
             <option value="" disabled>
-              Choose term
+              Select term
             </option>
             {groups.map((g) => (
               <optgroup key={g} label={g}>
@@ -316,6 +356,7 @@ function BookingCard({
               </optgroup>
             ))}
           </select>
+          {stay && <span className="room-book__value">{stayShort(stay)}</span>}
           <img src={dropdownIcon} width={24} height={24} alt="" />
         </span>
         {tried && missing.term && <span className="room-book__error">Please choose a term</span>}
@@ -341,17 +382,12 @@ function BookingCard({
               }
             }}
           />
-          {!date && <span className="room-book__placeholder">Choose your check in date</span>}
+          {!date && <span className="room-book__placeholder">Select date</span>}
           <img src={calendarIcon} width={24} height={24} alt="" />
         </span>
-        {stay && (
-          <span className="room-book__hint">
-            Check-in from {new Date(`${min}T00:00`).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })} to{' '}
-            {new Date(`${stay.checkIn.to}T00:00`).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
-          </span>
-        )}
         {tried && missing.date && <span className="room-book__error">Please choose your check in date</span>}
       </label>
+      </div>
 
       {hasViews && (
       <label className={`room-book__field${tried && missing.view ? ' has-error' : ''}`}>
@@ -390,24 +426,65 @@ function BookingCard({
         </div>
       )}
 
-      <div className="room-book__summary">
+      {/* v2 (Figma 1465:13300): the room's offers, inside the card */}
+      {offers.length > 0 && (
+        <div className="room-offers">
+          <span className="room-tag room-tag--offer">
+            <img src={tagLightning} width={16} height={16} alt="" />
+            Exclusive Offer
+          </span>
+          <ul className="room-offers__list">
+            {offers.map((o) => (
+              <li key={o.title} className="room-check">
+                <img src={offerCheck} width={24} height={24} alt="" />
+                <span>
+                  <strong>{o.title}</strong>
+                  <span>{o.text}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      </div>
+
+      <div className={`room-book__summary${content.opening ? '' : ' room-book__summary--stacked'}${more ? ' has-more' : ''}`}>
         {content.opening ? (
           <p className="room-book__price room-book__price--opening">{content.opening}</p>
         ) : (
-          <p className="room-book__price">
-            <span className="room-book__from">From</span>
-            <span className="room-book__amount">
+          // Figma 1470:17890: "Starts at" with the saving and the standard price, then the
+          // price (and how it's reached) beside Book
+          <div className="room-book__deal">
+            <p className="room-book__from">Starts at</p>
+            {was && (
+              <p className="room-book__discount">
+                <span className="room-book__off">{Math.round((1 - price / was) * 100)}% OFF</span>
+                <span className="room-book__standard">
+                  {currency}
+                  {was.toFixed(2)} Standard Price
+                </span>
+              </p>
+            )}
+          </div>
+        )}
+        <div className="room-book__pay">
+          {!content.opening && (
+            <p className="room-book__amount room-book__amount--stacked">
               <strong>
                 {currency} {price}
               </strong>
-              <span>wk / person</span>
-            </span>
-          </p>
-        )}
-        <button type="submit" className="room-book__submit" disabled={!room.available}>
-          {!room.available ? 'Sold out' : content.opening ? 'Register interest' : 'Book'}
-          {room.available && <img src={arrowWhite} width={24} height={24} alt="" />}
-        </button>
+              <span>
+                wk / person
+                {viaDirectDebit && ' with Direct Debit**'}
+              </span>
+            </p>
+          )}
+          <button type="submit" className="room-book__submit" disabled={!room.available}>
+            {!room.available ? 'Sold out' : content.opening ? 'Register interest' : 'Book'}
+            {room.available && <img src={arrowWhite} width={24} height={24} alt="" />}
+          </button>
+        </div>
       </div>
     </form>
   );
@@ -530,6 +607,13 @@ export default function RoomPage({
     io.observe(card);
     return () => io.disconnect();
   }, []);
+  // The phone's price bar: the chosen term's price, and its full rate where discounted
+  const barPrice = stays.find((s) => s.id === stayId)?.prices[room.id] ?? room.price;
+  const barWas = fullRate(content, room, barPrice);
+  const barViaDirectDebit =
+    barWas !== undefined &&
+    !!content.directDebitPercent &&
+    (room.discountPercent ?? content.directDebitPercent) === content.directDebitPercent;
   const crumbs = [
     { label: 'Home', href: '/' },
     { label: 'Locations', href: '/locations' },
@@ -600,23 +684,7 @@ export default function RoomPage({
               <a href={`${propertyHref}#rooms`} className="room-chip room-chip--icon" aria-label={`Back to ${content.brand} ${content.place} rooms`}>
                 <img src={arrowLeft16} width={16} height={16} alt="" />
               </a>
-              <div className="room-carousel__actions">
-                {details.virtualTour && (
-                  <a href={details.virtualTour} className="room-chip" target="_blank" rel="noopener noreferrer">
-                    Virtual tour
-                    <img src={arrowRight16} width={16} height={16} alt="" />
-                  </a>
-                )}
-                <button
-                  type="button"
-                  className={`room-chip${copied ? '' : ' room-chip--icon'}`}
-                  aria-label={copied ? undefined : 'Share'}
-                  onClick={share}
-                >
-                  {copied && 'Link copied'}
-                  <img src={share16} width={16} height={16} alt="" />
-                </button>
-              </div>
+              {/* v2: the virtual tour and sharing are in the overview, under the description */}
             </div>
             <div className="room-carousel__bottom">
               {tag ? (
@@ -650,27 +718,23 @@ export default function RoomPage({
                   </p>
                 </div>
                 <p className="room-overview__text">{details.description}</p>
-                {offers.length > 0 && (
-                <div className="room-offers">
-                  <span className="room-tag room-tag--offer">
-                    <img src={tagLightning} width={16} height={16} alt="" />
-                    Exclusive Offer
-                  </span>
-                  <ul className="room-offers__list">
-                    {offers.map((o) => (
-                      <li key={o.title} className="room-check">
-                        <span className="room-offers__icon">
-                          <img src={offerStar} width={16} height={16} alt="" />
-                        </span>
-                        <span>
-                          <strong>{o.title}</strong>
-                          <span>{o.text}</span>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                {/* v2 (Figma 1465:13360): the tour, then sharing, under the description */}
+                <div className="room-overview__actions">
+                  {/* Figma 1465:13360: Book a tour (Contact us opens with it as the enquiry),
+                      the virtual tour, then sharing */}
+                  <a href="/v2/contact" className="room-button room-button--solid">
+                    Book a tour
+                  </a>
+                  {details.virtualTour && (
+                    <a href={details.virtualTour} className="room-button room-button--dark" target="_blank" rel="noopener noreferrer">
+                      Virtual tour
+                    </a>
+                  )}
+                  <button type="button" className="room-link room-link--plain" onClick={share}>
+                    <img src={shareIcon} width={24} height={24} alt="" />
+                    {copied ? 'Link copied' : 'Share'}
+                  </button>
                 </div>
-                )}
               </div>
             </section>
 
@@ -800,19 +864,6 @@ export default function RoomPage({
           </div>
 
           <aside ref={bookRef} className="room-aside" id="book">
-            {/* v2 (Figma 1461:11935): Share and Virtual tour above the booking card */}
-            <div className="room-actions">
-              <button type="button" className="room-link" onClick={share}>
-                {copied ? 'Link copied' : 'Share'}
-                <img src={shareIcon} width={24} height={24} alt="" />
-              </button>
-              {details.virtualTour && (
-                <a href={details.virtualTour} className="room-link" target="_blank" rel="noopener noreferrer">
-                  Virtual tour
-                  <img src={arrowRight} width={24} height={24} alt="" />
-                </a>
-              )}
-            </div>
             <BookingCard
               room={room}
               details={details}
@@ -823,7 +874,14 @@ export default function RoomPage({
               date={date}
               setDate={setDate}
               content={content}
+              offers={offers}
             />
+            {!content.opening && (
+              <p className="room-aside__note">
+                <img src={infoNote} width={24} height={24} alt="" />
+                **Prices shown are subject to eligibility verification for offers, discounts, and promotions.
+              </p>
+            )}
           </aside>
         </div>
 
@@ -834,13 +892,27 @@ export default function RoomPage({
               <strong>{content.opening}</strong>
             </p>
           ) : (
-            <p className="room-bookbar__price">
-              <span>From</span>
-              <strong>
-                {content.roomCurrency} {stays.find((s) => s.id === stayId)?.prices[room.id] ?? room.price}
-              </strong>
-              <span>wk / person</span>
-            </p>
+            <div className="room-bookbar__summary">
+              {/* The saving, as in the booking card: its share, then the full rate struck */}
+              {barWas !== undefined && (
+                <p className="room-book__discount room-bookbar__discount">
+                  <span className="room-book__off">{Math.round((1 - barPrice / barWas) * 100)}% OFF</span>
+                  <s>
+                    {content.roomCurrency}
+                    {barWas.toFixed(2)}
+                  </s>
+                </p>
+              )}
+              <p className="room-bookbar__price">
+                <span>From</span>
+                <strong>
+                  {content.roomCurrency} {barPrice}
+                </strong>
+                <span>wk / person</span>
+              </p>
+              {/* How the price is reached, for transparency (as in the booking card) */}
+              {barViaDirectDebit && <p className="room-bookbar__note">with Direct Debit**</p>}
+            </div>
           )}
           <button
             type="button"

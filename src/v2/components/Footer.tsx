@@ -81,7 +81,7 @@ const CONTACT_LINKS = ['Contact Us', 'Join the Waitlist', 'FAQS', 'Book a Tour',
 const POLICY_LINKS = ['Privacy Policy', 'Cancellation Policy', 'GBV Support', 'GBV Whole-of-Organization Plan'];
 /** Footer links with a page so far; the rest link to '#' until their pages exist. */
 const LINK_HREFS: Record<string, string> = {
-  About: '/about',
+  About: '/v2/about',
   'Why EPIISOD': '/v2/why-epiisod',
   Experience: '/v2/experience',
   'For Parents': '/v2/blog',

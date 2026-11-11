@@ -36,6 +36,10 @@ export type Room = {
   features?: string;
   /** Weekly price with no length of stay chosen. */
   price: number;
+  /** A discount (%) already taken off this room's prices, where it has one: its card shows
+   *  the weekly saving and the full rate struck through (Figma 1465:17555), as does its
+   *  booking card. */
+  discountPercent?: number;
   available: boolean;
 };
 
@@ -101,6 +105,11 @@ export type PropertyContent = {
   /** Each room's details page (Figma 1195:26614), by room id. */
   roomDetails: RoomDetails[];
   roomCurrency: string;
+  /**
+   * The saving (%) for paying by Direct Debit, already taken off the listed prices: the
+   * booking card shows it, with the full rate struck through (Figma 1465:13421).
+   */
+  directDebitPercent?: number;
   /** Lengths of stay, in the order listed. */
   stays: Stay[];
   /** The property's own pin. */
@@ -195,7 +204,8 @@ export const MACQUARIE_PARK: PropertyContent = {
     },
   ],
   rooms: [
-    { id: 'quad', type: 'Shared', typeLabel: 'Shared Apartment', name: 'Quad 4 Bedroom Ensuite', image: roomQuad, tag: 'offer', price: 615, available: true },
+    // Figma 1465:17555's example of a discounted card (3% off) — to confirm
+    { id: 'quad', type: 'Shared', typeLabel: 'Shared Apartment', name: 'Quad 4 Bedroom Ensuite', image: roomQuad, tag: 'offer', price: 615, discountPercent: 3, available: true },
     { id: 'quint', type: 'Shared', typeLabel: 'Shared Apartment', name: 'Quint 5 Bedroom Ensuite', image: roomQuad, tag: 'popular', price: 615, available: true },
     { id: 'signature', type: 'Studio', typeLabel: 'Studio', name: 'Signature Studio', image: roomSignature, tag: 'promotion', features: 'Garden/Urban/Pool/City', price: 725, available: true },
     { id: 'signature-flex', type: 'Studio', typeLabel: 'Studio', name: 'Signature Studio Flex', image: roomSignatureFlex, tag: 'promotion', price: 727, available: true },
@@ -206,6 +216,8 @@ export const MACQUARIE_PARK: PropertyContent = {
   ],
   roomDetails: MACQUARIE_PARK_ROOM_DETAILS,
   roomCurrency: 'AU$',
+  // Figma 1465:13300: "Save 3% with Direct Debit" — AU$615 is the rate after it
+  directDebitPercent: 3,
   stays: MACQUARIE_PARK_STAYS,
   mapCenter: { lat: -33.77917242506175, lng: 151.11718975214868 },
   mapPlaces: MACQUARIE_PARK_PLACES,

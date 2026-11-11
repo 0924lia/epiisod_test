@@ -23,7 +23,12 @@ const size = () => (window.matchMedia(PHONE).matches ? 'phone' : 'desktop');
  * scrolling smoothly. The frame keeps its full slot throughout, so nothing below moves.
  * The section dims as the location section slides over it.
  */
-export default function AboutStory() {
+export default function AboutStory({
+  propertyHref = '/locations/macquarie-park',
+}: {
+  /** Where its property button goes (v2 passes its own page). */
+  propertyHref?: string;
+} = {}) {
   const sectionRef = useRef<HTMLElement>(null);
   const propertyTextRef = useRef<HTMLDivElement>(null);
   // Phones show the property text cut short under a fade until "Read more" (Figma 745:15539)
@@ -205,7 +210,7 @@ export default function AboutStory() {
 
         <div className="about-story__cta">
           <VLine src={line} length={100} />
-          <a href="/locations/macquarie-park" className="about-button">
+          <a href={propertyHref} className="about-button">
             <span>Discover the place</span>
             <img src={arrowRight} width={24} height={24} alt="" />
           </a>

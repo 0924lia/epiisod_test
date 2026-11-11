@@ -48,6 +48,9 @@ const HOVER_CLOSE_DELAY = 200;
 /** Moving the cursor within this distance (px) of the top of the window brings a hidden
  *  nav back (desktop pointers only). */
 const PEEK_EDGE = 24;
+/** How long (ms) the pointer rests at the top edge before the hidden nav peeks in, so
+ *  brushing past the edge doesn't pull it down. */
+const PEEK_DELAY = 200;
 
 const pageTop = (el: HTMLElement) => el.getBoundingClientRect().top + window.scrollY;
 
@@ -55,7 +58,18 @@ const pageTop = (el: HTMLElement) => el.getBoundingClientRect().top + window.scr
  * Scroll so `id`'s section lands just below the nav — below the sub-navigation alone
  * when the main bar will be hidden by the time it arrives.
  */
+/**
+ * Sections that land somewhere other than their top (by id): each gives the page position to
+ * scroll to — the amenities land on their carousel, once its photo has opened.
+ */
+export const SECTION_LANDINGS: Record<string, () => number | null> = {};
+
 export function scrollToSection(id: string, { immediate = false }: { immediate?: boolean } = {}) {
+  const landing = SECTION_LANDINGS[id]?.();
+  if (landing != null) {
+    scrollToY(Math.round(landing), { immediate });
+    return;
+  }
   const section = document.getElementById(id);
   const header = document.querySelector<HTMLElement>('.nav');
   if (!section || !header) return;
@@ -165,16 +179,34 @@ export default function Nav({
   };
   useEffect(() => () => window.clearTimeout(closeTimer.current), []);
 
-  // Peek: on desktop, the cursor at the top edge of the window brings the hidden nav back.
-  // It stays while the pointer is over the nav and hides again once it moves away below.
+  // Peek: on desktop, resting the cursor at the top edge of the window brings the nav back
+  // when it's entirely out of sight. Not while the sub-navigation is showing on its own
+  // (it sits at the top edge then, and pointing at it shouldn't pull the bar down; scrolling
+  // up brings the bar back). It stays while the pointer is over the nav and hides again once
+  // it moves away below.
+  const allHidden = useRef(false);
+  allHidden.current = hidden || (condensed && !subLinks?.length);
   useEffect(() => {
     const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+    let timer = 0;
+    const atEdge = () => {
+      if (timer || !allHidden.current) return;
+      timer = window.setTimeout(() => {
+        timer = 0;
+        if (allHidden.current) setPeek(true);
+      }, PEEK_DELAY);
+    };
+    const cancel = () => {
+      window.clearTimeout(timer);
+      timer = 0;
+    };
     const onMove = (e: MouseEvent) => {
       if (!fine.matches) return;
       if (e.clientY <= PEEK_EDGE) {
-        setPeek(true);
+        atEdge();
         return;
       }
+      cancel();
       const header = headerRef.current;
       // Measured without the hide transform: the bar's full height from the top
       const navBottom = header ? header.offsetHeight : 0;
@@ -182,11 +214,12 @@ export default function Nav({
     };
     // Leaving the window across its top edge (e.g. towards the browser's tabs) counts too
     const onLeave = (e: MouseEvent) => {
-      if (fine.matches && !e.relatedTarget && e.clientY <= PEEK_EDGE) setPeek(true);
+      if (fine.matches && !e.relatedTarget && e.clientY <= PEEK_EDGE) atEdge();
     };
     window.addEventListener('mousemove', onMove, { passive: true });
     document.addEventListener('mouseout', onLeave);
     return () => {
+      cancel();
       window.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseout', onLeave);
     };
@@ -431,7 +464,7 @@ export default function Nav({
           <div className="nav__links nav__links--end" onPointerEnter={scheduleClose}>
             <div className="nav__actions">
               {NAV_VARIANT === 'b' && (
-                <a href="/about" className="nav__link">
+                <a href="/v2/about" className="nav__link">
                   <span>About us</span>
                 </a>
               )}

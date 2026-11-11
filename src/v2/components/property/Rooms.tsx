@@ -125,6 +125,9 @@ function RoomCard({
 }) {
   const tagId = room.available ? room.tag : 'soldOut';
   const tag = tagId && TAGS[tagId];
+  // The full rate, where the room has a discount (and is bookable)
+  const was =
+    room.discountPercent && room.available && !opening ? room.weekly / (1 - room.discountPercent / 100) : undefined;
   const Card = href ? 'a' : 'article';
   return (
     <Card
@@ -158,13 +161,32 @@ function RoomCard({
             <span className="room-card__register">Register interest</span>
           </p>
         ) : (
-          <p className="room-card__price">
-            <span className="room-card__from">From</span>
-            <span className="room-card__amount">
-              {currency} {room.weekly}
-            </span>
-            <span className="room-card__unit">wk / person</span>
-          </p>
+          <div className="room-card__foot">
+            {/* Figma 1465:17564: the weekly saving and its share, then the price with the
+                full rate struck through */}
+            {was !== undefined && (
+              <p className="room-card__saving">
+                <span>
+                  Save {currency}
+                  {(was - room.weekly).toFixed(2)} every week
+                </span>
+                <span className="room-card__off">{room.discountPercent}% OFF</span>
+              </p>
+            )}
+            <p className="room-card__price">
+              <span className="room-card__from">From</span>
+              <span className="room-card__amount">
+                {currency} {room.weekly}
+              </span>
+              <span className="room-card__unit">wk / person</span>
+              {was !== undefined && (
+                <s className="room-card__was">
+                  {currency}
+                  {was.toFixed(2)}
+                </s>
+              )}
+            </p>
+          </div>
         )}
       </div>
     </Card>

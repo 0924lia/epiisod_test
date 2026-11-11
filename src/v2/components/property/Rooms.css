@@ -806,3 +806,74 @@ a.room-card:focus-visible {
   flex-wrap: wrap;
   white-space: normal;
 }
+
+/* ---------- v2 cards (Figma 1455:18357) ---------- */
+/* 360px tall on desktop, the price at the foot whatever the name and views above it */
+@media (min-width: 1101px) {
+  .room-card {
+    min-height: 360px;
+  }
+}
+
+.room-card__body {
+  flex: 1 0 auto;
+}
+
+.room-card__heading {
+  flex: 1 0 auto;
+}
+
+/* Bold prices; sold out stays lighter (Figma: medium, grey) */
+.room-card__amount {
+  font-weight: 700;
+}
+
+.room-card.is-sold-out .room-card__amount {
+  font-weight: 500;
+}
+
+.room-card.is-sold-out .room-card__price,
+.room-card.is-sold-out .room-card__amount {
+  color: var(--grey-500, #6c757d);
+}
+
+.room-card__foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* A discount (Figma 1465:17564): the saving in green, its share in a pale chip */
+.room-card__saving {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 18px;
+  color: #23a980;
+}
+
+.room-card__off {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: 15px;
+  background: var(--caution-200, #fef4e4);
+  font-weight: 600;
+  color: var(--error-500);
+}
+
+/* The full rate, struck through, at the row's right */
+.room-card__was {
+  flex: 1 0 auto;
+  font-size: 14px;
+  line-height: 18px;
+  text-align: right;
+  color: var(--error-500);
+}
+
+/* With a discount the price block sits 16px under the heading (Figma 1465:17559), so the
+   card keeps its 360px */
+.room-card__body:has(.room-card__saving) {
+  gap: 16px;
+}

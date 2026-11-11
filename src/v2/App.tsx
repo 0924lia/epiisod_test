@@ -12,6 +12,7 @@ import RoomPage from './pages/RoomPage';
 import ContactPage from './pages/ContactPage';
 import WaitlistPage from './pages/WaitlistPage';
 import FaqPage from './pages/FaqPage';
+import AboutPage from './pages/AboutPage';
 import ExperiencePage from './pages/ExperiencePage';
 import WhyPage from './pages/WhyPage';
 import PromotionsPage from './pages/PromotionsPage';
@@ -32,6 +33,7 @@ export default function App() {
   if (path === '/v2/contact') return <ContactPage />;
   if (path === '/v2/join-the-waitlist') return <WaitlistPage />;
   if (path === '/v2/faqs') return <FaqPage />;
+  if (path === '/v2/about') return <AboutPage />;
   if (path === '/v2/experience') return <ExperiencePage />;
   if (path === '/v2/why-epiisod') return <WhyPage />;
   if (path === '/v2/promotions') return <PromotionsPage />;

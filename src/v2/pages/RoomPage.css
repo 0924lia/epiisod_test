@@ -1475,3 +1475,402 @@ a.room-button:hover img {
     grid-column: auto;
   }
 }
+
+/* ---------- v2 (Figma 1461:10717, Nov 2026 revision) ---------- */
+
+/* Overview: Virtual tour (outlined in chocolate) and Share under the description, 40px down
+   (the overview's own gap) */
+.room-overview__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.room-button--dark {
+  border-color: var(--royal-chocolate-600);
+}
+
+.room-link--plain {
+  border-bottom: 0;
+}
+
+.room-link--plain img {
+  transition: none;
+}
+
+.room-link--plain:hover img {
+  transform: none;
+}
+
+/* The booking card: 20px top and bottom, the offers between the fields and the price */
+.room-book {
+  padding: 20px 24px;
+}
+
+.room-book .room-offers {
+  width: 100%;
+  margin-top: 8px;
+  border: 1px solid var(--bronze-300);
+  background: var(--white);
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.room-book .room-offers > .room-tag {
+  margin-left: 16px;
+}
+
+.room-book .room-offers__list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  padding: 16px;
+}
+
+.room-book .room-check {
+  gap: 8px;
+}
+
+.room-book .room-check > span {
+  gap: 4px;
+}
+
+.room-book .room-check strong {
+  font-size: 18px;
+  text-transform: uppercase;
+  color: var(--bronze-700);
+}
+
+.room-book .room-check strong + span {
+  color: var(--royal-chocolate-600);
+}
+
+/* "Starts at", the saving and the old price, then the price; Book at the foot */
+.room-book__summary {
+  align-items: flex-end;
+  margin-top: 8px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.room-book__price {
+  gap: 8px;
+}
+
+.room-book__discount {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.room-book__off {
+  padding: 4px 8px;
+  border-radius: 15px;
+  background: var(--caution-400, #f2c67e);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--royal-chocolate-600);
+}
+
+.room-book__discount s {
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--error-500, #ea5826);
+}
+
+/* On phones the three wrap: Book a tour and Virtual tour side by side, Share under them */
+@media (max-width: 700px) {
+  .room-overview__actions .room-link--plain {
+    padding-left: 0;
+  }
+}
+
+/* ---------- v2: the pinned booking card fits the screen (Figma 1465:13618) ----------
+   The aside (card, then the note) never runs past the bottom of the screen: the card's
+   heading and price stay put, and the fields and offers between them scroll. */
+.room-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-height: calc(100vh - var(--nav-offset, 0px) - 48px);
+  max-height: calc(100svh - var(--nav-offset, 0px) - 48px);
+}
+
+.room-book {
+  flex: 0 1 auto;
+  min-height: 0;
+  gap: 24px;
+  overflow: hidden;
+}
+
+.room-book__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* The scroll box reaches 16px into the card's right padding, so its scrollbar runs in
+     that margin (8px in from the edge) rather than over the fields; 4px on the left and
+     below leave room for the fields' focus rings */
+  margin: 0 -16px 0 -4px;
+  padding: 0 16px 4px 4px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bronze-400) transparent;
+}
+
+/* The "Required field" note sits 8px over the first field, the fields 16px apart */
+/* Heading row (Figma 1461:10945): the title, "* Required" on its right */
+.room-book__head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.room-book__head .room-book__title {
+  flex: 1 0 0;
+}
+
+/* Term and check-in side by side, 16px apart (Figma 1465:17374) */
+.room-book__pair {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.room-book__pair > .room-book__field {
+  flex: 1 0 0;
+  min-width: 0;
+}
+
+/* While there's more to scroll: the list fades out above a rule over the price */
+.room-book:has(.room-book__summary.has-more) .room-book__body {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
+}
+
+.room-book .room-book__summary {
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+.room-book .room-book__summary.has-more {
+  margin-top: -8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--bronze-300);
+}
+
+/* Offers (Figma 1465:13303): sentence case, 16px titles, 16px apart */
+.room-book .room-offers {
+  flex-shrink: 0;
+}
+
+.room-book .room-offers__list {
+  gap: 16px;
+}
+
+.room-book .room-check strong {
+  font-size: 16px;
+  text-transform: none;
+}
+
+/* Under the card: the pricing note */
+.room-aside__note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--royal-chocolate-600);
+}
+
+.room-aside__note img {
+  flex-shrink: 0;
+}
+
+/* Tablets and phones: the card isn't pinned there, so it simply runs its full length */
+@media (max-width: 1100px) {
+  .room-aside {
+    max-height: none;
+  }
+
+  .room-book {
+    overflow: visible;
+  }
+
+  .room-book__body {
+    overflow: visible;
+  }
+}
+
+/* Phones: too narrow for two fields side by side; they stack */
+@media (max-width: 700px) {
+  .room-book__pair {
+    flex-direction: column;
+  }
+
+  .room-book__pair > .room-book__field {
+    flex: none;
+    width: 100%;
+  }
+}
+
+/* The chosen term shows by its short name in the half-width field ("AY27 · 52 wks"); the
+   list keeps the full names */
+.room-book__select.has-value {
+  color: transparent;
+}
+
+.room-book__select option,
+.room-book__select optgroup {
+  color: var(--royal-chocolate-600);
+}
+
+.room-book__value {
+  position: absolute;
+  left: 16px;
+  right: 48px;
+  overflow: hidden;
+  font-size: 16px;
+  line-height: 24px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--royal-chocolate-600);
+  pointer-events: none;
+}
+
+/* What's included chips (Figma 1461:11660): a pale chocolate ground */
+.room-amenity {
+  background: var(--royal-chocolate-100, #f4f2f0);
+}
+
+/* Phones' price bar: the saving above the price when there is one */
+.room-bookbar__summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.room-bookbar__discount {
+  font-size: 12px;
+}
+
+.room-bookbar__discount .room-book__off {
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.room-bookbar__discount s {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* The price on one line beside Book, whatever its digits */
+@media (max-width: 1100px) {
+  .room-bookbar__summary {
+    flex: 1 1 auto;
+  }
+
+  .room-bookbar .room-book__submit {
+    flex-shrink: 0;
+  }
+
+  .room-bookbar__price {
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .room-bookbar__price > span {
+    font-size: 12px;
+  }
+}
+
+/* v2 breadcrumbs: 14px (room pages, offers and blog posts; v1 keeps its own) */
+.room-crumbs,
+.blog-post__crumbs {
+  font-size: 14px;
+}
+
+/* ---------- Booking card price (Figma 1470:17890) ---------- */
+.room-book .room-book__summary--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.room-book__deal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.room-book__deal .room-book__from {
+  font-weight: 600;
+}
+
+/* The saving's chip on the left, the standard price on the right */
+.room-book__deal .room-book__discount {
+  justify-content: space-between;
+}
+
+.room-book__standard {
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--error-500);
+}
+
+.room-book__pay {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.room-book__summary:not(.room-book__summary--stacked) .room-book__pay {
+  margin-left: auto;
+}
+
+.room-book__amount--stacked {
+  flex: 1 0 0;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.room-book__amount--stacked strong {
+  line-height: normal;
+}
+
+.room-book__amount--stacked span {
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--grey-800);
+}
+
+/* The note under the card: 16px below it, its mark in the error orange */
+.room-aside {
+  gap: 16px;
+}
+
+.room-aside__note {
+  font-weight: 500;
+}
+
+.room-bookbar__note {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--grey-800);
+}
+
+/* Room at the foot of the page for the taller price bar (with its Direct Debit line) */
+@media (max-width: 1100px) {
+  body:has(.room-bookbar__note) {
+    padding-bottom: 96px;
+  }
+}

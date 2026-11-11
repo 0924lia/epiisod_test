@@ -166,7 +166,7 @@ export default function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
                 </li>
                 <Group label="Contact" links={GROUPS.contact} onNavigate={onClose} />
                 <li>
-                  <a href="/about" className="menu-panel__item" onClick={onClose}>
+                  <a href="/v2/about" className="menu-panel__item" onClick={onClose}>
                     <span>About</span>
                   </a>
                 </li>

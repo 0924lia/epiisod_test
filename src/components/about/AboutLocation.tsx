@@ -32,7 +32,12 @@ const AUTOPLAY_DELAY = 4000;
  * timer. The backdrop drifts behind the content (parallax) and the section dims as the
  * sign-up slides over it.
  */
-export default function AboutLocation() {
+export default function AboutLocation({
+  propertyHref = '/locations/macquarie-park',
+}: {
+  /** Where its property button goes (v2 passes its own page). */
+  propertyHref?: string;
+} = {}) {
   const sectionRef = useRef<HTMLElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [slide, setSlide] = useState(0);
@@ -120,7 +125,7 @@ export default function AboutLocation() {
               </p>
             </div>
           </div>
-          <a href="/locations/macquarie-park" className="about-location__button">
+          <a href={propertyHref} className="about-location__button">
             <span>Discover the place</span>
             <img src={arrowRight} width={24} height={24} alt="" />
           </a>

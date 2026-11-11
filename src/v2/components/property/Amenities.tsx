@@ -1,300 +1,188 @@
-import { useRef, useState } from 'react';
-import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type { CSSProperties, KeyboardEvent, UIEvent } from 'react';
 import VLine from '../VLine';
-import { addStepSnap, gsap, ScrollTrigger, scrollToY, useGSAP } from '../../../lib/smoothScroll';
+import { gsap, useGSAP } from '../../../lib/smoothScroll';
+import { SECTION_LANDINGS } from '../Nav';
 import { useExitParallax } from '../../lib/useExitParallax';
 import line from '../../../assets/make-it-yours-line.svg';
 import play from '../../../assets/property/icon-play-white.svg';
+import prevIcon from '../../../assets/v2/property/icon-amenity-prev.svg';
+import nextIcon from '../../../assets/v2/property/icon-amenity-next.svg';
+import leftIcon from '../../../assets/v2/property/icon-carousel-prev.svg';
+import rightIcon from '../../../assets/v2/property/icon-carousel-next.svg';
 import type { Amenity, PropertyContent } from './propertyContent';
 import { EXPERIENCE_URL } from '../../../lib/links';
 import './Amenities.css';
 
-/** Figma sizes: the opening window, then the wide frame (transition 1099:34869). */
-const WINDOW = { w: 324, h: 276 };
-const WIDE = { w: 992, h: 454 };
-/** Phones (Figma 1314:14065): the window under the lede, the frame it grows to as it rises,
- *  then the carousel's photo frame and the gap to the next one. */
-const PHONE = { window: { w: 162, h: 140 }, wide: { w: 342, h: 297 }, card: { w: 342, h: 276 }, gap: 8 };
+/** The photo's opening frames, in Figma px (transition 1099:34869): a small window, then a
+ *  wide frame, then the whole panel. Phones (1314:14065) use their own, on a 390 screen. */
+const FRAMES = {
+  desktop: { base: 1512, window: { w: 324, h: 276 }, wide: { w: 992, h: 454 } },
+  phone: { base: 390, window: { w: 162, h: 140 }, wide: { w: 342, h: 297 } },
+};
 
 const cropStyle = (a: Amenity) =>
   (a.crop ? { '--pos': a.crop.position, '--zoom': a.crop.zoom } : undefined) as CSSProperties | undefined;
 
 /**
- * Amenities (Figma 1080:5595 → transition 1099:34869). The heading scrolls in, then the
- * stage pins: the photo opens from a small window, through a wide frame, to the whole
- * screen (as the brand video does), and darkens behind the amenities list. Scrolling on
- * steps through the amenities: the active one grows, its description opens, the photo
- * behind it changes and the bar beside the list fills to it. It all follows the scroll
- * fluidly, 70% of a screen of scroll per amenity; when the scroll comes to rest in the list it
- * eases to the nearer amenity.
+ * Amenities: the heading, then a one-screen carousel (Figma 1465:17377). The photo behind
+ * the list shows the active amenity; the arrows beside the list step through them (round
+ * from the last back to the first), and clicking an amenity's title opens it. The white
+ * mark on the line between the arrows shows where in the list it is. Nothing is tied to
+ * scrolling, so the page scrolls straight on to the rooms.
  *
- * On phones (Figma 1314:14065) the window sits under the lede and widens as it rises; the
- * stage pins and it opens to the whole screen and darkens. Over it, the amenities become a
- * carousel: each one's photo slides in from the right, the bar across fills, and its copy
- * hands over, a step of scroll per amenity, easing to the nearer one when it rests.
+ * Before it, as the panel arrives, it pins for about a screen of scroll while the photo
+ * opens from a small window to a wide frame to the whole panel, darkens, and the carousel
+ * rises in over it (as before, Figma 1099:34869); then the page carries on.
  *
- * Tablets and reduced motion get the heading, the photo, then the whole list.
+ * Phones (Figma 1465:17455): the active amenity's name and description, then its photo in a
+ * row of cards (the next one peeking in) to swipe through, the arrows either side of a
+ * progress line under them, and the button across the width.
  */
 export default function Amenities({ id, content }: { id: string; content: PropertyContent }) {
   const sectionRef = useRef<HTMLElement>(null);
-  /** Page position of each amenity's stop (larger screens), for dragging the bar. */
-  const stopsAt = useRef<(() => number[]) | null>(null);
-  const dragging = useRef(false);
   const [active, setActive] = useState(0);
   const items = content.amenities;
+  const count = items.length;
+  const wrap = (i: number) => ((i % count) + count) % count;
 
-  useGSAP(
-    () => {
-      const section = sectionRef.current;
-      if (!section) return;
-      gsap.matchMedia().add('(min-width: 901px) and (prefers-reduced-motion: no-preference)', () => {
-        section.classList.add('is-animated');
-        const q = gsap.utils.selector(section);
-        const stage = q('.amenities__stage')[0] as HTMLElement;
-        const media = q('.amenities__media')[0] as HTMLElement;
-
-        /** A frame of `w × h` Figma px, centred on the screen, as a clip-path inset. */
-        const frame = ({ w, h }: { w: number; h: number }) => () => {
-          const k = Math.min(1, stage.clientWidth / 1512);
-          const x = Math.max(0, (stage.clientWidth - w * k) / 2);
-          const y = Math.max(0, (stage.clientHeight - h * k) / 2);
-          return `inset(${y}px ${x}px ${y}px ${x}px)`;
-        };
-
-        /** Timeline time of the first amenity; each of the others follows a unit later. */
-        const STEPS_AT = 2.1;
-        /** When the list arrives over the full-screen photo. */
-        const LIST_AT = 1.5;
-        const tl = gsap.timeline({
-          defaults: { ease: 'none' },
-          scrollTrigger: {
-            trigger: stage,
-            start: 'top top',
-            // 70% of a screen of scroll per amenity: quick to move on, still room to stop
-            end: () => `+=${window.innerHeight * 0.7 * (STEPS_AT + items.length - 1 + 0.3)}`,
-            pin: true,
-            // Follows the scroll closely, with just enough catch-up to smooth it
-            scrub: 0.12,
-            invalidateOnRefresh: true,
-            // The active amenity follows the scroll; CSS eases each change
-            onUpdate: (self) => {
-              const t = self.progress * tl.duration();
-              const step = Math.round(Math.min(Math.max(t - STEPS_AT, 0), items.length - 1));
-              setActive((a) => (a === step ? a : step));
-              // Once the list is up, each photo takes its Figma crop; until then it's whole.
-              // Set on the element, not through React, which owns only the base classes.
-              section.classList.toggle('is-listing', t >= LIST_AT);
-            },
-          },
-        });
-
-        // 0) On the way in, a gentle parallax between the heading and the small window: the
-        //    heading lags behind the scroll while the window rises a touch faster, so the
-        //    gap between them closes softly. It ends as the stage pins, with both in place.
-        const approach = { trigger: stage, start: 'top bottom', end: 'top top', scrub: 0.2 };
-        gsap.fromTo(
-          '.amenities__intro',
-          { y: 0 },
-          { y: () => window.innerHeight * 0.08, ease: 'none', scrollTrigger: approach },
-        );
-        gsap.fromTo(
-          media,
-          { y: () => window.innerHeight * 0.12 },
-          { y: 0, ease: 'none', immediateRender: true, scrollTrigger: approach },
-        );
-
-        tl.addLabel('window')
-          // 1) The window opens to the wide frame, then to the whole screen
-          // One continuous growth: speeding up into the wide frame, slowing out of it, so
-          // the motion doesn't pause at the hand-over
-          .fromTo(media, { clipPath: frame(WINDOW) }, { clipPath: frame(WIDE), duration: 0.8, ease: 'power1.in' })
-          .addLabel('wide')
-          // From an explicit four-edge start: the browser reports the wide frame in short form
-          // ("inset(y x)"), and tweening that against four values opened the left edge first
-          .fromTo(media, { clipPath: frame(WIDE) }, { clipPath: 'inset(0px 0px 0px 0px)', duration: 0.8, ease: 'power1.out' })
-          // 2) The photo darkens and the list arrives
-          .fromTo('.amenities__overlay', { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.3)
-          .fromTo(
-            '.amenities__copy',
-            { autoAlpha: 0, y: 40 },
-            { autoAlpha: 1, y: 0, duration: 0.4, ease: 'power2.out' },
-            1.6,
-          )
-          .addLabel('step0', STEPS_AT);
-        // 3) One unit of scroll per amenity (the change itself is CSS, on `active`)
-        for (let i = 1; i < items.length; i++) tl.addLabel(`step${i}`, STEPS_AT + i);
-        tl.to({}, { duration: 0.3 }, STEPS_AT + items.length - 1);
-
-        // Everything follows the scroll fluidly; once it comes to rest within the list, it
-        // eases to an amenity: the next one if it moved even a little towards it, otherwise
-        // back (a magnetic settle that never carries on further)
-        const stops = () => items.map((_, i) => tl.labels[`step${i}`] / tl.duration());
-        const removeSnap = addStepSnap(tl.scrollTrigger!, stops, {
-          nearest: true,
-          // A tenth of the way towards the next amenity is enough to settle there
-          lean: 0.1,
-          duration: 0.5,
-          rest: 120,
-          paused: () => dragging.current,
-        });
-        stopsAt.current = () => {
-          const { start, end } = tl.scrollTrigger!;
-          return stops().map((p) => start + p * (end - start));
-        };
-
-        return () => {
-          removeSnap();
-          stopsAt.current = null;
-          section.classList.remove('is-animated');
-          setActive(0);
-          section.classList.remove('is-listing');
-        };
-      });
-    },
-    { scope: sectionRef, dependencies: [items.length] },
-  );
-
-  useGSAP(
-    () => {
-      const section = sectionRef.current;
-      if (!section) return;
-      gsap.matchMedia().add('(max-width: 700px) and (prefers-reduced-motion: no-preference)', () => {
-        section.classList.add('is-carousel');
-        const q = gsap.utils.selector(section);
-        const stage = q('.amenities__stage')[0] as HTMLElement;
-        const media = q('.amenities__media')[0] as HTMLElement;
-        const cards = q('.amenities__card') as HTMLElement[];
-        const entries = q('.amenities__item') as HTMLElement[];
-
-        /** A frame of `w × h` Figma px, centred across the stage and at its top. */
-        const frame = ({ w, h }: { w: number; h: number }) => () => {
-          const k = stage.clientWidth / 390;
-          const x = (stage.clientWidth - w * k) / 2;
-          return `inset(0px ${x}px ${stage.clientHeight - h * k}px ${x}px)`;
-        };
-        const cardW = () => q('.amenities__cards')[0].clientWidth;
-        /** The photo's centre: the frame's centre while it's at the stage's top. */
-        const middle = ({ h }: { h: number }) => () => `${(h * stage.clientWidth) / 390 / 2}px`;
-
-        // One timeline from the moment the stage comes on screen, so the window's widening
-        // and its opening can't fight over the clip-path (two scrubbed tweens on the same
-        // property would let the late one win when scrolling fast). The pin is separate.
-        // Units: 70% of a screen of scroll each; the approach is a whole screen.
-        const UNIT = 0.7;
-        const A = 1 / UNIT;
-        const PINNED = 1.6 + items.length - 1 + 0.3;
-        ScrollTrigger.create({
-          trigger: stage,
-          start: 'top top',
-          end: () => `+=${window.innerHeight * UNIT * PINNED}`,
-          pin: true,
-          invalidateOnRefresh: true,
-        });
-        const tl = gsap.timeline({
-          defaults: { ease: 'none' },
-          scrollTrigger: {
-            trigger: stage,
-            start: 'top bottom',
-            end: () => `+=${window.innerHeight * (1 + UNIT * PINNED)}`,
-            scrub: 0.4,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        tl.set(cards, { width: cardW })
-          .set(entries.slice(1), { autoAlpha: 0, x: 40 })
-          .set('.amenities__progress-bar', { scaleX: 1 / items.length })
-          // 0) On the way up, the window under the lede widens to the content width
-          .fromTo(
-            media,
-            { clipPath: frame(PHONE.window), '--cy': middle(PHONE.window) },
-            { clipPath: frame(PHONE.wide), '--cy': middle(PHONE.wide), duration: A, ease: 'power1.inOut' },
-            0,
-          )
-          // 1) Pinned: the frame opens to the whole screen and darkens
-          // From an explicit four-edge start (the browser reports the frame in short form,
-          // which tweened against four values opens the left edge first)
-          .fromTo(
-            media,
-            { clipPath: frame(PHONE.wide), '--cy': middle(PHONE.wide) },
-            {
-              clipPath: 'inset(0px 0px 0px 0px)',
-              '--cy': () => `${stage.clientHeight / 2}px`,
-              duration: 0.8,
-              ease: 'power2.inOut',
-              immediateRender: false,
-            },
-            A,
-          )
-          .fromTo('.amenities__overlay', { opacity: 0 }, { opacity: 0.95, duration: 0.4 }, A + 0.5)
-          // 2) The carousel rises in over it
-          .fromTo('.amenities__copy', { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.4, ease: 'power2.out' }, A + 1)
-          .addLabel('step0', A + 1.6);
-        // 3) A unit of scroll per amenity: photos slide across, copy hands over, the bar fills
-        for (let i = 1; i < items.length; i++) {
-          const at = A + 1.6 + i - 1 + 0.15;
-          tl.to('.amenities__track', { x: () => -i * (cardW() + PHONE.gap), duration: 0.7, ease: 'power2.inOut' }, at)
-            .to(entries[i - 1], { autoAlpha: 0, x: -40, duration: 0.3, ease: 'power1.in' }, at)
-            .to(entries[i], { autoAlpha: 1, x: 0, duration: 0.4, ease: 'power2.out' }, at + 0.3)
-            .to('.amenities__progress-bar', { scaleX: (i + 1) / items.length, duration: 0.7, ease: 'power2.inOut' }, at)
-            .addLabel(`step${i}`, A + 1.6 + i);
-        }
-        tl.to({}, { duration: 0.3 }, A + 1.6 + items.length - 1);
-
-        const removeSnap = addStepSnap(
-          tl.scrollTrigger!,
-          () => items.map((_, i) => tl.labels[`step${i}`] / tl.duration()),
-          { nearest: true, lean: 0.1, duration: 0.6, rest: 120 },
-        );
-
-        return () => {
-          removeSnap();
-          section.classList.remove('is-carousel');
-        };
-      });
-    },
-    { scope: sectionRef, dependencies: [items.length] },
-  );
-
-  /**
-   * The bar beside the list doubles as a scrollbar: press or drag along it to move through
-   * the amenities. The page follows the pointer between stops; letting go settles on the
-   * nearest amenity (the step snap).
-   */
-  const scrubTo = (e: ReactPointerEvent<HTMLDivElement>, immediate: boolean) => {
-    const at = stopsAt.current?.();
-    if (!at || !at.length) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    // Each amenity owns an equal share of the bar; the middle of its share is its stop
-    const f = Math.min(Math.max((e.clientY - r.top) / r.height, 0), 1) * at.length - 0.5;
-    const i = Math.min(Math.max(Math.floor(f), 0), at.length - 2);
-    const t = Math.min(Math.max(f - i, 0), 1);
-    const y = at.length > 1 ? at[i] + (at[i + 1] - at[i]) * t : at[0];
-    scrollToY(Math.round(immediate ? y : at[Math.round(Math.min(Math.max(f, 0), at.length - 1))]), { immediate });
+  // Phones: the cards row follows the active amenity, and swiping it sets the amenity
+  const cardsRef = useRef<HTMLDivElement>(null);
+  const step = () => {
+    const row = cardsRef.current;
+    const card = row?.firstElementChild as HTMLElement | null;
+    return card ? card.offsetWidth + parseFloat(getComputedStyle(row!).columnGap || '0') : 0;
+  };
+  useEffect(() => {
+    const row = cardsRef.current;
+    const w = step();
+    if (!row || !w || row.offsetParent === null) return;
+    if (Math.round(row.scrollLeft / w) !== active) row.scrollTo({ left: active * w, behavior: 'smooth' });
+  }, [active]);
+  const onCardsScroll = (e: UIEvent<HTMLDivElement>) => {
+    const w = step();
+    if (!w) return;
+    const i = Math.min(count - 1, Math.max(0, Math.round(e.currentTarget.scrollLeft / w)));
+    if (i !== active) setActive(i);
   };
 
-  const onBarDown = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (!stopsAt.current || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  // The list's tallest state (whichever amenity is open), so it never changes height as
+  // the active one changes: measured on a hidden copy, each amenity opened in turn
+  const listRef = useRef<HTMLUListElement>(null);
+  const [listH, setListH] = useState(0);
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const measure = () => {
+      if (!list.offsetParent) return;
+      const copy = list.cloneNode(true) as HTMLUListElement;
+      copy.removeAttribute('id');
+      copy.setAttribute('aria-hidden', 'true');
+      Object.assign(copy.style, { position: 'absolute', visibility: 'hidden', pointerEvents: 'none', minHeight: '0', width: `${list.clientWidth}px` });
+      copy.querySelectorAll<HTMLElement>('*').forEach((el) => (el.style.transition = 'none'));
+      list.parentElement!.appendChild(copy);
+      const rows = [...copy.children] as HTMLElement[];
+      let max = 0;
+      rows.forEach((_, i) => {
+        rows.forEach((r, j) => r.classList.toggle('is-active', i === j));
+        max = Math.max(max, copy.offsetHeight);
+      });
+      copy.remove();
+      setListH(Math.ceil(max));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(list.parentElement!);
+    document.fonts?.ready.then(measure);
+    return () => ro.disconnect();
+  }, [items]);
+
+  // Up and down arrows move through the list while one of its titles has focus
+  const onListKey = (e: KeyboardEvent<HTMLUListElement>) => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
     e.preventDefault();
-    dragging.current = true;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    e.currentTarget.classList.add('is-dragging');
-    scrubTo(e, false);
+    const next = wrap(active + (e.key === 'ArrowDown' ? 1 : -1));
+    setActive(next);
+    e.currentTarget.querySelectorAll<HTMLButtonElement>('.amenities__title')[next]?.focus();
   };
 
-  const onBarMove = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (dragging.current) scrubTo(e, true);
-  };
+  // The opening: pinned for a screen of scroll, the photo grows to the whole panel, darkens,
+  // and the carousel rises in. Reduced motion skips it (the panel is simply there).
+  useGSAP(
+    () => {
+      const section = sectionRef.current;
+      if (!section) return;
+      const mm = gsap.matchMedia();
+      mm.add(
+        {
+          phone: '(max-width: 700px) and (prefers-reduced-motion: no-preference)',
+          desktop: '(min-width: 701px) and (prefers-reduced-motion: no-preference)',
+        },
+        (ctx) => {
+          const f = ctx.conditions!.phone ? FRAMES.phone : FRAMES.desktop;
+          const q = gsap.utils.selector(section);
+          const stage = q('.amenities__stage')[0] as HTMLElement;
+          const media = q('.amenities__media')[0] as HTMLElement;
+          section.classList.add('is-revealing');
+          /** A frame of `w × h` Figma px, centred in the panel, as a clip-path inset. */
+          const frame = ({ w, h }: { w: number; h: number }) => () => {
+            const k = Math.min(1, stage.clientWidth / f.base);
+            const x = Math.max(0, (stage.clientWidth - w * k) / 2);
+            const y = Math.max(0, (stage.clientHeight - h * k) / 2);
+            return `inset(${y}px ${x}px ${y}px ${x}px)`;
+          };
+          const tl = gsap.timeline({
+            defaults: { ease: 'none' },
+            scrollTrigger: {
+              trigger: stage,
+              start: 'top top',
+              end: () => `+=${window.innerHeight}`,
+              pin: true,
+              scrub: 0.2,
+              invalidateOnRefresh: true,
+              // The photos show whole in the window, taking their crops once open
+              onUpdate: (self) => section.classList.toggle('is-revealing', self.progress < 0.75),
+            },
+          });
+          // On the way in the window rises a touch faster than the heading above it
+          gsap.fromTo(
+            media,
+            { y: () => window.innerHeight * 0.12 },
+            { y: 0, ease: 'none', immediateRender: true, scrollTrigger: { trigger: stage, start: 'top bottom', end: 'top top', scrub: 0.2 } },
+          );
+          // One continuous growth: speeding into the wide frame, easing out of it. From an
+          // explicit four-edge start each time (the browser reports frames in short form).
+          tl.fromTo(media, { clipPath: frame(f.window) }, { clipPath: frame(f.wide), duration: 0.8, ease: 'power1.in' })
+            .fromTo(media, { clipPath: frame(f.wide) }, { clipPath: 'inset(0px 0px 0px 0px)', duration: 0.8, ease: 'power1.out' })
+            .fromTo('.amenities__overlay', { opacity: 0 }, { opacity: ctx.conditions!.phone ? 0.95 : 1, duration: 0.4 }, 1.3)
+            .fromTo('.amenities__copy', { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.4, ease: 'power2.out' }, 1.6)
+            .to({}, { duration: 0.2 });
+          // The sub-navigation's "Amenities" lands here: the photo open, the carousel up
+          SECTION_LANDINGS[id] = () => tl.scrollTrigger?.end ?? null;
+          return () => {
+            section.classList.remove('is-revealing');
+            delete SECTION_LANDINGS[id];
+          };
+        },
+      );
+    },
+    { scope: sectionRef },
+  );
 
-  const onBarUp = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (!dragging.current) return;
-    dragging.current = false;
-    e.currentTarget.classList.remove('is-dragging');
-    // Settle on the amenity nearest where it was let go
-    scrubTo(e, false);
-  };
+  // Without the opening (reduced motion), "Amenities" still lands on the carousel itself
+  useEffect(() => {
+    if (SECTION_LANDINGS[id]) return;
+    const stage = () => document.getElementById(`${id}-stage`);
+    SECTION_LANDINGS[id] = () => {
+      const el = stage();
+      return el ? el.getBoundingClientRect().top + window.scrollY : null;
+    };
+    return () => {
+      delete SECTION_LANDINGS[id];
+    };
+  }, [id]);
 
-  // Hand-over to the rooms: the finished frame lags and dims as they slide over it.
+  // Hand-over to the rooms: the panel lags and dims as they slide over it.
   // Set up after the pin, so it measures the section with its pinned scroll added.
   useExitParallax(sectionRef);
 
@@ -315,8 +203,6 @@ export default function Amenities({ id, content }: { id: string; content: Proper
       </div>
 
       <div className="amenities__stage" id={`${id}-stage`}>
-        {/* Drifts on the hand-over to the rooms; the stage itself is pinned, so the drift
-            can't go on it (the two would compound) */}
         <div className="amenities__inner" data-exit-content>
           <div className="amenities__media" aria-hidden>
             {items.map((a, i) => (
@@ -332,51 +218,107 @@ export default function Amenities({ id, content }: { id: string; content: Proper
           </div>
 
           <div className="amenities__copy">
-            {/* Phones: the amenities' photos in a row, slid across one at a time */}
-            <div className="amenities__cards" aria-hidden>
-              <div className="amenities__track">
-                {items.map((a) => (
-                  <div key={a.lead + a.rest} className="amenities__card">
-                    <img src={a.image} alt="" />
+            <p className="amenities__eyebrow">Amenities</p>
+
+            {/* Phones (Figma 1465:17455) */}
+            <div className="amenities__phone">
+              <div className="amenities__current" aria-live="polite">
+                {items.map((a, i) => (
+                  <div key={a.lead + a.rest} className={`amenities__current-item${i === active ? ' is-active' : ''}`} aria-hidden={i !== active}>
+                    <h3 className="amenities__current-title">
+                      <em>{a.lead}</em>
+                      {a.rest}
+                    </h3>
+                    <p className="amenities__current-text">{a.text}</p>
                   </div>
                 ))}
               </div>
-            </div>
-            <p className="eyebrow amenities__eyebrow">Amenities</p>
-            <div className="amenities__list-row">
-              <div
-                className="amenities__progress"
-                aria-hidden
-                onPointerDown={onBarDown}
-                onPointerMove={onBarMove}
-                onPointerUp={onBarUp}
-                onPointerCancel={onBarUp}
-              >
-                <span
-                  className="amenities__progress-bar"
-                  style={{ '--fill': `${((active + 1) / items.length) * 100}%` } as CSSProperties}
-                />
+              <div ref={cardsRef} className="amenities__cards" onScroll={onCardsScroll}>
+                {items.map((a, i) => (
+                  <button
+                    key={a.lead + a.rest}
+                    type="button"
+                    className="amenities__card"
+                    aria-label={`${a.lead}${a.rest}`}
+                    aria-current={i === active}
+                    onClick={() => setActive(i)}
+                  >
+                    <img src={a.image} alt="" style={cropStyle(a)} />
+                  </button>
+                ))}
               </div>
-              <ul className="amenities__list">
+              <div className="amenities__pager">
+                <button type="button" className="amenities__arrow" aria-label="Previous amenity" onClick={() => setActive(wrap(active - 1))}>
+                  <img src={leftIcon} width={24} height={24} alt="" />
+                </button>
+                <div className="amenities__bar" aria-hidden>
+                  <span style={{ '--n': count, '--i': active } as CSSProperties} />
+                </div>
+                <button type="button" className="amenities__arrow" aria-label="Next amenity" onClick={() => setActive(wrap(active + 1))}>
+                  <img src={rightIcon} width={24} height={24} alt="" />
+                </button>
+              </div>
+            </div>
+
+            <div className="amenities__row">
+              {/* Figma 1465:17440: previous, the progress line, next */}
+              <div className="amenities__nav">
+                <button
+                  type="button"
+                  className="amenities__arrow"
+                  aria-label="Previous amenity"
+                  aria-controls={`${id}-list`}
+                  onClick={() => setActive(wrap(active - 1))}
+                >
+                  <img src={prevIcon} width={24} height={24} alt="" />
+                </button>
+                <div className="amenities__track" aria-hidden>
+                  <span
+                    className="amenities__mark"
+                    style={{ '--fill': (active + 1) / count } as CSSProperties}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="amenities__arrow"
+                  aria-label="Next amenity"
+                  aria-controls={`${id}-list`}
+                  onClick={() => setActive(wrap(active + 1))}
+                >
+                  <img src={nextIcon} width={24} height={24} alt="" />
+                </button>
+              </div>
+
+              <ul
+                ref={listRef}
+                className="amenities__list"
+                id={`${id}-list`}
+                onKeyDown={onListKey}
+                style={listH ? ({ '--list-h': `${listH}px` } as CSSProperties) : undefined}
+              >
                 {items.map((a, i) => (
                   <li key={a.lead + a.rest} className={`amenities__item${i === active ? ' is-active' : ''}`}>
-                    <h3 className="amenities__title">
-                      <span className="amenities__lead">{a.lead}</span>
-                      {a.rest}
+                    <h3 className="amenities__heading">
+                      <button
+                        type="button"
+                        className="amenities__title"
+                        aria-expanded={i === active}
+                        aria-controls={`${id}-text-${i}`}
+                        tabIndex={i === active ? 0 : -1}
+                        onClick={() => setActive(i)}
+                      >
+                        <span className="amenities__lead">{a.lead}</span>
+                        {a.rest}
+                      </button>
                     </h3>
-                    <div className="amenities__text-wrap">
+                    <div className="amenities__text-wrap" id={`${id}-text-${i}`}>
                       <p className="amenities__text">{a.text}</p>
                     </div>
                   </li>
                 ))}
               </ul>
             </div>
-            <a
-              href={EXPERIENCE_URL}
-              className="amenities__button"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={EXPERIENCE_URL} className="amenities__button" target="_blank" rel="noopener noreferrer">
               <img src={play} width={24} height={24} alt="" />
               <span>Enter the EPIISOD experience</span>
             </a>
