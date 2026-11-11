@@ -5,10 +5,8 @@ import BlogCard, { postHref } from '../components/blog/BlogCard';
 import WhyLiving from '../../components/why/WhyLiving';
 import AboutClosing from '../../components/about/AboutClosing';
 import Footer from '../components/Footer';
-import VLine from '../../components/VLine';
 import { gsap, useGSAP } from '../../lib/smoothScroll';
 import { AUDIENCES, POSTS, categoryTone, postMeta } from '../../components/blog/blogData';
-import line from '../../assets/cta-line.svg';
 import '../../components/blog/Blog.css';
 
 const ALL = 'All';
@@ -88,7 +86,6 @@ export default function BlogListPage() {
             <h1 className="type-h1">
               EPIISOD <em>blogs</em>
             </h1>
-            <VLine src={line} length={100} />
           </div>
 
           {featured && (
