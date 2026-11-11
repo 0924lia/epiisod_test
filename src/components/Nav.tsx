@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { scrollToY } from '../lib/smoothScroll';
 import caretLight from '../assets/caret-down.svg';
 import caretDark from '../assets/caret-down-dark.svg';
@@ -28,6 +29,9 @@ const PRIMARY_LINKS: { label: string; menu?: MenuKey; href?: string; caret?: boo
   { label: 'Contact us', menu: 'contact', href: '/contact' },
 ];
 const menuId = (menu: MenuKey) => `nav-${menu}-menu`;
+/** Grace period (ms) before a hovered-open menu closes once the pointer leaves the nav,
+ *  so crossing a small gap doesn't snap it shut. */
+const HOVER_CLOSE_DELAY = 200;
 /** A link in the sub-navigation row: scrolls to the section with this id. */
 export type SubLink = { label: string; target: string };
 
@@ -111,6 +115,32 @@ export default function Nav({
   const [condensed, setCondensed] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [openMenu, setOpenMenu] = useState<MenuKey | null>(null);
+  const closeTimer = useRef<number>();
+  /** The open menu was opened by hovering (so a click on its link keeps it open). */
+  const openedByHover = useRef(false);
+
+  // Hover opens menus with a mouse; touch and pens keep tap-to-open.
+  const cancelClose = () => window.clearTimeout(closeTimer.current);
+  const scheduleClose = (e: ReactPointerEvent) => {
+    if (e.pointerType !== 'mouse') return;
+    cancelClose();
+    closeTimer.current = window.setTimeout(() => setOpenMenu(null), HOVER_CLOSE_DELAY);
+  };
+  const hoverOpen = (menu: MenuKey) => (e: ReactPointerEvent) => {
+    if (e.pointerType !== 'mouse') return;
+    cancelClose();
+    openedByHover.current = true;
+    setOpenMenu(menu);
+  };
+  const toggleMenu = (menu: MenuKey) => {
+    cancelClose();
+    // Clicking a link whose menu just opened on hover keeps it open rather than closing it
+    // again. Reads the current state (not this render's), as hover and click can land together.
+    const keep = openedByHover.current;
+    openedByHover.current = false;
+    setOpenMenu((current) => (current === menu ? (keep ? current : null) : menu));
+  };
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
   const [panelOpen, setPanelOpen] = useState(false);
   const closePanel = useCallback(() => setPanelOpen(false), []);
   const [currentSub, setCurrentSub] = useState<string | null>(null);
@@ -303,6 +333,8 @@ export default function Nav({
       <header
         ref={headerRef}
         className={`nav${tone !== 'light' ? ` nav--${tone}` : ''}${subLinks ? ' nav--sub' : ''}${scrolled ? ' is-scrolled' : ''}${openMenu ? ' is-open' : ''}${condensed && !openMenu ? ' is-condensed' : ''}${hidden && !openMenu ? ' is-hidden' : ''}`}
+        onPointerLeave={scheduleClose}
+        onPointerEnter={cancelClose}
         data-hide-after={hideBarAfter}
         data-bar-hidden-in={barHiddenIn?.join(',')}
       >
@@ -310,7 +342,7 @@ export default function Nav({
           <div className="nav__links">
             {PRIMARY_LINKS.map(({ label, menu, href = '#', caret = true }) =>
               menu && href !== '#' ? (
-                <span key={label} className="nav__split">
+                <span key={label} className="nav__split" onPointerEnter={hoverOpen(menu)}>
                   <a href={href} className={`nav__link${openMenu === menu ? ' is-active' : ''}`}>
                     <span>{label}</span>
                   </a>
@@ -320,7 +352,7 @@ export default function Nav({
                     aria-label={`${label} menu`}
                     aria-expanded={openMenu === menu}
                     aria-controls={menuId(menu)}
-                    onClick={() => setOpenMenu((current) => (current === menu ? null : menu))}
+                    onClick={() => toggleMenu(menu)}
                   >
                     <Icon light={caretLight} dark={caretDark} size={16} />
                   </button>
@@ -332,7 +364,8 @@ export default function Nav({
                   className={`nav__link${openMenu === menu ? ' is-active' : ''}`}
                   aria-expanded={openMenu === menu}
                   aria-controls={menuId(menu)}
-                  onClick={() => setOpenMenu((current) => (current === menu ? null : menu))}
+                  onPointerEnter={hoverOpen(menu)}
+                  onClick={() => toggleMenu(menu)}
                 >
                   <span>{label}</span>
                   {caret && <Icon light={caretLight} dark={caretDark} size={16} />}
