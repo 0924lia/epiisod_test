@@ -1646,11 +1646,8 @@ a.room-button:hover img {
   min-width: 0;
 }
 
-/* While there's more to scroll: the list fades out above a rule over the price */
-.room-book:has(.room-book__summary.has-more) .room-book__body {
-  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
-}
+/* While there's more to scroll, a rule over the price says so (no fade: it would wash out
+   the offers box's border) */
 
 .room-book .room-book__summary {
   flex-shrink: 0;
@@ -1873,4 +1870,387 @@ a.room-button:hover img {
   body:has(.room-bookbar__note) {
     padding-bottom: 96px;
   }
+}
+
+/* ---------- Offers folded into a row (Figma 1470:20279), opening to the list (1470:21414) ---------- */
+.room-offers-fold {
+  flex-shrink: 0;
+  margin-top: 8px;
+  border: 1px solid var(--bronze-500);
+  border-radius: 4px;
+  background: var(--white);
+}
+
+.room-offers-fold__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.room-offers-fold__tag {
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.room-offers-fold__count {
+  flex: 1 0 0;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 24px;
+  text-transform: uppercase;
+  color: var(--royal-chocolate-700);
+}
+
+.room-offers-fold__view {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--royal-chocolate-500);
+}
+
+.room-offers-fold__view img {
+  transition: transform 300ms var(--ease-in-out);
+}
+
+.room-offers-fold.is-open .room-offers-fold__view img {
+  transform: rotate(180deg);
+}
+
+/* The list opens below the row, at most ~2½ offers tall, scrolling within */
+.room-offers-fold__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 400ms var(--ease-in-out);
+}
+
+.room-offers-fold.is-open .room-offers-fold__panel {
+  grid-template-rows: 1fr;
+}
+
+.room-offers-fold__inner {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.room-offers-fold__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 158px;
+  margin: 0;
+  padding: 0 16px 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--royal-chocolate-400) var(--royal-chocolate-100, #f4f2f0);
+}
+
+.room-offers-fold__list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.room-offers-fold__list::-webkit-scrollbar-track {
+  border-radius: 6px;
+  background: var(--royal-chocolate-100, #f4f2f0);
+}
+
+.room-offers-fold__list::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background: var(--royal-chocolate-400);
+}
+
+/* A white fade over the list's foot (Figma's 64px gradient) */
+.room-offers-fold__inner::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 12px;
+  bottom: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 65%);
+  pointer-events: none;
+}
+
+.room-offers-fold .room-check {
+  gap: 8px;
+}
+
+.room-offers-fold .room-check > span {
+  gap: 4px;
+}
+
+.room-offers-fold .room-check strong {
+  font-size: 16px;
+  color: var(--bronze-700);
+}
+
+.room-offers-fold .room-check strong + span {
+  color: var(--royal-chocolate-600);
+}
+
+/* ---------- The price (Figma 1470:20287) ---------- */
+.room-book .room-book__summary--stacked {
+  gap: 24px;
+}
+
+.room-book__rate {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.room-book__rate .room-book__from {
+  font-weight: 600;
+}
+
+.room-book__rate .room-book__pay {
+  align-items: center;
+  gap: 16px;
+}
+
+.room-book__line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.room-book__line strong {
+  font-weight: 700;
+  font-size: 24px;
+  line-height: normal;
+  color: var(--royal-chocolate-700);
+}
+
+.room-book__rate .room-book__amount--stacked > span {
+  color: var(--royal-chocolate-700);
+}
+
+.room-book__standard-rate {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--royal-chocolate-600);
+}
+
+/* The note: its icon at the top of the lines */
+.room-aside__note {
+  align-items: flex-start;
+}
+
+.room-offers-fold__count {
+  white-space: nowrap;
+}
+
+/* Phones: the row's too narrow for the word "View" beside the count; the arrow stays */
+@media (max-width: 700px) {
+  .room-offers-fold__head {
+    padding: 12px;
+  }
+
+  .room-offers-fold__view {
+    font-size: 0;
+    gap: 0;
+  }
+
+  .room-offers-fold__list {
+    padding-inline: 12px;
+  }
+}
+
+/* The list's scrollbar 8px in from the box's edge and clear of its foot, 3px off the text
+   (Figma 1470:21591) */
+.room-offers-fold__list {
+  margin: 0 8px 8px 0;
+  padding: 0 3px 16px 16px;
+}
+
+.room-offers-fold__inner::after {
+  right: 16px;
+  bottom: 8px;
+}
+
+@media (max-width: 700px) {
+  .room-offers-fold__list {
+    padding-left: 12px;
+  }
+}
+
+/* The list's scrollbar is drawn (as in Figma): the native one hidden */
+.room-offers-fold__list {
+  scrollbar-width: none;
+}
+
+.room-offers-fold__list::-webkit-scrollbar {
+  display: none;
+}
+
+.room-offers-fold__track {
+  position: absolute;
+  top: 0;
+  right: 8px;
+  bottom: 8px;
+  width: 5px;
+  border-radius: 6px;
+  background: var(--royal-chocolate-100, #f4f2f0);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.room-offers-fold__thumb {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  min-height: 20px;
+  border-radius: 6px;
+  background: var(--royal-chocolate-400);
+}
+
+/* Text clear of the drawn bar: 3px off it */
+.room-offers-fold__list {
+  padding-right: 16px;
+}
+
+/* Figma's spacing: text ends 16px from the box's edge, the 5px bar 8px from it */
+.room-offers-fold__list {
+  margin-right: 0;
+}
+
+/* The fade over the list's foot goes once the list is scrolled to its end */
+.room-offers-fold__inner::after {
+  transition: opacity 250ms var(--ease-in-out);
+}
+
+.room-offers-fold.is-at-end .room-offers-fold__inner::after {
+  opacity: 0;
+}
+
+@media (max-width: 1100px) {
+  body:has(.room-bookbar__note) {
+    padding-bottom: 116px;
+  }
+}
+
+/* Tablets and phones: the list in full — no inner scroll, drawn bar or fade */
+@media (max-width: 1100px) {
+  .room-offers-fold__list {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .room-offers-fold__track,
+  .room-offers-fold__inner::after {
+    display: none;
+  }
+}
+
+/* ---------- Phones (Figma 1470:20477) ---------- */
+@media (max-width: 700px) {
+  /* Term and check-in side by side again, their text a size down to fit the half width */
+  .room-book__pair {
+    flex-direction: row;
+  }
+
+  .room-book__pair > .room-book__field {
+    flex: 1 0 0;
+    width: auto;
+  }
+
+  .room-book__pair .room-book__control select,
+  .room-book__pair .room-book__control input,
+  .room-book__pair .room-book__placeholder,
+  .room-book__pair .room-book__value {
+    font-size: 14px;
+  }
+
+  .room-book__pair .room-book__control select,
+  .room-book__pair .room-book__control input {
+    padding: 0 40px 0 12px;
+  }
+
+  .room-book__pair .room-book__placeholder,
+  .room-book__pair .room-book__value {
+    left: 12px;
+    right: 40px;
+  }
+
+  .room-book__pair .room-book__control > img {
+    right: 12px;
+  }
+
+  /* The offers row: the tag and View on top, the count under them */
+  .room-offers-fold__head {
+    flex-wrap: wrap;
+    row-gap: 8px;
+    padding: 16px;
+  }
+
+  .room-offers-fold__view {
+    margin-left: auto;
+    font-size: 16px;
+    gap: 8px;
+  }
+
+  .room-offers-fold__count {
+    order: 3;
+    flex: 1 0 100%;
+  }
+
+  .room-offers-fold__list {
+    padding-left: 16px;
+  }
+
+  /* The price, then Book across the card's width */
+  .room-book__rate .room-book__pay {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+  }
+
+  .room-book__rate .room-book__submit {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .room-book__line {
+    flex-wrap: nowrap;
+  }
+}
+
+/* The narrowest phones: a chosen term and date don't fit half widths, so they stack */
+@media (max-width: 379px) {
+  .room-book__pair {
+    flex-direction: column;
+  }
+
+  .room-book__pair > .room-book__field {
+    flex: none;
+    width: 100%;
+  }
+}
+
+/* ---------- The card never scrolls; only its open offers list does ---------- */
+.room-aside {
+  max-height: none;
+}
+
+.room-book {
+  overflow: visible;
+}
+
+.room-book__body {
+  overflow: visible;
+  margin: 0;
+  padding: 0;
 }

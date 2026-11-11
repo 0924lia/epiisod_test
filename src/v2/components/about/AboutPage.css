@@ -1,0 +1,15 @@
+/* About us intro (Figma 1470:21624): no gold line under the title in v2 */
+.about-hero .page-hero__content > .vline {
+  display: none;
+}
+
+/* Figma's 600px under the nav (120 + 360 + 120): the title centred in it, the photos
+   (72px down, 438 tall) wholly inside */
+@media (min-width: 901px) {
+  .about-hero .page-hero__inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 360px;
+  }
+}

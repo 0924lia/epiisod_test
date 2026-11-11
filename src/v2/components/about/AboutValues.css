@@ -1,0 +1,138 @@
+/* "Designed around what matters" (Figma 1470:21852), on the homepage Locations section's
+   layout (Locations.css): only what differs is set here */
+.about-values.locations {
+  background: var(--white);
+}
+
+.about-values .locations__intro {
+  justify-content: flex-start;
+  gap: 48px;
+  background: var(--white);
+}
+
+.about-values .locations__overview {
+  align-items: flex-start;
+}
+
+.about-values__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 1.2;
+  color: var(--royal-chocolate-700);
+}
+
+/* The intro's button keeps its own width (the column stretches its children) */
+.about-values__intro > .about-v2__button {
+  align-self: flex-start;
+}
+
+/* 440 × 428 photo cards: a chocolate fade at the foot, the title over it */
+.about-values__card {
+  position: relative;
+  flex-shrink: 0;
+  width: 440px;
+  height: 428px;
+  overflow: hidden;
+  border: 1px solid var(--bronze-100);
+  background: var(--royal-chocolate-700);
+  box-shadow: 0 48px 20px -32px rgba(0, 0, 0, 0.18);
+}
+
+.about-values__card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.about-values__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(190deg, rgba(57, 29, 19, 0) 58.8%, rgba(57, 29, 19, 0.9) 92.4%),
+    linear-gradient(to top, rgba(36, 18, 12, 0.35) 0%, rgba(36, 18, 12, 0) 24%);
+  mix-blend-mode: multiply;
+}
+
+.about-values__card-title {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 32px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1;
+  color: var(--white);
+}
+
+/* The page's solid chocolate button (Why EPIISOD, The EPIISOD experience, Book now) */
+.about-v2__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 4px;
+  background: var(--royal-chocolate-700);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--white);
+  transition: background-color 300ms var(--ease-in-out);
+}
+
+.about-v2__button:hover {
+  background: var(--royal-chocolate-600);
+}
+
+.about-v2__button img {
+  transition: transform 300ms var(--ease-in-out);
+}
+
+.about-v2__button:hover img {
+  transform: translateX(4px);
+}
+
+/* Phones and portrait tablets: the homepage centres its column; here the heading and
+   button stay left above the cards */
+@media (max-width: 700px), (max-width: 1100px) and (orientation: portrait) {
+  .about-values .locations__intro {
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    gap: 32px;
+  }
+
+  .about-values__title {
+    font-size: 40px;
+  }
+
+  .about-values__card {
+    width: 300px;
+    height: 292px;
+  }
+
+  .about-values__card-title {
+    font-size: 32px;
+    bottom: 24px;
+  }
+}
+
+/* The column is as tall as the cards (not the controls under them), so its shadow runs
+   beside the cards only */
+@media (min-width: 701px) {
+  .about-values .locations__intro {
+    align-self: flex-start;
+    min-height: 428px;
+    /* Its shadow falls to the right only (over the cards), not below the column */
+    clip-path: inset(0 -120px 0 0);
+  }
+}

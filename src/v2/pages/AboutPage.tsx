@@ -1,27 +1,41 @@
 import Nav from '../components/Nav';
-import AboutIntro from '../../components/about/AboutIntro';
-import AboutStory from '../../components/about/AboutStory';
-import AboutLocation from '../../components/about/AboutLocation';
-import AboutSignup from '../../components/about/AboutSignup';
-import AboutClosing from '../../components/about/AboutClosing';
 import Footer from '../components/Footer';
+import PageHero from '../../components/PageHero';
+import AboutValues from '../components/about/AboutValues';
+import AboutTogether from '../components/about/AboutTogether';
+import AboutBuilt from '../components/about/AboutBuilt';
+import AboutClosing from '../../components/about/AboutClosing';
+import photoLeft from '../../assets/about/intro-left.jpg';
+import photoRight from '../../assets/about/intro-right.jpg';
+import '../components/about/AboutPage.css';
 
 /**
- * v2: v1's page as it is, under v2's navigation and above v2's footer.
- */
-/**
- * About us (Figma 735:13844). The nav starts as a cream bar; each section hands over to
- * the next with parallax, and the closing fold flows into the footer undimmed.
+ * About us, v2 (Figma 1470:21593): "Where your story finds its place" between two photos;
+ * "Designed around what matters" with its carousel; "Where it all comes together" over the
+ * building; "Built on experience" and "Write your story with EPIISOD"; then the closing fold
+ * and the footer.
  */
 export default function AboutPage() {
   return (
     <>
       <Nav tone="cream" />
       <main>
-        <AboutIntro />
-        <AboutStory propertyHref="/v2/locations/macquarie-park" />
-        <AboutLocation propertyHref="/v2/locations/macquarie-park" />
-        <AboutSignup />
+        <PageHero
+          className="about-hero"
+          eyebrow="This is EPIISOD"
+          title={
+            <>
+              Where <em>your story</em>
+              <br />
+              finds its place
+            </>
+          }
+          photos={{ left: photoLeft, right: photoRight }}
+          tone="cream"
+        />
+        <AboutValues />
+        <AboutTogether />
+        <AboutBuilt />
         <AboutClosing />
       </main>
       <Footer />

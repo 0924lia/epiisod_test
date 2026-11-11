@@ -1,0 +1,118 @@
+/* "Built on experience" (Figma 1470:22221) */
+.about-built {
+  position: relative;
+  background: var(--white);
+}
+
+/* 200px between the copy, the square and the call to action (the photo's slot is 360px
+   tall around the 208px square, so 124px either side of it) */
+.about-built__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 124px;
+  padding: 200px var(--page-gutter);
+}
+
+.about-built__story {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  width: 100%;
+}
+
+.about-built__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--royal-chocolate-700);
+}
+
+.about-built__text {
+  display: flex;
+  flex-direction: column;
+  gap: 27px;
+  width: min(672px, 100%);
+  text-align: center;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--grey-700, #495057);
+}
+
+/* The photo's full 1368 × 360 slot; the frame inside grows from the square to fill it */
+.about-built__photo {
+  --slot-w: min(var(--content-max), 100vw - 2 * var(--page-gutter));
+  position: relative;
+  width: 100%;
+  max-width: var(--content-max);
+  height: 360px;
+}
+
+.about-built__frame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 208px;
+  height: 208px;
+  overflow: hidden;
+  transform: translate(-50%, -50%);
+  background: #d9d9d9;
+  box-shadow: 0 100px 48px -72px rgba(57, 29, 19, 0.2);
+}
+
+/* The picture stays the slot's size, centred, so the square shows its middle (the
+   building's top) and widening reveals the rest */
+.about-built__frame img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--slot-w);
+  height: 360px;
+  max-width: none;
+  object-fit: cover;
+  object-position: 50% 39%;
+  transform: translate(-50%, -50%);
+}
+
+.about-built__cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-built__frame {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  .about-built__content {
+    gap: 64px;
+    padding: 96px var(--page-gutter);
+  }
+
+  .about-built__story {
+    gap: 32px;
+  }
+
+  .about-built__title {
+    font-size: 36px;
+  }
+
+  .about-built__text {
+    font-size: 16px;
+  }
+
+  .about-built__photo,
+  .about-built__frame img {
+    height: 209px;
+  }
+}

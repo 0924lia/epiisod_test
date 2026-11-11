@@ -103,9 +103,9 @@ const today = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 const latest = (a: string, b: string) => (a > b ? a : b);
-/** A term, short enough for the half-width field once chosen: "AY27 · 52 wks", "Short Stay". */
+/** A term, short enough for the half-width field once chosen: "AY27 · 52 wk", "Short Stay". */
 const stayShort = (s: Stay) =>
-  s.group === 'Short Stay' ? 'Short Stay' : `${s.group.replace(/Academic Year 20(\d\d)/, 'AY$1')} · ${s.label.replace('weeks', 'wks')}`;
+  s.group === 'Short Stay' ? 'Short Stay' : `${s.group.replace(/Academic Year 20(\d\d)/, 'AY$1')} · ${s.label.replace('weeks', 'wk')}`;
 const stayLabel = (s: Stay) => (s.group === 'Short Stay' ? `Short Stay · ${s.label}` : `${s.group.replace('Academic Year', 'AY')} · ${s.label}`);
 
 /** The full rate behind a discounted price (the room's own discount, else Direct Debit), or
@@ -269,22 +269,75 @@ function BookingCard({
 }) {
   const [view, setView] = useState('');
   const [tried, setTried] = useState(false);
-  // Whether the middle has more to scroll to (shows a fade and a rule above the price)
-  const bodyRef = useRef<HTMLDivElement>(null);
-  const [more, setMore] = useState(false);
-  const measure = useCallback(() => {
-    const el = bodyRef.current;
-    if (el) setMore(el.scrollHeight - el.scrollTop - el.clientHeight > 2);
+  // Opening or closing the offers changes the page's height, and the page's scroll
+  // animations then re-measure it — which can leave the page scrolled elsewhere. Keep it
+  // where it was when the offers were toggled.
+  const holdPage = () => {
+    const y = window.scrollY;
+    // After the re-measure has finished its own scrolling (a couple of frames on)
+    const restore = () =>
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          if (Math.abs(window.scrollY - y) > 2) scrollToY(y, { immediate: true });
+        }),
+      );
+    ScrollTrigger.addEventListener('refresh', restore);
+    window.setTimeout(() => ScrollTrigger.removeEventListener('refresh', restore), 2000);
+  };
+  // The offers start folded (Figma 1470:20279 / phones 1470:20534); opened on tablets and
+  // phones they show in full
+  const [offersOpen, setOffersOpen] = useState(false);
+  // The offers list's own scrollbar: the thumb's share of the track and where it sits
+  const offersListRef = useRef<HTMLUListElement>(null);
+  const [offersThumb, setOffersThumb] = useState<{ size: number; at: number } | null>(null);
+  // At the list's end (or with nothing to scroll) the fade over its foot goes
+  const [offersAtEnd, setOffersAtEnd] = useState(false);
+  const measureOffers = useCallback(() => {
+    const l = offersListRef.current;
+    if (!l) return;
+    const room = l.scrollHeight - l.clientHeight;
+    setOffersAtEnd(room <= 1 || l.scrollTop >= room - 2);
+    if (room <= 1) return setOffersThumb(null);
+    const size = l.clientHeight / l.scrollHeight;
+    setOffersThumb({ size, at: (l.scrollTop / room) * (1 - size) });
   }, []);
   useEffect(() => {
-    const el = bodyRef.current;
-    if (!el) return;
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    [...el.children].forEach((c) => ro.observe(c));
+    const l = offersListRef.current;
+    if (!l) return;
+    measureOffers();
+    const ro = new ResizeObserver(measureOffers);
+    ro.observe(l);
     return () => ro.disconnect();
-  }, [measure]);
+  }, [measureOffers]);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  // The card itself never scrolls (only the offers list does, within it): on desktop, where
+  // the card is pinned, the open list takes what height the screen has left, up to Figma's
+  // 158px, so the whole card — the price and Book included — stays in view
+  const fitOffers = useCallback(() => {
+    const list = offersListRef.current;
+    const body = bodyRef.current;
+    const card = body?.closest<HTMLElement>('.room-book');
+    const aside = card?.parentElement;
+    const panel = list?.closest<HTMLElement>('.room-offers-fold__panel');
+    if (!list || !card || !aside || !panel) return;
+    if (!window.matchMedia('(min-width: 1101px)').matches) {
+      list.style.maxHeight = '';
+      return;
+    }
+    const top = parseFloat(getComputedStyle(aside).top) || 0;
+    const note = aside.querySelector<HTMLElement>('.room-aside__note');
+    const noteH = note ? note.offsetHeight + 16 : 0;
+    // The card without its open list, and the list's own margin below it
+    const rest = card.offsetHeight - panel.offsetHeight + 8;
+    const room = window.innerHeight - top - 24 - noteH - rest;
+    list.style.maxHeight = `${Math.max(96, Math.min(158, Math.floor(room)))}px`;
+    measureOffers();
+  }, [measureOffers]);
+  useEffect(() => {
+    fitOffers();
+    window.addEventListener('resize', fitOffers);
+    return () => window.removeEventListener('resize', fitOffers);
+  }, [fitOffers, offersOpen]);
   const stay = stays.find((s) => s.id === stayId) ?? null;
   const price = stay ? stay.prices[room.id] : room.price;
   // The price before a discount, where the room has one (none on the live site yet)
@@ -323,7 +376,7 @@ function BookingCard({
       </div>
       {/* Everything between the heading and the price scrolls when the card would be taller
           than the screen, so the price and Book always show (the card is pinned) */}
-      <div ref={bodyRef} className="room-book__body" data-lenis-prevent onScroll={measure}>
+      <div ref={bodyRef} className="room-book__body">
 
       <div className="room-book__pair">
       <label className={`room-book__field${tried && missing.term ? ' has-error' : ''}`}>
@@ -426,65 +479,106 @@ function BookingCard({
         </div>
       )}
 
-      {/* v2 (Figma 1465:13300): the room's offers, inside the card */}
+      {/* v2 (Figma 1470:20279): the offers folded into a row — how many apply, and View —
+          that opens to the list, scrolling within (1470:21414) */}
       {offers.length > 0 && (
-        <div className="room-offers">
-          <span className="room-tag room-tag--offer">
-            <img src={tagLightning} width={16} height={16} alt="" />
-            Exclusive Offer
-          </span>
-          <ul className="room-offers__list">
-            {offers.map((o) => (
-              <li key={o.title} className="room-check">
-                <img src={offerCheck} width={24} height={24} alt="" />
-                <span>
-                  <strong>{o.title}</strong>
-                  <span>{o.text}</span>
+        <div className={`room-offers-fold${offersOpen ? ' is-open' : ''}${offersAtEnd ? ' is-at-end' : ''}`}>
+          <button
+            type="button"
+            className="room-offers-fold__head"
+            aria-expanded={offersOpen}
+            aria-controls="room-offers-list"
+            onClick={() => {
+              holdPage();
+              setOffersOpen((o) => !o);
+            }}
+          >
+            <span className="room-tag room-tag--offer room-offers-fold__tag">
+              <img src={tagLightning} width={16} height={16} alt="" />
+              Exclusive Offer
+            </span>
+            <span className="room-offers-fold__count">{offers.length} eligible</span>
+            <span className="room-offers-fold__view">
+              View
+              <img src={dropdownIcon} width={24} height={24} alt="" />
+            </span>
+          </button>
+          <div className="room-offers-fold__panel" id="room-offers-list">
+            <div className="room-offers-fold__inner">
+              <ul
+                ref={offersListRef}
+                className="room-offers-fold__list"
+                data-lenis-prevent
+                onScroll={measureOffers}
+              >
+                {offers.map((o) => (
+                  <li key={o.title} className="room-check">
+                    <img src={offerCheck} width={24} height={24} alt="" />
+                    <span>
+                      <strong>{o.title}</strong>
+                      <span>{o.text}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              {/* Figma 1470:21591: a slim track and thumb, 8px in from the box's edge */}
+              {offersThumb && (
+                <span className="room-offers-fold__track" aria-hidden>
+                  <span
+                    className="room-offers-fold__thumb"
+                    style={{ height: `${offersThumb.size * 100}%`, top: `${offersThumb.at * 100}%` }}
+                  />
                 </span>
-              </li>
-            ))}
-          </ul>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
       </div>
 
-      <div className={`room-book__summary${content.opening ? '' : ' room-book__summary--stacked'}${more ? ' has-more' : ''}`}>
+      <div className={`room-book__summary${content.opening ? '' : ' room-book__summary--stacked'}`}>
         {content.opening ? (
           <p className="room-book__price room-book__price--opening">{content.opening}</p>
         ) : (
-          // Figma 1470:17890: "Starts at" with the saving and the standard price, then the
-          // price (and how it's reached) beside Book
-          <div className="room-book__deal">
-            <p className="room-book__from">Starts at</p>
-            {was && (
-              <p className="room-book__discount">
-                <span className="room-book__off">{Math.round((1 - price / was) * 100)}% OFF</span>
-                <span className="room-book__standard">
-                  {currency}
-                  {was.toFixed(2)} Standard Price
+          // Figma 1470:20287: "From", the price with its saving beside it and how it's
+          // reached under it, Book alongside; the standard rate below
+          <div className="room-book__rate">
+            <p className="room-book__from">From</p>
+            <div className="room-book__pay">
+              <div className="room-book__amount room-book__amount--stacked">
+                <p className="room-book__line">
+                  <strong>
+                    {currency} {price.toFixed(2)}
+                  </strong>
+                  {was && <span className="room-book__off">{Math.round((1 - price / was) * 100)}% OFF</span>}
+                </p>
+                <span>
+                  per week / person
+                  {viaDirectDebit && ' with Direct Debit*'}
                 </span>
-              </p>
-            )}
+              </div>
+              <button type="submit" className="room-book__submit" disabled={!room.available}>
+                {room.available ? 'Book' : 'Sold out'}
+                {room.available && <img src={arrowWhite} width={24} height={24} alt="" />}
+              </button>
+            </div>
           </div>
         )}
-        <div className="room-book__pay">
-          {!content.opening && (
-            <p className="room-book__amount room-book__amount--stacked">
-              <strong>
-                {currency} {price}
-              </strong>
-              <span>
-                wk / person
-                {viaDirectDebit && ' with Direct Debit**'}
-              </span>
-            </p>
-          )}
-          <button type="submit" className="room-book__submit" disabled={!room.available}>
-            {!room.available ? 'Sold out' : content.opening ? 'Register interest' : 'Book'}
-            {room.available && <img src={arrowWhite} width={24} height={24} alt="" />}
-          </button>
-        </div>
+        {!content.opening && was && (
+          <p className="room-book__standard-rate">
+            {currency}
+            {was.toFixed(2)} / wk / person Standard Rate
+          </p>
+        )}
+        {content.opening && (
+          <div className="room-book__pay">
+            <button type="submit" className="room-book__submit" disabled={!room.available}>
+              {room.available ? 'Register interest' : 'Sold out'}
+              {room.available && <img src={arrowWhite} width={24} height={24} alt="" />}
+            </button>
+          </div>
+        )}
       </div>
     </form>
   );
@@ -879,7 +973,7 @@ export default function RoomPage({
             {!content.opening && (
               <p className="room-aside__note">
                 <img src={infoNote} width={24} height={24} alt="" />
-                **Prices shown are subject to eligibility verification for offers, discounts, and promotions.
+                *Prices shown are subject to eligibility verification for offers, discounts, and promotions.
               </p>
             )}
           </aside>
@@ -908,10 +1002,12 @@ export default function RoomPage({
                 <strong>
                   {content.roomCurrency} {barPrice}
                 </strong>
-                <span>wk / person</span>
               </p>
               {/* How the price is reached, for transparency (as in the booking card) */}
-              {barViaDirectDebit && <p className="room-bookbar__note">with Direct Debit**</p>}
+              <p className="room-bookbar__note">
+                per week / person
+                {barViaDirectDebit && ' with Direct Debit*'}
+              </p>
             </div>
           )}
           <button

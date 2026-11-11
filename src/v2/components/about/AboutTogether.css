@@ -1,0 +1,28 @@
+/* "Where it all comes together" (Figma 1470:22196), on the Life @ EPIISOD intro's layout
+   (LifeSection.css): the heading and button, 64px apart, inside the growing white card */
+.about-together__heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 64px;
+}
+
+.about-together__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--royal-chocolate-700);
+}
+
+@media (max-width: 700px) {
+  .about-together__heading {
+    gap: 40px;
+  }
+
+  .about-together__title {
+    font-size: 36px;
+  }
+}
