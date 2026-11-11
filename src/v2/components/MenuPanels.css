@@ -16,8 +16,8 @@
 }
 
 .menu2__image--life {
-  height: 408px;
-  object-position: 50% 100%;
+  height: 204px;
+  object-position: 50% 64%;
 }
 
 /* Matches the height of the links beside it (Figma: self-stretch) */

@@ -17,6 +17,9 @@ import WhyPage from './pages/WhyPage';
 import PromotionsPage from './pages/PromotionsPage';
 import PromoDetailPage from './pages/PromoDetailPage';
 import { OFFERS } from './components/promotions/promotionsData';
+import BlogListPage from './pages/BlogListPage';
+import BlogPostPage from './pages/BlogPostPage';
+import { POSTS } from '../components/blog/blogData';
 import { MACQUARIE_PARK } from './components/property/propertyContent';
 import { BEDFORD } from './components/property/bedfordContent';
 
@@ -35,6 +38,13 @@ export default function App() {
   // An offer's page: /v2/promotions/<offer>
   const offer = OFFERS.find((o) => path === `/v2/promotions/${o.id}`);
   if (offer) return <PromoDetailPage key={path} offer={offer} />;
+  // The blog: /v2/blog lists every post (the old /v2/blog/<audience> too); a post is
+  // /v2/blog/<audience>/<post>
+  const blog = path.match(/^\/v2\/blog(?:\/([^/]+))?(?:\/([^/]+))?$/);
+  if (blog) {
+    const post = blog[2] && POSTS.find((p) => p.audience === blog[1] && p.slug === blog[2]);
+    return post ? <BlogPostPage key={path} post={post} /> : <BlogListPage />;
+  }
   const match = path.match(/^\/v2\/locations\/([^/]+)(?:\/([^/]+))?$/);
   const content = match && PROPERTIES.find((p) => p.slug === match[1]);
   if (content) {

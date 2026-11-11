@@ -10,31 +10,20 @@ type LifeMenuProps = {
 
 type Item = { title: string; text: string; href: string };
 
-/** Figma 1441:14254, two columns. Pages not built yet link to '#'. */
+/** Figma 1465:13198: two columns of two. */
 const COLUMNS: Item[][] = [
   [
     { title: 'Why EPIISOD', text: 'Where your story finds its place', href: '/v2/why-epiisod' },
     { title: 'Experience', text: 'The EPIISOD Experience that goes beyond accommodation', href: '/v2/experience' },
-    { title: 'Blogs', text: 'Guides and stories for student life', href: '/blog' },
-    { title: 'Promotions', text: 'EPIISOD’s exclusive deals', href: '/v2/promotions' },
   ],
   [
-    { title: 'Moving In', text: 'Move-in guide: Everything you need to know', href: '#' },
-    {
-      title: 'Scholarships',
-      text: 'EPIISOD is dedicated to making elevated student living more accessible.',
-      href: '#',
-    },
-    {
-      title: 'For International Students',
-      text: 'Safe, Secure, and Convenient Student Accommodation',
-      href: '/blog/for-international-students',
-    },
-    { title: 'For Parents', text: 'Choosing the right place for your child', href: '/blog/for-parents' },
+    // Figma's lines for these two are placeholders ("Something")
+    { title: 'Blogs', text: 'Guides and stories for student life', href: '/v2/blog' },
+    { title: 'Promotions', text: 'EPIISOD’s exclusive deals', href: '/v2/promotions' },
   ],
 ];
 
-/** Life @ EPIISOD mega menu (Figma 1441:14223): photo beside two columns of page links. */
+/** Life @ EPIISOD mega menu (Figma 1465:13198): photo beside two columns of page links. */
 export default function LifeMenu({ id, open, onNavigate }: LifeMenuProps) {
   return (
     <MegaMenuPanel id={id} open={open} heading="Life @ EPIISOD">

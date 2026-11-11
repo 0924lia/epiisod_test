@@ -12,21 +12,18 @@ import './HamburgerMenu.css';
 type Link = { label: string; href: string };
 
 /** Expandable groups (Figma 652:9263 / 652:9422). Pages not built yet link to '#'. */
-const GROUPS: Record<'life' | 'contact' | 'blog', Link[]> = {
+const GROUPS: Record<'life' | 'contact', Link[]> = {
   /** The desktop bar's Life @ EPIISOD menu (Figma 539:20915) */
   life: [
     { label: 'Why EPIISOD', href: '/v2/why-epiisod' },
     { label: 'Experience', href: '/v2/experience' },
+    { label: 'Blogs', href: '/v2/blog' },
     { label: 'Promotions', href: '/v2/promotions' },
   ],
   contact: [
     { label: 'Contact Us', href: '/v2/contact' },
     { label: 'Join Waitlist', href: '/v2/join-the-waitlist' },
     { label: 'FAQs', href: '/v2/faqs' },
-  ],
-  blog: [
-    { label: 'For Parents', href: '/blog/for-parents' },
-    { label: 'For International Students', href: '/blog/for-international-students' },
   ],
 };
 
@@ -173,7 +170,6 @@ export default function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
                     <span>About</span>
                   </a>
                 </li>
-                <Group label="Blog" links={GROUPS.blog} onNavigate={onClose} />
               </ul>
             </nav>
             <a href="#" className="menu-panel__cta" onClick={onClose}>
