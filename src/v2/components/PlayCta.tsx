@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import type React from 'react';
 import { gsap, useGSAP } from '../../lib/smoothScroll';
 import './PlayCta.css';
 
@@ -14,7 +15,6 @@ const STAGGER_SPREAD = 0.2; // seconds between the first and last letter of the 
 /** How far (em) the button drifts toward the pointer, and the label a little further. */
 const MAGNET = 25 / 16;
 
-const LINES = ['Play', 'Video'];
 
 /** Convert a CSS cubic-bezier into a GSAP ease function. */
 function bezier(css: string) {
@@ -38,10 +38,10 @@ const soft = bezier('cubic-bezier(0.25, 0.1, 0.25, 1)');
 
 /** The label, one line per word. Each line clips its own roll: the word rolls up and out
  *  while a copy of it rolls in from below, so lines never overlap mid-roll. */
-function Label() {
+function Label({ lines }: { lines: string[] }) {
   return (
     <span className="play-cta__label" aria-hidden>
-      {LINES.map((line) => (
+      {lines.map((line) => (
         <span key={line} className="play-cta__line">
           {([1, 2] as const).map((copy) => (
             <span key={copy} className={`play-cta__word play-cta__word--${copy}`}>
@@ -66,8 +66,24 @@ function Label() {
  * - on desktop the button is magnetic — it drifts toward the pointer (the label a
  *   little further) and springs back when the pointer leaves.
  */
-export default function PlayCta({ onPlay }: { onPlay: () => void }) {
-  const rootRef = useRef<HTMLButtonElement>(null);
+export default function PlayCta({
+  onPlay,
+  lines = ['Play', 'Video'],
+  label = 'Play video',
+  decorative = false,
+}: {
+  onPlay?: () => void;
+  /** The label, a line per entry (default "Play / Video"). */
+  lines?: string[];
+  /** The button's accessible name. */
+  label?: string;
+  /**
+   * Inside a link (Experience's ENTER cards): drawn as a plain span, and the hover — ring,
+   * letter roll — answers to the whole card; the magnetic pull stays on the circle.
+   */
+  decorative?: boolean;
+}) {
+  const rootRef = useRef<HTMLElement>(null);
 
   useGSAP(
     () => {
@@ -105,11 +121,12 @@ export default function PlayCta({ onPlay }: { onPlay: () => void }) {
           gsap.to(out, { yPercent: 0, opacity: 1, duration: DURATION, ease: soft, stagger: byPosition(STAGGER_SPREAD), overwrite: true });
           gsap.to(incoming, { yPercent: 100, opacity: 0, duration: DURATION, ease: soft, stagger: byPosition(STAGGER_SPREAD), overwrite: true });
         };
-        root.addEventListener('mouseenter', enter);
-        root.addEventListener('mouseleave', leave);
+        const host = (decorative && root.closest('a')) || root;
+        host.addEventListener('mouseenter', enter);
+        host.addEventListener('mouseleave', leave);
         return () => {
-          root.removeEventListener('mouseenter', enter);
-          root.removeEventListener('mouseleave', leave);
+          host.removeEventListener('mouseenter', enter);
+          host.removeEventListener('mouseleave', leave);
         };
       });
 
@@ -136,8 +153,8 @@ export default function PlayCta({ onPlay }: { onPlay: () => void }) {
     { scope: rootRef },
   );
 
-  return (
-    <button ref={rootRef} type="button" className="play-cta" onClick={onPlay} aria-label="Play video">
+  const face = (
+    <>
       <svg className="play-cta__ring" viewBox="0 0 120 120" aria-hidden>
         <circle className="play-cta__track" cx="60" cy="60" r={R} />
         {/* Start angles as in Figma: upper-left and lower-right, drawn clockwise */}
@@ -145,8 +162,26 @@ export default function PlayCta({ onPlay }: { onPlay: () => void }) {
         <circle className="play-cta__arc" cx="60" cy="60" r={R} transform="rotate(30 60 60)" />
       </svg>
       <span className="play-cta__inner">
-        <Label />
+        <Label lines={lines} />
       </span>
+    </>
+  );
+  if (decorative) {
+    return (
+      <span ref={rootRef as React.RefObject<HTMLSpanElement>} className="play-cta" aria-hidden>
+        {face}
+      </span>
+    );
+  }
+  return (
+    <button
+      ref={rootRef as React.RefObject<HTMLButtonElement>}
+      type="button"
+      className="play-cta"
+      onClick={onPlay}
+      aria-label={label}
+    >
+      {face}
     </button>
   );
 }
