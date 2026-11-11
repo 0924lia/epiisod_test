@@ -167,11 +167,13 @@ button.nav__link.nav__caret {
   padding: 0 6px;
 }
 
-.nav__caret .nav__icon {
+/* Every menu's caret flips while its menu is open: the separate caret beside Locations and
+   Contact us, and the one inside Life @ EPIISOD (a single button, having no page of its own) */
+button.nav__link .nav__icon {
   transition: transform 300ms var(--ease-in-out);
 }
 
-.nav__caret[aria-expanded='true'] .nav__icon {
+button.nav__link[aria-expanded='true'] .nav__icon {
   transform: rotate(180deg);
 }
 
