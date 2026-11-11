@@ -12,8 +12,20 @@ import line from '../../assets/cta-line.svg';
 import '../../components/blog/Blog.css';
 
 const ALL = 'All';
-/** Every category of both blogs (For parents, then For international students). */
-const CATEGORIES = [...new Set(AUDIENCES.flatMap((a) => a.categories))];
+/**
+ * The tabs: first the two audiences (each showing its blog's posts) and Moving In, then
+ * every other category of both blogs. Each tab maps to the posts it shows.
+ */
+const AUDIENCE_TABS: Record<string, string> = { 'For Parents': 'for-parents', 'For International Students': 'for-international-students' };
+const CATEGORY_TABS: Record<string, string> = { 'Moving In': 'Moving in' };
+/** Categories without a tab of their own; their posts show under All and their audience. */
+const NO_TAB = ['Settling in', 'Staying connected', 'Safety & wellbeing', 'Exploring Sydney'];
+const OTHER_CATEGORIES = [...new Set(AUDIENCES.flatMap((a) => a.categories))].filter(
+  (c) => !Object.values(CATEGORY_TABS).includes(c) && !NO_TAB.includes(c),
+);
+const TABS = [ALL, ...Object.keys(AUDIENCE_TABS), ...Object.keys(CATEGORY_TABS), ...OTHER_CATEGORIES];
+const inTab = (p: (typeof POSTS)[number], tab: string) =>
+  tab === ALL || (AUDIENCE_TABS[tab] ? p.audience === AUDIENCE_TABS[tab] : p.category === (CATEGORY_TABS[tab] ?? tab));
 /** Newest first, across both blogs. */
 const ALL_POSTS = [...POSTS].sort((a, b) => b.date.localeCompare(a.date));
 /** Posts shown at first, and added by each "Load more". */
@@ -32,7 +44,7 @@ export default function BlogListPage() {
   const [category, setCategory] = useState(ALL);
   const [shown, setShown] = useState(PAGE);
   const [featured, ...rest] = ALL_POSTS;
-  const listed = rest.filter((p) => category === ALL || p.category === category);
+  const listed = rest.filter((p) => inTab(p, category));
   const listRef = useRef<HTMLElement>(null);
 
   // A soft hand-over from the heading to the featured post: the heading lags and fades a
@@ -110,7 +122,7 @@ export default function BlogListPage() {
             <FilterTabs
               className="blog-list__filters"
               label="Category"
-              options={[ALL, ...CATEGORIES]}
+              options={TABS}
               value={category}
               onChange={(c) => {
                 setCategory(c);

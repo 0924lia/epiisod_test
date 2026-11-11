@@ -440,8 +440,9 @@ export default function Nav({
                 <span>Log in</span>
               </a>
               {NAV_VARIANT === 'a' && <LanguageSelect onOpen={() => setOpenMenu(null)} />}
-              <a href="#" className="nav__cta">
-                Book a room
+              {/* Contact us opens with "Book a tour" as its enquiry type */}
+              <a href="/v2/contact" className="nav__cta">
+                Book a tour
               </a>
             </div>
             {/* Option B has no hamburger on desktop; it remains the navigation on tablets and phones */}
