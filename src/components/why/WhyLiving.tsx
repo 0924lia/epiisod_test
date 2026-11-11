@@ -12,7 +12,12 @@ import './WhyLiving.css';
  * between two photos that bleed off the edges. The backdrop and the pictures inside their
  * frames drift a little as the page scrolls.
  */
-export default function WhyLiving() {
+export default function WhyLiving({
+  bookHref = '/locations/macquarie-park#rooms',
+}: {
+  /** Where "Book now" goes (v2 passes its own pages). */
+  bookHref?: string;
+} = {}) {
   const sectionRef = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -55,7 +60,7 @@ export default function WhyLiving() {
             EPIISOD
           </h2>
         </div>
-        <a href="/locations/macquarie-park#rooms" className="why-living__button">
+        <a href={bookHref} className="why-living__button">
           Book now
         </a>
       </div>
