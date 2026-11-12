@@ -77,3 +77,37 @@
   font-weight: 300;
   color: var(--royal-chocolate-500);
 }
+
+/* In the menu (Figma 1511:14933): a bordered button, its list opening upwards */
+.language-select__menu-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--royal-chocolate-700);
+  border-radius: 4px;
+  background: none;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  color: var(--royal-chocolate-700);
+  cursor: pointer;
+  transition: background-color 250ms var(--ease-in-out);
+}
+
+.language-select__menu-button:hover {
+  background: var(--bronze-200);
+}
+
+.language-select--menu .language-select__menu {
+  top: auto;
+  bottom: calc(100% + 8px);
+  left: auto;
+  right: 0;
+  transform: translateY(4px);
+}
+
+.language-select--menu.is-open .language-select__menu {
+  transform: none;
+}

@@ -1,4 +1,4 @@
-/* Hamburger menu (Figma 652:9490), above the nav */
+/* The menu (Figma 1511:14024), above the nav */
 .hamburger {
   position: fixed;
   inset: 0;
@@ -27,13 +27,13 @@
   opacity: 1;
 }
 
-/* Both panels share one 396px column on the right */
+/* A 390px column on the right (the whole screen on phones) */
 .hamburger__panels {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(396px, 100vw);
+  width: min(390px, 100vw);
   transform: translateX(100%);
   transition: transform 450ms var(--ease-in-out);
 }
@@ -47,82 +47,86 @@
   inset: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  padding: 0 72px 48px 48px;
+  gap: 24px;
+  padding: 0 24px 48px 48px;
   overflow-y: auto;
   overscroll-behavior: contain;
   background: var(--white);
-}
-
-.menu-panel--main {
-  gap: 48px;
   box-shadow: -2px 0 4px rgba(0, 0, 0, 0.12);
-}
-
-/*
- * Locations slides in over the main list, 30px short of its left edge. Coming in it
- * arrives briskly and glides gently into place (ease-out); on Back it eases away
- * gently, then gathers speed off-screen (the mirrored ease-in).
- */
-.menu-panel--locations {
-  left: 30px;
-  gap: 16px;
-  box-shadow: -8px 0 8px rgba(0, 0, 0, 0.16);
-  transform: translateX(calc(100% + 16px));
-  visibility: hidden;
-  will-change: transform;
-  /* Leaving */
-  transition:
-    transform 550ms cubic-bezier(0.64, 0, 0.78, 0),
-    visibility 0s linear 550ms;
-}
-
-.hamburger__panels.is-locations .menu-panel--locations {
-  transform: translateX(0);
-  visibility: visible;
-  /* Arriving */
-  transition:
-    transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
-    visibility 0s;
 }
 
 .menu-panel__header {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  width: 100%;
   padding: 16px 0;
 }
 
-.menu-panel__logo {
+.menu-panel__logo,
+.menu-panel__close {
   display: flex;
 }
 
 .menu-panel__close {
-  display: flex;
-  padding: 8px;
+  padding: 0;
   border: 0;
-  border-radius: 24px;
-  background: var(--bronze-300);
+  background: none;
   cursor: pointer;
-  transition: background-color 200ms ease;
+  transition: opacity 200ms ease;
 }
 
 .menu-panel__close:hover {
-  background: var(--line-in-white);
+  opacity: 0.7;
+}
+
+/* Log in, the list, then the foot pinned to the bottom */
+.menu-panel__body {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.menu-panel__account {
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--bronze-300);
+}
+
+.menu-panel__login {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 4px;
+  background: #f4f2f0;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 20px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--royal-chocolate-600);
+  transition: background-color 250ms var(--ease-in-out);
+}
+
+.menu-panel__login span {
+  flex: 1;
+}
+
+.menu-panel__login:hover {
+  background: var(--royal-chocolate-200);
 }
 
 /* Main list */
 .menu-panel nav {
-  width: 100%;
+  padding-bottom: 24px;
 }
 
 .menu-panel__items {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 100%;
   margin: 0;
   padding: 0 10px 0 0;
   list-style: none;
@@ -144,51 +148,21 @@
   text-transform: uppercase;
   color: var(--royal-chocolate-600);
   cursor: pointer;
-}
-
-/* Locations: the word links to its page; the arrow on the right opens its panel */
-.menu-panel__split {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.menu-panel__split .menu-panel__item {
-  flex: 1;
-}
-
-.menu-panel__split-caret {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  margin-right: -9px; /* the arrow stays in line with the other carets */
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
+  transition: color 250ms var(--ease-in-out);
 }
 
 .menu-panel__item span {
   flex: 1;
 }
 
-.menu-panel__item:hover span,
-.menu-panel__sub-link:hover,
-.menu-panel__property:hover {
+/* The open section's heading turns bronze, its caret points up */
+.menu-panel__group.is-expanded .menu-panel__item,
+.menu-panel__item:hover,
+.menu-panel__sub-link:hover {
   color: var(--bronze-700);
 }
 
-.menu-panel__caret {
-  transition: transform 250ms var(--ease-in-out);
-}
-
-.menu-panel__group.is-expanded .menu-panel__caret {
-  transform: rotate(180deg);
-}
-
-/* Expandable groups (Contact, Blog): open by animating the grid row */
+/* A section opens by animating its grid row */
 .menu-panel__sub {
   display: grid;
   grid-template-rows: 0fr;
@@ -200,19 +174,19 @@
 }
 
 .menu-panel__sub-clip {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Its links under a thin rule, 16px below the heading */
+.menu-panel__sub-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-height: 0;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
+  margin: 16px 0 0;
+  padding: 8px 0;
+  border-left: 1px solid var(--royal-chocolate-300);
   list-style: none;
-}
-
-/* 16px from the heading, 16px + 16px before the next item */
-.menu-panel__group.is-expanded .menu-panel__sub-clip {
-  padding: 16px 0 16px;
 }
 
 .menu-panel__sub-link {
@@ -223,15 +197,27 @@
   font-size: 16px;
   line-height: 1.2;
   color: var(--royal-chocolate-600);
+  transition: color 250ms var(--ease-in-out);
+}
+
+/* Book a tour and the language, over a rule */
+.menu-panel__foot {
+  display: flex;
+  flex-shrink: 0;
+  gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--bronze-300);
 }
 
 .menu-panel__cta {
-  border-radius: 4px;
-  display: inline-flex;
+  display: flex;
+  flex: 1;
   align-items: center;
+  justify-content: center;
   height: 44px;
   padding: 0 24px;
-  background: var(--line-in-white);
+  border-radius: 4px;
+  background: var(--bronze-400);
   font-weight: 600;
   font-size: 16px;
   line-height: 20px;
@@ -244,123 +230,7 @@
   background: var(--bronze-600);
 }
 
-/* Locations panel (Figma 652:9182) */
-.menu-panel__locations {
-  display: flex;
-  flex-direction: column;
-  /* 32px visible from the Back label to the title (20px + the button's 12px padding) */
-  gap: 20px;
-  width: 100%;
-}
-
-.menu-panel__back {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  gap: 8px;
-  padding: 12px 8px 12px 0;
-  border: 0;
-  background: none;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 20px;
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
-  color: var(--bronze-700);
-  cursor: pointer;
-}
-
-.menu-panel__list {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.menu-panel__heading {
-  font-weight: 700;
-  font-size: 18px;
-  line-height: 20px;
-  letter-spacing: 1.8px;
-  text-transform: uppercase;
-  color: var(--royal-chocolate-600);
-}
-
-.menu-panel__countries {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
-
-.menu-panel__country {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.menu-panel__country-name {
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--royal-chocolate-300);
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 18px;
-  line-height: 20px;
-  color: var(--bronze-700);
-}
-
-.menu-panel__city {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.menu-panel__city-name {
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 20px;
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
-  color: var(--royal-chocolate-600);
-}
-
-.menu-panel__properties {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin: 0;
-  padding: 0 0 0 24px;
-  list-style: none;
-}
-
-.menu-panel__property {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 22px;
-  font-size: 16px;
-  line-height: 1.2;
-  color: var(--royal-chocolate-600);
-}
-
-.menu-panel__soon {
-  padding: 4px 8px;
-  background: var(--bronze-600);
-  font-size: 12px;
-  line-height: normal;
-  text-transform: uppercase;
-  color: var(--white);
-}
-
 .menu-panel :focus-visible {
   outline: 1px solid var(--bronze-700);
   outline-offset: 2px;
-}
-
-@media (max-width: 480px) {
-  .menu-panel {
-    padding: 0 24px 40px;
-  }
-
-  .menu-panel--locations {
-    left: 0;
-  }
 }
