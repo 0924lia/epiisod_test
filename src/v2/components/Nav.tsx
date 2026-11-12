@@ -473,8 +473,7 @@ export default function Nav({
                 <span>Log in</span>
               </a>
               {NAV_VARIANT === 'a' && <LanguageSelect onOpen={() => setOpenMenu(null)} />}
-              {/* Contact us opens with "Book a tour" as its enquiry type */}
-              <a href="/v2/contact" className="nav__cta">
+              <a href="/v2/book-a-tour" className="nav__cta">
                 Book a tour
               </a>
             </div>

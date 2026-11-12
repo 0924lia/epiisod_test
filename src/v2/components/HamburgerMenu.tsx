@@ -172,7 +172,7 @@ export default function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
                 </li>
               </ul>
             </nav>
-            <a href="#" className="menu-panel__cta" onClick={onClose}>
+            <a href="/v2/book-a-tour" className="menu-panel__cta" onClick={onClose}>
               Book a tour
             </a>
           </>,

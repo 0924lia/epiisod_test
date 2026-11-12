@@ -90,6 +90,7 @@ const LINK_HREFS: Record<string, string> = {
   Blog: '/v2/blog',
   'Contact Us': '/v2/contact',
   'Join the Waitlist': '/v2/join-the-waitlist',
+  'Book a Tour': '/v2/book-a-tour',
   FAQS: '/v2/faqs',
   'Macquarie Park, Sydney': '/v2/locations/macquarie-park',
   'Bedford, Melbourne': '/v2/locations/bedford',

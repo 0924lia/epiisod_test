@@ -10,6 +10,7 @@ import Footer from './components/Footer';
 import PropertyPage from './pages/PropertyPage';
 import RoomPage from './pages/RoomPage';
 import ContactPage from './pages/ContactPage';
+import TourPage from './pages/TourPage';
 import WaitlistPage from './pages/WaitlistPage';
 import FaqPage from './pages/FaqPage';
 import AboutPage from './pages/AboutPage';
@@ -32,6 +33,7 @@ export default function App() {
   const path = window.location.pathname.replace(/\/+$/, '');
   if (path === '/v2/contact') return <ContactPage />;
   if (path === '/v2/join-the-waitlist') return <WaitlistPage />;
+  if (path === '/v2/book-a-tour') return <TourPage />;
   if (path === '/v2/faqs') return <FaqPage />;
   if (path === '/v2/about') return <AboutPage />;
   if (path === '/v2/experience') return <ExperiencePage />;

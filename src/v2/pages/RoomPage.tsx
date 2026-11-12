@@ -814,9 +814,12 @@ export default function RoomPage({
                 <p className="room-overview__text">{details.description}</p>
                 {/* v2 (Figma 1465:13360): the tour, then sharing, under the description */}
                 <div className="room-overview__actions">
-                  {/* Figma 1465:13360: Book a tour (Contact us opens with it as the enquiry),
-                      the virtual tour, then sharing */}
-                  <a href="/v2/contact" className="room-button room-button--solid">
+                  {/* Figma 1465:13360: Book a tour (its form opens on this residence), the
+                      virtual tour, then sharing */}
+                  <a
+                    href={`/v2/book-a-tour?property=${propertyHref.split('/').pop()}`}
+                    className="room-button room-button--solid"
+                  >
                     Book a tour
                   </a>
                   {details.virtualTour && (

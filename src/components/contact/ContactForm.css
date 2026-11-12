@@ -153,8 +153,18 @@
 }
 
 .contact-field__box select {
-  color: var(--royal-chocolate-500);
   cursor: pointer;
+}
+
+/* A choice still on its prompt ("Select") reads as a placeholder; a chosen value is as
+   dark as typed text */
+.contact-field__box select:has(option[value='']:checked) {
+  color: var(--royal-chocolate-500);
+}
+
+/* The options in the open list stay dark either way */
+.contact-field__box select option {
+  color: var(--royal-chocolate-700);
 }
 
 .contact-field__box input::placeholder,

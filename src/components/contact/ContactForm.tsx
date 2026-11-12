@@ -8,6 +8,13 @@ import { PROPERTIES } from '../locationData';
 import './ContactForm.css';
 
 const PROPERTY_OPTIONS = ['General Inquiry', ...PROPERTIES.map((p) => p.name)];
+/** A tour is only of a residence that is open. */
+const TOUR_PROPERTIES = PROPERTIES.filter((p) => !p.comingSoon);
+/** The residence a link asked for (?property=macquarie-park), else the first. */
+const tourProperty = () => {
+  const id = new URLSearchParams(window.location.search).get('property');
+  return (TOUR_PROPERTIES.find((p) => p.id === id) ?? TOUR_PROPERTIES[0]).name;
+};
 const ROLES = ['Student', 'Parent / Guardian', 'Agent', 'Other'];
 const ROOM_TYPES = ['Studio', 'Shared Apartment', 'No preference'];
 const ENQUIRY_TYPES = ['Book a tour', 'Room availability', 'General enquiry', 'Other'];
@@ -15,6 +22,19 @@ const DIAL_CODES = [
   { country: 'Australia', code: '+61', flag: flagAu },
   { country: 'United Kingdom', code: '+44', flag: null },
 ];
+
+/**
+ * A date field shows its placeholder as text until used: turn it into a date input and
+ * open the calendar on the same click (browsers only open it themselves on a second one).
+ */
+function openDatePicker(input: HTMLInputElement) {
+  input.type = 'date';
+  try {
+    input.showPicker();
+  } catch {
+    // Not allowed without a click (e.g. tabbing in), or not supported: the field still works
+  }
+}
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: ReactNode }) {
   return (
@@ -28,7 +48,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
   );
 }
 
-type Variant = 'contact' | 'waitlist';
+type Variant = 'contact' | 'waitlist' | 'tour';
 
 /** The copy beside each form. */
 const COPY: Record<Variant, { eyebrow: string; title: ReactNode; lede: ReactNode; submit: string }> = {
@@ -63,6 +83,30 @@ const COPY: Record<Variant, { eyebrow: string; title: ReactNode; lede: ReactNode
     ),
     submit: 'Join the waitlist',
   },
+  // v2's Book a tour (Figma 1496:23698)
+  tour: {
+    eyebrow: 'Visit EPIISOD',
+    title: (
+      <>
+        Every story begins with a <em>first step</em>
+      </>
+    ),
+    lede: (
+      <>
+        <p>
+          Now that EPIISOD has launched, we invite you to experience the residence in full. Join us
+          for a guided tour and site inspection, where you can view available room types, explore
+          our amenities, and walk through the communal spaces that shape everyday life at EPIISOD.
+        </p>
+        <p>
+          Discover how thoughtfully designed student living feels — from private rooms to shared
+          spaces created for study, wellbeing, and connection.
+        </p>
+        <p>Schedule your visit today and take the next step towards making EPIISOD your home.</p>
+      </>
+    ),
+    submit: 'Schedule your visit',
+  },
 };
 
 /**
@@ -75,6 +119,7 @@ const COPY: Record<Variant, { eyebrow: string; title: ReactNode; lede: ReactNode
 export default function ContactForm({ variant = 'contact' }: { variant?: Variant }) {
   const copy = COPY[variant];
   const waitlist = variant === 'waitlist';
+  const tour = variant === 'tour';
   const sectionRef = useRef<HTMLElement>(null);
   const thanksRef = useRef<HTMLParagraphElement>(null);
   const [dial, setDial] = useState(DIAL_CODES[0]);
@@ -108,13 +153,21 @@ export default function ContactForm({ variant = 'contact' }: { variant?: Variant
           <fieldset className="contact-form__fields" disabled={submitted}>
             {/* Which property, set apart by a rule (Figma 1109:37624) */}
             <div className="contact-form__property">
-              <Field label="Property inquiring for">
+              <Field label={tour ? 'Property visiting for' : 'Property inquiring for'}>
                 <span className="contact-field__box contact-field__box--strong">
-                  <select name="property" defaultValue={PROPERTY_OPTIONS[0]}>
-                    {PROPERTY_OPTIONS.map((p) => (
-                      <option key={p}>{p}</option>
-                    ))}
-                  </select>
+                  {tour ? (
+                    <select name="property" defaultValue={tourProperty()}>
+                      {TOUR_PROPERTIES.map((p) => (
+                        <option key={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <select name="property" defaultValue={PROPERTY_OPTIONS[0]}>
+                      {PROPERTY_OPTIONS.map((p) => (
+                        <option key={p}>{p}</option>
+                      ))}
+                    </select>
+                  )}
                   <img src={caretDown} width={24} height={24} alt="" />
                 </span>
               </Field>
@@ -222,16 +275,34 @@ export default function ContactForm({ variant = 'contact' }: { variant?: Variant
                     <img src={caretDown} width={24} height={24} alt="" />
                   </span>
                 </Field>
-                <Field label="Enquiry Type" required>
-                  <span className="contact-field__box">
-                    <select name="enquiry" defaultValue={ENQUIRY_TYPES[0]} required>
-                      {ENQUIRY_TYPES.map((t) => (
-                        <option key={t}>{t}</option>
-                      ))}
-                    </select>
-                    <img src={caretDown} width={24} height={24} alt="" />
-                  </span>
-                </Field>
+                {tour ? (
+                  <Field label="Visit date" required>
+                    <span className="contact-field__box">
+                      <input
+                        type="text"
+                        name="visitDate"
+                        placeholder="Select date"
+                        required
+                        min={new Date().toISOString().slice(0, 10)}
+                        onFocus={(e) => openDatePicker(e.currentTarget)}
+                        onClick={(e) => openDatePicker(e.currentTarget)}
+                        onBlur={(e) => !e.currentTarget.value && (e.currentTarget.type = 'text')}
+                      />
+                      <img src={caretDown} width={24} height={24} alt="" />
+                    </span>
+                  </Field>
+                ) : (
+                  <Field label="Enquiry Type" required>
+                    <span className="contact-field__box">
+                      <select name="enquiry" defaultValue={ENQUIRY_TYPES[0]} required>
+                        {ENQUIRY_TYPES.map((t) => (
+                          <option key={t}>{t}</option>
+                        ))}
+                      </select>
+                      <img src={caretDown} width={24} height={24} alt="" />
+                    </span>
+                  </Field>
+                )}
               </div>
             )}
 
@@ -277,6 +348,10 @@ export default function ContactForm({ variant = 'contact' }: { variant?: Variant
                 {waitlist ? (
                   <>
                     You’re on the <em>list</em>. We’ll let you know when a room opens up.
+                  </>
+                ) : tour ? (
+                  <>
+                    Thank <em>you</em>. We’ll be in touch to confirm your visit.
                   </>
                 ) : (
                   <>
