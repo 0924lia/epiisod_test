@@ -1,0 +1,87 @@
+/*
+ * v3 design tokens, in the same layers as the Figma variables:
+ *   1. Primitives: raw values (number scale, colours, font families).
+ *   2. Semantics: roles that point at primitives (surfaces, text, buttons, type).
+ * Pages and components use semantics only, never primitives or raw values.
+ *
+ * TODO(brand): colours and fonts are neutral placeholders until the new brand
+ * guidelines arrive. Replace the primitives; the semantics and pages follow.
+ */
+:root {
+  /* ---------- Primitives: number scale (4-pt grid, plus 2) ---------- */
+  --scale-0: 0px;
+  --scale-2: 2px;
+  --scale-4: 4px;
+  --scale-8: 8px;
+  --scale-12: 12px;
+  --scale-16: 16px;
+  --scale-20: 20px;
+  --scale-24: 24px;
+  --scale-32: 32px;
+  --scale-40: 40px;
+  --scale-48: 48px;
+  --scale-56: 56px;
+  --scale-64: 64px;
+  --scale-72: 72px;
+  --scale-80: 80px;
+  --scale-96: 96px;
+  --scale-120: 120px;
+  --scale-144: 144px;
+
+  /* ---------- Primitives: colours (placeholders) ---------- */
+  --color-white: #ffffff;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-300: #d4d4d4;
+  --color-neutral-500: #737373;
+  --color-neutral-700: #404040;
+  --color-neutral-900: #171717;
+  /* primary, secondary and accent ramps go here once the brand is in */
+
+  /* ---------- Primitives: font families (placeholders) ---------- */
+  --font-family-display: Georgia, 'Times New Roman', serif;
+  --font-family-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* ---------- Semantics: colour ---------- */
+  --surface-page: var(--color-white);
+  --surface-subtle: var(--color-neutral-100);
+  --surface-inverse: var(--color-neutral-900);
+  --text-primary: var(--color-neutral-900);
+  --text-secondary: var(--color-neutral-500);
+  --text-inverse: var(--color-white);
+  --border-default: var(--color-neutral-300);
+  --button-primary-bg: var(--color-neutral-900);
+  --button-primary-text: var(--color-white);
+
+  /* ---------- Semantics: space, radius, border ---------- */
+  --space-xs: var(--scale-4);
+  --space-sm: var(--scale-8);
+  --space-md: var(--scale-16);
+  --space-lg: var(--scale-24);
+  --space-xl: var(--scale-48);
+  --space-2xl: var(--scale-80);
+  --page-gutter: var(--scale-72);
+  --radius-sm: var(--scale-4);
+  --border-hairline: 1px;
+
+  /* ---------- Semantics: typography (Desktop mode) ---------- */
+  --type-display-size: var(--scale-72);
+  --type-h1-size: var(--scale-56);
+  --type-h2-size: var(--scale-40);
+  --type-h3-size: var(--scale-32);
+  --type-body-lg-size: var(--scale-20);
+  --type-body-size: var(--scale-16);
+  --type-label-size: var(--scale-12);
+  --type-heading-line: 1.2;
+  --type-body-line: 1.5;
+}
+
+/* Typography (Mobile mode) and the phone gutter, as Figma's Mobile variable mode */
+@media (max-width: 900px) {
+  :root {
+    --type-display-size: var(--scale-48);
+    --type-h1-size: var(--scale-40);
+    --type-h2-size: var(--scale-32);
+    --type-h3-size: var(--scale-24);
+    --page-gutter: var(--scale-24);
+  }
+}
