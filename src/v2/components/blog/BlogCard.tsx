@@ -30,7 +30,17 @@ export default function BlogCard({ post }: { post: BlogPost }) {
           <span className="blog-card__title">{post.title}</span>
         </span>
         <span className="blog-card__foot">
-          <span className="blog-card__meta">{postMeta(post)}</span>
+          {/* Date and read time each kept whole, so a tight line breaks between them */}
+          <span className="blog-card__meta">
+            {postMeta(post)
+              .split(' • ')
+              .map((part, i) => (
+                <span key={part} className="blog-card__meta-part">
+                  {i > 0 && ' • '}
+                  {part}
+                </span>
+              ))}
+          </span>
           <span className="blog-card__read">
             Read now
             <img src={arrowRight} width={24} height={24} alt="" />

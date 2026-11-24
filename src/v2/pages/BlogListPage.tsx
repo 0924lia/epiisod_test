@@ -8,6 +8,7 @@ import Footer from '../components/Footer';
 import { gsap, useGSAP } from '../../lib/smoothScroll';
 import { AUDIENCES, POSTS, categoryTone, postMeta } from '../../components/blog/blogData';
 import '../../components/blog/Blog.css';
+import './BlogListPage.css';
 
 const ALL = 'All';
 /**
@@ -81,7 +82,7 @@ export default function BlogListPage() {
     <>
       <Nav tone="cream" />
       <main>
-        <section ref={listRef} className="blog-list">
+        <section ref={listRef} className="blog-list blog-list--v2">
           <div className="blog-list__heading">
             <h1 className="type-h1">
               EPIISOD <em>blogs</em>

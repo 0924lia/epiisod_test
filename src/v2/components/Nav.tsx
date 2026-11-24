@@ -22,12 +22,12 @@ type MenuKey = 'life' | 'locations' | 'contact';
 
 /**
  * Primary links; those with a `menu` toggle a mega menu instead of navigating. With both a
- * `menu` and an `href` (Locations), the word goes to the page and its caret opens the menu.
- * Contact us works the same way, its caret opening the contact menu (Figma 690:4830).
+ * `menu` and an `href` (Contact us), the word goes to the page and its caret opens the
+ * menu (Figma 690:4830). Locations only opens its menu: v2 has no Locations page yet.
  */
 const PRIMARY_LINKS: { label: string; menu?: MenuKey; href?: string; caret?: boolean }[] = [
   { label: 'Life @ epiisod', menu: 'life' },
-  { label: 'Locations', menu: 'locations', href: '/locations' },
+  { label: 'Locations', menu: 'locations' },
   { label: 'Contact us', menu: 'contact', href: '/v2/contact' },
 ];
 const menuId = (menu: MenuKey) => `nav-${menu}-menu`;

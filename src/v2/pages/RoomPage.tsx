@@ -708,11 +708,12 @@ export default function RoomPage({
     barWas !== undefined &&
     !!content.directDebitPercent &&
     (room.discountPercent ?? content.directDebitPercent) === content.directDebitPercent;
-  const crumbs = [
-    { label: 'Home', href: '/' },
-    { label: 'Locations', href: '/locations' },
-    { label: 'en-au', href: '/locations?country=Australia' },
-    { label: content.city, href: `/locations?country=Australia&city=${content.city}` },
+  // v2 has no Locations, country or city pages yet, so those crumbs are plain text
+  const crumbs: { label: string; href?: string }[] = [
+    { label: 'Home', href: '/v2' },
+    { label: 'Locations' },
+    { label: 'en-au' },
+    { label: content.city },
     { label: content.place, href: `${propertyHref}#rooms` },
   ];
 
@@ -724,7 +725,7 @@ export default function RoomPage({
           <nav className="room-crumbs" aria-label="Breadcrumb">
             {crumbs.map((c) => (
               <span key={c.label}>
-                <a href={c.href}>{c.label}</a>
+                {c.href ? <a href={c.href}>{c.label}</a> : c.label}
                 <span className="room-crumbs__slash" aria-hidden>
                   /
                 </span>

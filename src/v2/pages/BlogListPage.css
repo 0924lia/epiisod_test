@@ -1,0 +1,81 @@
+/*
+ * v2 blog listing on phones (Figma 1512:23568): Figma's spacing, the featured post
+ * stacked with its date over its button, taller cards further apart, and the category
+ * tabs pinned under the nav while the posts scroll (1512:24135).
+ */
+@media (max-width: 700px) {
+  /* 72px under the nav; the heading 40px over the featured post; 144px (two sections'
+     72px) from the post to the tabs */
+  .blog-list--v2 {
+    gap: 144px;
+    padding-top: calc(64px + 72px);
+  }
+
+  .blog-list--v2 .blog-list__heading {
+    margin-bottom: -104px;
+  }
+
+  .blog-list--v2 > .blog-button {
+    margin-top: -96px;
+  }
+
+  .blog-list--v2 .blog-featured__media {
+    height: 240px;
+  }
+
+  .blog-list--v2 .blog-featured__body {
+    gap: 24px;
+    padding: 48px 40px;
+  }
+
+  .blog-list--v2 .blog-featured__excerpt {
+    font-size: 18px;
+  }
+
+  .blog-list--v2 .blog-featured__foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  /* The tabs stay just below the nav (following it as it hides) on a white band while
+     the posts scroll; the padding is cancelled by the margins */
+  .blog-list--v2 .blog-list__filters {
+    position: sticky;
+    top: var(--nav-offset, 64px);
+    z-index: 5;
+    margin-block: -16px;
+    padding-block: 16px;
+    background: var(--white);
+    transition: top 400ms var(--ease-in-out);
+  }
+
+  .blog-list--v2 .filter-tabs__option {
+    font-size: 18px;
+  }
+
+  .blog-list--v2 .blog-grid {
+    gap: 48px;
+  }
+
+  .blog-list--v2 .blog-card {
+    height: 448px;
+  }
+
+  .blog-list--v2 .blog-card__title {
+    font-size: 24px;
+  }
+
+  /* When the date and READ NOW don't fit on one line, the date wraps rather than the
+     arrow being cut off */
+  .blog-list--v2 .blog-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 0.3em;
+    min-width: 0;
+  }
+
+  .blog-list--v2 .blog-card__read {
+    flex-shrink: 0;
+  }
+}
